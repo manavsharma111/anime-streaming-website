@@ -1,9 +1,7 @@
 const dotenv = require("dotenv");
 dotenv.config();
 
-console.log("=========================================");
-console.log("   DISTRIBUTED ENCODING WORKER NODE      ");
-console.log("=========================================");
+console.log("DISTRIBUTED ENCODING WORKER NODE");
 
 // Ensure FFmpeg is accessible. Our worker.js requires the ffmpegService which relies on system ffmpeg or local binaries.
 console.log(`Connecting to Redis: ${process.env.REDIS_URI}`);
