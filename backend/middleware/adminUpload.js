@@ -1,9 +1,9 @@
-// adminUpload.js – handles multipart uploads for admin episode creation
+// handles multipart uploads for admin episode creation
 const multer = require("multer")
 const path = require("path")
 const fs = require("fs")
 
-// Ensure directories exist
+// ensure directories exist
 const dirs = {
   video: path.join(__dirname, "..", "uploads", "raw_videos"),
   thumbnail: path.join(__dirname, "..", "uploads", "thumbnails"),

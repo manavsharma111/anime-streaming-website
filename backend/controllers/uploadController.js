@@ -4,7 +4,6 @@ const path = require("path")
 const Redis = require("ioredis")
 
 // Setup BullMQ Queue
-// Ensure you have Redis running!
 const connection = new Redis(
   process.env.REDIS_URI || "redis://127.0.0.1:6379",
   {
@@ -49,7 +48,6 @@ const uploadEpisode = async (req, res, next) => {
     const rawVideoPath = req.file.path
 
     // Output directory where FFmpeg will save HLS and MP4s for this episode
-    // e.g. uploads/processed/episode_id/
     const outputDir = path.join(
       __dirname,
       "..",
@@ -58,7 +56,7 @@ const uploadEpisode = async (req, res, next) => {
       newEpisode._id.toString(),
     )
 
-    // 2. Add job to BullMQ
+    // Add job to BullMQ
     await videoQueue.add(
       "processVideo",
       {

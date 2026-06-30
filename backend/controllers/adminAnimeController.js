@@ -6,8 +6,9 @@ const ffmpeg = require("fluent-ffmpeg")
 const ffmpegStatic = require("ffmpeg-static")
 ffmpeg.setFfmpegPath(ffmpegStatic)
 const redisClient = require("../config/redis")
+const axios = require("axios")
 
-// create
+// create anime
 const createAnime = async (req, res, next) => {
   const keys = await redisClient.keys("animes:*")
   if (keys.length > 0) await redisClient.del(keys)
@@ -19,7 +20,7 @@ const createAnime = async (req, res, next) => {
     next(err)
   }
 }
-// update
+// update anime
 const updateAnime = async (req, res, next) => {
   const keys = await redisClient.keys("animes:*")
   if (keys.length > 0) await redisClient.del(keys)
@@ -41,7 +42,7 @@ const updateAnime = async (req, res, next) => {
     next(err)
   }
 }
-// delete
+// delete anime
 const deleteAnime = async (req, res, next) => {
   const keys = await redisClient.keys("animes:*")
   if (keys.length > 0) await redisClient.del(keys)
@@ -52,8 +53,7 @@ const deleteAnime = async (req, res, next) => {
     next(err)
   }
 }
-
-// upload episode meta (admin)
+// upload episode meta 
 const uploadEpisodeMeta = async (req, res, next) => {
   const keys = await redisClient.keys("animes:*")
   if (keys.length > 0) await redisClient.del(keys)
@@ -161,7 +161,6 @@ const uploadEpisodeMeta = async (req, res, next) => {
     next(err)
   }
 }
-
 // Get recent episodes for system logs
 const getRecentEpisodes = async (req, res, next) => {
   try {
@@ -174,7 +173,6 @@ const getRecentEpisodes = async (req, res, next) => {
     next(err)
   }
 }
-
 // Episode CRUD
 const getEpisodesByAnime = async (req, res, next) => {
   try {
@@ -186,7 +184,7 @@ const getEpisodesByAnime = async (req, res, next) => {
     next(err)
   }
 }
-
+// update episode
 const updateEpisode = async (req, res, next) => {
   try {
     const episode = await Episode.findByIdAndUpdate(req.params.id, req.body, {
@@ -201,7 +199,7 @@ const updateEpisode = async (req, res, next) => {
     next(err)
   }
 }
-
+// delete episode
 const deleteEpisode = async (req, res, next) => {
   try {
     const episode = await Episode.findById(req.params.id)
@@ -246,7 +244,7 @@ const deleteEpisode = async (req, res, next) => {
     next(err)
   }
 }
-
+// get upload processing status
 const getQueueStatus = async (req, res, next) => {
   try {
     const { videoQueue } = require("../controllers/uploadController")
@@ -274,7 +272,7 @@ const getQueueStatus = async (req, res, next) => {
     next(err)
   }
 }
-
+// retry fail upload job
 const retryJob = async (req, res, next) => {
   try {
     const { videoQueue } = require("../controllers/uploadController")
@@ -288,7 +286,7 @@ const retryJob = async (req, res, next) => {
     next(err)
   }
 }
-
+// delete upload job
 const deleteJob = async (req, res, next) => {
   try {
     const { videoQueue } = require("../controllers/uploadController")
@@ -302,8 +300,7 @@ const deleteJob = async (req, res, next) => {
     next(err)
   }
 }
-
-// add direct link episode (admin)
+// add direct link episode
 const addEpisodeLink = async (req, res, next) => {
   const keys = await redisClient.keys("animes:*")
   if (keys.length > 0) await redisClient.del(keys)
@@ -356,10 +353,7 @@ const addEpisodeLink = async (req, res, next) => {
     next(err)
   }
 }
-
-const axios = require("axios")
-
-// bulk fetch episodes from Consumet (Zoro provider)
+// bulk fetch episodes from Consumet
 const bulkFetchEpisodes = async (req, res, next) => {
   const keys = await redisClient.keys("animes:*")
   if (keys.length > 0) await redisClient.del(keys)
@@ -373,7 +367,7 @@ const bulkFetchEpisodes = async (req, res, next) => {
     const { ANIME } = require("@consumet/extensions")
     const hianime = new ANIME.Hianime()
 
-    // Step 1: Search for the anime natively
+    // Search for the anime
     const searchRes = await hianime.search(title)
     if (!searchRes.results || searchRes.results.length === 0) {
       return res
@@ -381,10 +375,10 @@ const bulkFetchEpisodes = async (req, res, next) => {
         .json({ message: "Anime not found via Hianime Scraper" })
     }
 
-    // Pick the most relevant result (usually the first one)
+    // Pick the most relevant result
     const consumetId = searchRes.results[0].id
 
-    // Step 2: Get anime info to get all episodes
+    // Get anime info to get all episodes
     const infoRes = await hianime.fetchAnimeInfo(consumetId)
     const episodesList = infoRes.episodes
 
@@ -409,7 +403,7 @@ const bulkFetchEpisodes = async (req, res, next) => {
 
     let addedCount = 0
 
-    // Step 3: Loop through all episodes and fetch streaming links + skip times
+    // Loop through all episodes and fetch streaming links + skip times
     for (const ep of episodesList) {
       try {
         // Check if episode already exists in DB to prevent duplicates
@@ -474,7 +468,7 @@ const bulkFetchEpisodes = async (req, res, next) => {
           episodeNumber: ep.number,
           title: ep.title || `Episode ${ep.number}`,
           videoUrl: bestSource.url,
-          status: "ready", // M3U8 links are instantly ready
+          status: "ready", // M3U8 links 
           introStart,
           introEnd,
           outroStart,

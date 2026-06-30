@@ -87,6 +87,7 @@ const deleteAllHistory = async (req, res, next) => {
     next(error)
   }
 }
+
 module.exports = {
   getWatchHistory,
   addToHistory,

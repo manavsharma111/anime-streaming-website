@@ -1,9 +1,7 @@
 const Review = require("../models/Review")
 const Anime = require("../models/Anime")
 
-// @desc    Get all reviews for an anime
-// @route   GET /api/reviews/:animeId
-// @access  Public
+// get anime reviews
 exports.getAnimeReviews = async (req, res, next) => {
   try {
     const reviews = await Review.find({ anime: req.params.animeId })
@@ -20,9 +18,7 @@ exports.getAnimeReviews = async (req, res, next) => {
   }
 }
 
-// @desc    Add a new review
-// @route   POST /api/reviews/:animeId
-// @access  Private
+// add new review
 exports.addReview = async (req, res, next) => {
   try {
     const { rating, comment, media } = req.body
@@ -77,9 +73,7 @@ exports.addReview = async (req, res, next) => {
   }
 }
 
-// @desc    Delete a review
-// @route   DELETE /api/reviews/:id
-// @access  Private
+// delete review
 exports.deleteReview = async (req, res, next) => {
   try {
     const review = await Review.findById(req.params.id)
@@ -128,9 +122,7 @@ exports.deleteReview = async (req, res, next) => {
   }
 }
 
-// @desc    Add a reply to a review
-// @route   POST /api/reviews/:id/reply
-// @access  Private
+// add reply to review
 exports.addReply = async (req, res, next) => {
   try {
     const { comment } = req.body
@@ -168,9 +160,7 @@ exports.addReply = async (req, res, next) => {
   }
 }
 
-// @desc    Delete a reply
-// @route   DELETE /api/reviews/:id/reply/:replyId
-// @access  Private
+// delete reply to review
 exports.deleteReply = async (req, res, next) => {
   try {
     const review = await Review.findById(req.params.id)

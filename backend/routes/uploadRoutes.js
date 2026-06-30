@@ -4,7 +4,7 @@ const adminUpload = require("../middleware/adminUpload")
 const adminMiddleware = require("../middleware/adminMiddleware")
 const { uploadEpisodeMeta } = require("../controllers/adminAnimeController")
 
-// Admin upload endpoint – supports video, thumbnail, subtitles, audios
+// upload endpoint - supports video, thumbnail, subtitles, audios
 router.post(
   "/",
   adminUpload.fields([

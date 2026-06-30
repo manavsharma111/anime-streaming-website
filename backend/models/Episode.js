@@ -20,7 +20,7 @@ const episodeSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    // Custom Dynamic Timestamps (Seconds me)
+    // custom dynamic timestamps (sec)
     introStart: {
       type: Number,
       default: 0,

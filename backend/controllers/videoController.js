@@ -2,7 +2,7 @@ const fs = require("fs")
 const path = require("path")
 const Episode = require("../models/Episode")
 
-// VIDEO STREAMING LOGIC
+// VIDEO STREAMING
 const streamEpisode = async (req, res, next) => {
   try {
     const episode = await Episode.findById(req.params.id)
@@ -58,7 +58,7 @@ const downloadEpisode = async (req, res, next) => {
     const episode = await Episode.findById(req.params.id)
     if (!episode) return res.status(404).json({ message: "Episode not found" })
 
-    const quality = req.query.quality || "720p" // Default to 720p
+    const quality = req.query.quality || "720p" // 720p by default
 
     // Get the relative path for the requested quality from DB
     const downloadPathUrl =
@@ -69,9 +69,7 @@ const downloadEpisode = async (req, res, next) => {
         .status(404)
         .json({ message: `Quality ${quality} not available for this episode` })
     }
-
-    // downloadPathUrl looks like: "/uploads/processed/episode_id/downloads/720p.mp4"
-    // We need to resolve this to the actual filesystem path
+    // download path
     const basePath = path.join(__dirname, "..")
     const videoPath = path.join(basePath, downloadPathUrl)
 

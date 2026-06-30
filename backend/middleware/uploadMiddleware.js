@@ -23,7 +23,7 @@ const storage = multer.diskStorage({
 })
 
 const fileFilter = (req, file, cb) => {
-  // MKV files standard stream containers some time mime typt is binary/octet-stream
+  // MKV files standard stream containers sometimes mime type is binary/octet-stream
   const ext = path.extname(file.originalname).toLowerCase()
   const allowedExtensions = [".mp4", ".mkv", ".avi", ".webm"]
 
@@ -43,7 +43,7 @@ const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024 * 1024, // 5GB Strict Bound
+    fileSize: 5 * 1024 * 1024 * 1024, // 5GB
   },
 })
 

@@ -18,7 +18,7 @@ const getAnimes = async (req, res, next) => {
 
     const redisKey = `animes:${JSON.stringify(req.query)}`
 
-    // Try to fetch from cache, gracefully fallback if Redis fails/is down
+    // Try to fetch from cache
     try {
       const cachedData = await redisClient.get(redisKey)
       if (cachedData) {
@@ -30,7 +30,7 @@ const getAnimes = async (req, res, next) => {
     }
 
     let query = {}
-    // Search by title (removed title from destructing to avoid overriding)
+    // Search by title 
     if (search) query.title = { $regex: search, $options: "i" }
     // Filters
     if (status) query.status = status
@@ -50,7 +50,7 @@ const getAnimes = async (req, res, next) => {
     if (sort === "oldest") sortOption.createdAt = 1
     if (sort === "rating") sortOption.rating = -1
 
-    // Pagination
+    // Pagination- ek saath sbb na load hoe wrna server pe load pdta h
     const pageNumber = parseInt(page) || 1
     const limitNumber = parseInt(limit) || 10
     const skip = (pageNumber - 1) * limitNumber
@@ -71,7 +71,7 @@ const getAnimes = async (req, res, next) => {
       },
     }
 
-    // Try to set cache, gracefully handle failure
+    // Try to set cache
     try {
       await redisClient.setex(redisKey, 3600, JSON.stringify(responsePayload))
     } catch (redisError) {

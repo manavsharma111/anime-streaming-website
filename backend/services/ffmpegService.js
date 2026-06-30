@@ -4,6 +4,7 @@ const ffmpeg = require("fluent-ffmpeg")
 const ffmpegStatic = require("ffmpeg-static")
 const ffprobeStatic = require("ffprobe-static")
 
+// ffmpeg service
 const processAnimeVideo = async (
   ffmpegPath,
   inputPath,
@@ -118,11 +119,9 @@ const processAnimeVideo = async (
 
       let lastLoggedFrame = 0
 
-      // We no longer rely on var_stream_map with restrictive audio groups.
-      // Instead, we globally pass audio and subs and map video to resolutions.
 
       command
-        // --- 1. ADAPTIVE HLS STREAMING ---
+        // adaptive hls streaming
         .output(path.join(streamDir, "%v/manifest.m3u8"))
         .outputOptions([
           "-map 0:v:0",
@@ -157,7 +156,7 @@ const processAnimeVideo = async (
           varStreamMap,
         ])
 
-        // --- 2. DOWNLOAD MP4 CONTAINERS (CRF COMPRESSION ON CPU) ---
+        // download mp4 containers (crf compression on cpu)
         // 1080p
         .output(path.join(downloadDir, "1080p.mp4"))
         .outputOptions([
@@ -200,7 +199,7 @@ const processAnimeVideo = async (
           "-s 854x480",
         ])
 
-        // --- 3. THUMBNAILS ---
+        //  thumbnails
         .output(path.join(thumbDir, "thumb_%04d.png"))
         .outputOptions(["-vf fps=1/60", "-vframes 5"])
 
@@ -209,7 +208,7 @@ const processAnimeVideo = async (
           if (percent >= 100) percent = 99.9
 
           if (p.frames - lastLoggedFrame >= 50 || p.frames < lastLoggedFrame) {
-            console.log(
+            console.log(  
               `[FFmpeg] Encoding: ${percent}% | Frames: ${p.frames} | Speed: ${p.currentFps} fps`,
             )
             lastLoggedFrame = p.frames

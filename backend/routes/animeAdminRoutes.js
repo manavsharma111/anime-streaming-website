@@ -16,7 +16,7 @@ const {
 } = require("../controllers/adminAnimeController")
 const admin = require("../middleware/adminMiddleware")
 const adminUpload = require("../middleware/adminUpload")
-
+// Admin Anime CRUD Routes
 router.post(
   "/create",
   admin,

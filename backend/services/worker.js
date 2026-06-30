@@ -7,8 +7,6 @@ const Episode = require("../models/Episode")
 const connectDB = require("../config/db")
 
 dotenv.config()
-
-// Connect to database if not already connected
 connectDB()
 
 const connection = new Redis(
@@ -43,11 +41,11 @@ const worker = new Worker(
         job,
       )
 
-      // Upload to Cloudflare R2
+      // upload to cloudflare r2
       const publicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL
       if (publicUrl) {
         const { uploadDirectoryToR2 } = require("./r2UploadService")
-        // We need to construct the S3 prefix from the outputDir, e.g., 'uploads/processed/folderId'
+        // we need to construct the s3 prefix from the outputDir, e.g., 'uploads/processed/folderId'
         // outputDir is like c:\NEWTUBE\backend\public\uploads\processed\6a42...
         const path = require("path")
         const folderId = path.basename(outputDir)

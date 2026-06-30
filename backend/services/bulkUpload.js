@@ -65,7 +65,7 @@ const runBulkUpload = async () => {
       const episodeNumber = parseInt(match[2], 10)
       const title = match[3].trim()
 
-      // Find the Anime in DB (Case insensitive)
+      // find the anime in db 
       let animeDoc = await Anime.findOne({
         title: { $regex: new RegExp(`^${animeName}$`, "i") },
       })
@@ -77,7 +77,7 @@ const runBulkUpload = async () => {
         continue
       }
 
-      // Check for optional JSON Sidecar for Skip Timings (e.g. Naruto_E15_The Final Battle.json)
+      // check for optional json sidecar for skip timings 
       let introStart = 0,
         introEnd = 0,
         outroStart = 0,
@@ -98,10 +98,10 @@ const runBulkUpload = async () => {
           `Loaded skip timings from sidecar JSON for Ep ${episodeNumber}`,
         )
       } catch (err) {
-        // No JSON file or invalid JSON, ignore and use defaults
+        // no json file or invalid json, ignore and use defaults
       }
 
-      // Create Episode in DB
+      // create episode in db
       const newEpisode = new Episode({
         anime: animeDoc._id,
         episodeNumber,

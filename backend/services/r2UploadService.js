@@ -45,7 +45,7 @@ const getAllFiles = async (dirPath, arrayOfFiles = []) => {
   }
   return arrayOfFiles
 }
-
+// upload file to r2
 const uploadFileToR2 = async (localFilePath, s3Key) => {
   const fileBuffer = await fs.readFile(localFilePath)
   const contentType = getContentType(localFilePath)
@@ -59,7 +59,7 @@ const uploadFileToR2 = async (localFilePath, s3Key) => {
 
   return s3Client.send(command)
 }
-
+// upload directory to r2
 const uploadDirectoryToR2 = async (localDir, s3Prefix) => {
   try {
     console.log(

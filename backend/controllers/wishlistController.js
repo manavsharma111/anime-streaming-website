@@ -52,7 +52,6 @@ const addToWishlist = async (req, res, next) => {
 // Remove from wishlist
 const removeFromWishlist = async (req, res, next) => {
   try {
-    // Can be deleted by wishlist item ID or anime ID
     const wishlistItem = await Wishlist.findByIdAndDelete(req.params.id)
 
     if (!wishlistItem) {
