@@ -1,80 +1,80 @@
-const Anime = require("../models/Anime");
-const Episode = require("../models/Episode");
-const path = require("path");
-const fs = require("fs");
-const ffmpeg = require("fluent-ffmpeg");
-const ffmpegStatic = require("ffmpeg-static");
-ffmpeg.setFfmpegPath(ffmpegStatic);
-const redisClient = require("../config/redis");
+const Anime = require("../models/Anime")
+const Episode = require("../models/Episode")
+const path = require("path")
+const fs = require("fs")
+const ffmpeg = require("fluent-ffmpeg")
+const ffmpegStatic = require("ffmpeg-static")
+ffmpeg.setFfmpegPath(ffmpegStatic)
+const redisClient = require("../config/redis")
 
 // create
 const createAnime = async (req, res, next) => {
-  const keys = await redisClient.keys('animes:*');
-  if (keys.length > 0) await redisClient.del(keys);
+  const keys = await redisClient.keys("animes:*")
+  if (keys.length > 0) await redisClient.del(keys)
   try {
-    const anime = new Anime(req.body);
-    await anime.save();
-    res.status(201).json({ success: true, data: anime });
+    const anime = new Anime(req.body)
+    await anime.save()
+    res.status(201).json({ success: true, data: anime })
   } catch (err) {
-    next(err);
+    next(err)
   }
-};
+}
 // update
 const updateAnime = async (req, res, next) => {
-  const keys = await redisClient.keys('animes:*');
-if (keys.length > 0) await redisClient.del(keys);
+  const keys = await redisClient.keys("animes:*")
+  if (keys.length > 0) await redisClient.del(keys)
   try {
     if (req.files) {
       if (req.files.thumbnail && req.files.thumbnail[0]) {
-        req.body.thumbnail = `/uploads/thumbnails/${req.files.thumbnail[0].filename}`;
+        req.body.thumbnail = `/uploads/thumbnails/${req.files.thumbnail[0].filename}`
       }
       if (req.files.cover && req.files.cover[0]) {
-        req.body.cover = `/uploads/covers/${req.files.cover[0].filename}`;
+        req.body.cover = `/uploads/covers/${req.files.cover[0].filename}`
       }
     }
     const anime = await Anime.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
-    });
-    res.status(200).json({ success: true, data: anime });
+    })
+    res.status(200).json({ success: true, data: anime })
   } catch (err) {
-    next(err);
+    next(err)
   }
-};
+}
 // delete
 const deleteAnime = async (req, res, next) => {
-  const keys = await redisClient.keys('animes:*');
-if (keys.length > 0) await redisClient.del(keys);
+  const keys = await redisClient.keys("animes:*")
+  if (keys.length > 0) await redisClient.del(keys)
   try {
-    await Anime.findByIdAndDelete(req.params.id);
-    res.status(200).json({ success: true, message: "Anime deleted" });
+    await Anime.findByIdAndDelete(req.params.id)
+    res.status(200).json({ success: true, message: "Anime deleted" })
   } catch (err) {
-    next(err);
+    next(err)
   }
-};
+}
 
 // upload episode meta (admin)
 const uploadEpisodeMeta = async (req, res, next) => {
-  const keys = await redisClient.keys('animes:*');
-if (keys.length > 0) await redisClient.del(keys);
+  const keys = await redisClient.keys("animes:*")
+  if (keys.length > 0) await redisClient.del(keys)
   try {
-    const { anime, episodeNumber, title, scheduledAt } = req.body;
+    const { anime, episodeNumber, title, scheduledAt } = req.body
 
     if (!req.files || !req.files.video || !req.files.video[0]) {
-      return res.status(400).json({ message: "Video file required" });
+      return res.status(400).json({ message: "Video file required" })
     }
-    const videoFile = req.files.video[0];
+    const videoFile = req.files.video[0]
 
     // thumbnail – admin may upload, otherwise auto‑generate
-    let thumbnailUrl = "";
+    let thumbnailUrl = ""
     if (req.files.thumbnail && req.files.thumbnail[0]) {
-      thumbnailUrl = `/uploads/thumbnails/${req.files.thumbnail[0].filename}`;
+      thumbnailUrl = `/uploads/thumbnails/${req.files.thumbnail[0].filename}`
     } else {
       const thumbPath = path.join(
         "uploads",
         "thumbnails",
         `${videoFile.filename}.png`,
-      );
+      )
       await new Promise((resolve, reject) => {
         ffmpeg(videoFile.path)
           .screenshots({
@@ -84,20 +84,20 @@ if (keys.length > 0) await redisClient.del(keys);
             size: "320x180",
           })
           .on("end", resolve)
-          .on("error", reject);
-      });
-      thumbnailUrl = `/uploads/thumbnails/${path.basename(thumbPath)}`;
+          .on("error", reject)
+      })
+      thumbnailUrl = `/uploads/thumbnails/${path.basename(thumbPath)}`
     }
 
     const subtitleTracks = (req.files.subtitles || []).map((f) => ({
       lang: f.originalname.split(".").shift().toLowerCase(),
       url: `/uploads/subtitles/${f.filename}`,
-    }));
+    }))
 
     const audioTracks = (req.files.audios || []).map((f) => ({
       lang: f.originalname.split(".").shift().toLowerCase(),
       url: `/uploads/audios/${f.filename}`,
-    }));
+    }))
 
     const newEpisode = new Episode({
       anime,
@@ -109,36 +109,40 @@ if (keys.length > 0) await redisClient.del(keys);
       audioTracks,
       status: scheduledAt ? "scheduled" : "queued",
       scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
-    });
-    await newEpisode.save();
+    })
+    await newEpisode.save()
 
     // Push the newly created episode to the Anime's episodes array
     await Anime.findByIdAndUpdate(anime, {
-      $push: { episodes: newEpisode._id }
-    });
-    const rawVideoPath = videoFile.path;
-    const audioPaths = (req.files.audios || []).map((f) => f.path);
-    const subtitlePaths = (req.files.subtitles || []).map((f) => f.path);
-    
+      $push: { episodes: newEpisode._id },
+    })
+    const rawVideoPath = videoFile.path
+    const audioPaths = (req.files.audios || []).map((f) => f.path)
+    const subtitlePaths = (req.files.subtitles || []).map((f) => f.path)
+
     const outputDir = path.join(
       __dirname,
       "..",
       "uploads",
       "processed",
       newEpisode._id.toString(),
-    );
-    
+    )
+
     const { videoQueue } = require("../controllers/uploadController")
     await videoQueue.add(
       "processVideo",
-      { 
-        episodeId: newEpisode._id, 
-        inputPath: rawVideoPath, 
-        audioPaths, 
-        subtitlePaths, 
-        outputDir 
+      {
+        episodeId: newEpisode._id,
+        inputPath: rawVideoPath,
+        audioPaths,
+        subtitlePaths,
+        outputDir,
       },
-      { delay: scheduledAt ? Math.max(0, new Date(scheduledAt) - Date.now()) : 0 }
+      {
+        delay: scheduledAt
+          ? Math.max(0, new Date(scheduledAt) - Date.now())
+          : 0,
+      },
     )
 
     if (global.io) {
@@ -149,14 +153,14 @@ if (keys.length > 0) await redisClient.del(keys);
         thumbnailUrl,
         subtitleTracks,
         audioTracks,
-      });
+      })
     }
 
-    res.status(202).json({ success: true, data: newEpisode });
+    res.status(202).json({ success: true, data: newEpisode })
   } catch (err) {
-    next(err);
+    next(err)
   }
-};
+}
 
 // Get recent episodes for system logs
 const getRecentEpisodes = async (req, res, next) => {
@@ -164,130 +168,161 @@ const getRecentEpisodes = async (req, res, next) => {
     const episodes = await Episode.find({})
       .sort({ createdAt: -1 })
       .limit(10)
-      .populate("anime", "title");
-    res.status(200).json({ success: true, data: episodes });
+      .populate("anime", "title")
+    res.status(200).json({ success: true, data: episodes })
   } catch (err) {
-    next(err);
+    next(err)
   }
-};
+}
 
 // Episode CRUD
 const getEpisodesByAnime = async (req, res, next) => {
   try {
-    const episodes = await Episode.find({ anime: req.params.animeId }).sort({ episodeNumber: 1 });
-    res.status(200).json({ success: true, data: episodes });
+    const episodes = await Episode.find({ anime: req.params.animeId }).sort({
+      episodeNumber: 1,
+    })
+    res.status(200).json({ success: true, data: episodes })
   } catch (err) {
-    next(err);
+    next(err)
   }
-};
+}
 
 const updateEpisode = async (req, res, next) => {
   try {
     const episode = await Episode.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
-    });
+    })
     // Clear related redis keys
-    const keys = await redisClient.keys('animes:*');
-    if (keys.length > 0) await redisClient.del(keys);
-    res.status(200).json({ success: true, data: episode });
+    const keys = await redisClient.keys("animes:*")
+    if (keys.length > 0) await redisClient.del(keys)
+    res.status(200).json({ success: true, data: episode })
   } catch (err) {
-    next(err);
+    next(err)
   }
-};
+}
 
 const deleteEpisode = async (req, res, next) => {
   try {
-    const episode = await Episode.findById(req.params.id);
-    if (!episode) return res.status(404).json({ success: false, message: "Episode not found" });
+    const episode = await Episode.findById(req.params.id)
+    if (!episode)
+      return res
+        .status(404)
+        .json({ success: false, message: "Episode not found" })
 
     // Remove from Anime array
-    await Anime.findByIdAndUpdate(episode.anime, { $pull: { episodes: episode._id } });
-    
+    await Anime.findByIdAndUpdate(episode.anime, {
+      $pull: { episodes: episode._id },
+    })
+
     // Delete physical files (processed and raw)
-    const outputDir = path.join(__dirname, "..", "uploads", "processed", episode._id.toString());
+    const outputDir = path.join(
+      __dirname,
+      "..",
+      "uploads",
+      "processed",
+      episode._id.toString(),
+    )
     if (fs.existsSync(outputDir)) {
-      fs.rmSync(outputDir, { recursive: true, force: true });
+      fs.rmSync(outputDir, { recursive: true, force: true })
     }
-    if (episode.videoUrl && fs.existsSync(path.join(__dirname, "..", episode.videoUrl))) {
-      fs.unlinkSync(path.join(__dirname, "..", episode.videoUrl));
+    if (
+      episode.videoUrl &&
+      fs.existsSync(path.join(__dirname, "..", episode.videoUrl))
+    ) {
+      fs.unlinkSync(path.join(__dirname, "..", episode.videoUrl))
     }
 
-    await Episode.findByIdAndDelete(req.params.id);
+    await Episode.findByIdAndDelete(req.params.id)
 
     // Clear related redis keys
-    const keys = await redisClient.keys('animes:*');
-    if (keys.length > 0) await redisClient.del(keys);
+    const keys = await redisClient.keys("animes:*")
+    if (keys.length > 0) await redisClient.del(keys)
 
-    res.status(200).json({ success: true, message: "Episode deleted completely" });
+    res
+      .status(200)
+      .json({ success: true, message: "Episode deleted completely" })
   } catch (err) {
-    next(err);
+    next(err)
   }
-};
+}
 
 const getQueueStatus = async (req, res, next) => {
   try {
-    const { videoQueue } = require("../controllers/uploadController");
-    const active = await videoQueue.getJobs(['active']);
-    const waiting = await videoQueue.getJobs(['waiting', 'delayed']);
-    const failed = await videoQueue.getJobs(['failed']);
+    const { videoQueue } = require("../controllers/uploadController")
+    const active = await videoQueue.getJobs(["active"])
+    const waiting = await videoQueue.getJobs(["waiting", "delayed"])
+    const failed = await videoQueue.getJobs(["failed"])
 
     const formatJob = (j, status) => ({
       id: j.id,
       progress: j.progress,
       data: j.data,
       status,
-      failedReason: j.failedReason
-    });
+      failedReason: j.failedReason,
+    })
 
     res.status(200).json({
       success: true,
       data: {
-        active: active.map(j => formatJob(j, 'active')),
-        waiting: waiting.map(j => formatJob(j, 'waiting')),
-        failed: failed.map(j => formatJob(j, 'failed'))
-      }
-    });
+        active: active.map((j) => formatJob(j, "active")),
+        waiting: waiting.map((j) => formatJob(j, "waiting")),
+        failed: failed.map((j) => formatJob(j, "failed")),
+      },
+    })
   } catch (err) {
-    next(err);
+    next(err)
   }
-};
+}
 
 const retryJob = async (req, res, next) => {
   try {
-    const { videoQueue } = require("../controllers/uploadController");
-    const job = await videoQueue.getJob(req.params.id);
-    if (!job) return res.status(404).json({ success: false, message: "Job not found" });
-    
-    await job.retry();
-    res.status(200).json({ success: true, message: "Job retried successfully" });
+    const { videoQueue } = require("../controllers/uploadController")
+    const job = await videoQueue.getJob(req.params.id)
+    if (!job)
+      return res.status(404).json({ success: false, message: "Job not found" })
+
+    await job.retry()
+    res.status(200).json({ success: true, message: "Job retried successfully" })
   } catch (err) {
-    next(err);
+    next(err)
   }
-};
+}
 
 const deleteJob = async (req, res, next) => {
   try {
-    const { videoQueue } = require("../controllers/uploadController");
-    const job = await videoQueue.getJob(req.params.id);
-    if (!job) return res.status(404).json({ success: false, message: "Job not found" });
-    
-    await job.remove();
-    res.status(200).json({ success: true, message: "Job deleted successfully" });
+    const { videoQueue } = require("../controllers/uploadController")
+    const job = await videoQueue.getJob(req.params.id)
+    if (!job)
+      return res.status(404).json({ success: false, message: "Job not found" })
+
+    await job.remove()
+    res.status(200).json({ success: true, message: "Job deleted successfully" })
   } catch (err) {
-    next(err);
+    next(err)
   }
-};
+}
 
 // add direct link episode (admin)
 const addEpisodeLink = async (req, res, next) => {
-  const keys = await redisClient.keys('animes:*');
-  if (keys.length > 0) await redisClient.del(keys);
+  const keys = await redisClient.keys("animes:*")
+  if (keys.length > 0) await redisClient.del(keys)
   try {
-    const { anime, episodeNumber, title, videoUrl, introStart, introEnd, outroStart, outroEnd } = req.body;
+    const {
+      anime,
+      episodeNumber,
+      title,
+      videoUrl,
+      introStart,
+      introEnd,
+      outroStart,
+      outroEnd,
+    } = req.body
 
     if (!anime || !episodeNumber || !videoUrl) {
-      return res.status(400).json({ message: "Anime, Episode Number, and Video URL are required" });
+      return res
+        .status(400)
+        .json({ message: "Anime, Episode Number, and Video URL are required" })
     }
 
     const newEpisode = new Episode({
@@ -299,101 +334,138 @@ const addEpisodeLink = async (req, res, next) => {
       introStart: introStart || 0,
       introEnd: introEnd || 0,
       outroStart: outroStart || 0,
-      outroEnd: outroEnd || 0
-    });
-    
-    await newEpisode.save();
+      outroEnd: outroEnd || 0,
+    })
+
+    await newEpisode.save()
 
     await Anime.findByIdAndUpdate(anime, {
-      $push: { episodes: newEpisode._id }
-    });
+      $push: { episodes: newEpisode._id },
+    })
 
     if (global.io) {
       global.io.emit("newEpisode", {
         animeId: anime,
         episodeId: newEpisode._id,
         title: newEpisode.title,
-      });
+      })
     }
 
-    res.status(201).json({ success: true, data: newEpisode });
+    res.status(201).json({ success: true, data: newEpisode })
   } catch (err) {
-    next(err);
+    next(err)
   }
-};
+}
 
-const axios = require("axios");
+const axios = require("axios")
 
 // bulk fetch episodes from Consumet (Zoro provider)
 const bulkFetchEpisodes = async (req, res, next) => {
-  const keys = await redisClient.keys('animes:*');
-  if (keys.length > 0) await redisClient.del(keys);
-  
-  try {
-    const { anime: animeId, title } = req.body;
-    if (!animeId || !title) return res.status(400).json({ message: "Anime ID and title required" });
+  const keys = await redisClient.keys("animes:*")
+  if (keys.length > 0) await redisClient.del(keys)
 
-    // Step 1: Search for the anime on Consumet Zoro provider
-    const searchRes = await axios.get(`https://api.consumet.org/anime/zoro/${encodeURIComponent(title)}`);
-    if (!searchRes.data.results || searchRes.data.results.length === 0) {
-      return res.status(404).json({ message: "Anime not found on Consumet API" });
+  try {
+    const { anime: animeId, title } = req.body
+    if (!animeId || !title)
+      return res.status(400).json({ message: "Anime ID and title required" })
+
+    // Initialize Native Consumet Scraper
+    const { ANIME } = require("@consumet/extensions")
+    const hianime = new ANIME.Hianime()
+
+    // Step 1: Search for the anime natively
+    const searchRes = await hianime.search(title)
+    if (!searchRes.results || searchRes.results.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "Anime not found via Hianime Scraper" })
     }
-    
+
     // Pick the most relevant result (usually the first one)
-    const consumetId = searchRes.data.results[0].id;
+    const consumetId = searchRes.results[0].id
 
     // Step 2: Get anime info to get all episodes
-    const infoRes = await axios.get(`https://api.consumet.org/anime/zoro/info?id=${consumetId}`);
-    const episodesList = infoRes.data.episodes;
-    
+    const infoRes = await hianime.fetchAnimeInfo(consumetId)
+    const episodesList = infoRes.episodes
+
     if (!episodesList || episodesList.length === 0) {
-      return res.status(404).json({ message: "No episodes found for this anime on Consumet" });
+      return res
+        .status(404)
+        .json({ message: "No episodes found for this anime" })
     }
 
     // Attempt to get MAL ID for AniSkip integration
-    let malId = null;
+    let malId = null
     try {
-      const jikanRes = await axios.get(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1`);
+      const jikanRes = await axios.get(
+        `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1`,
+      )
       if (jikanRes.data.data && jikanRes.data.data.length > 0) {
-        malId = jikanRes.data.data[0].mal_id;
+        malId = jikanRes.data.data[0].mal_id
       }
     } catch (jikanErr) {
-      console.warn("Could not fetch MAL ID from Jikan:", jikanErr.message);
+      console.warn("Could not fetch MAL ID from Jikan:", jikanErr.message)
     }
 
-    let addedCount = 0;
-    
+    let addedCount = 0
+
     // Step 3: Loop through all episodes and fetch streaming links + skip times
     for (const ep of episodesList) {
       try {
         // Check if episode already exists in DB to prevent duplicates
-        const existingEp = await Episode.findOne({ anime: animeId, episodeNumber: ep.number });
-        if (existingEp) continue;
+        const existingEp = await Episode.findOne({
+          anime: animeId,
+          episodeNumber: ep.number,
+        })
+        if (existingEp) continue
 
-        // Fetch streaming link for the episode
-        const watchRes = await axios.get(`https://api.consumet.org/anime/zoro/watch?episodeId=${ep.id}`);
-        const sources = watchRes.data.sources;
-        
+        // Fetch streaming link for the episode natively
+        const watchRes = await hianime.fetchEpisodeSources(ep.id)
+        const sources = watchRes.sources
+
+        if (!sources || sources.length === 0) continue
+
         // Find the 'auto' quality source (or first available)
-        const bestSource = sources.find(s => s.quality === 'auto') || sources.find(s => s.quality === 'default') || sources[0];
-        
-        if (!bestSource || !bestSource.url) continue;
+        const bestSource =
+          sources.find((s) => s.quality === "auto") ||
+          sources.find((s) => s.quality === "default") ||
+          sources[0]
+
+        if (!bestSource || !bestSource.url) continue
 
         // Try to fetch skip times if we have a MAL ID
-        let introStart = 0, introEnd = 0, outroStart = 0, outroEnd = 0;
+        let introStart = 0,
+          introEnd = 0,
+          outroStart = 0,
+          outroEnd = 0
         if (malId) {
           try {
-            const aniskipRes = await axios.get(`https://api.aniskip.com/v2/skip-times/${malId}/${ep.number}?types[]=op&types[]=ed&episodeLength=0`);
+            const aniskipRes = await axios.get(
+              `https://api.aniskip.com/v2/skip-times/${malId}/${ep.number}?types[]=op&types[]=ed&episodeLength=0`,
+            )
             if (aniskipRes.data.found) {
-              const op = aniskipRes.data.results.find(r => r.skipType === 'op');
-              const ed = aniskipRes.data.results.find(r => r.skipType === 'ed');
-              if (op) { introStart = Math.round(op.interval.startTime); introEnd = Math.round(op.interval.endTime); }
-              if (ed) { outroStart = Math.round(ed.interval.startTime); outroEnd = Math.round(ed.interval.endTime); }
+              const op = aniskipRes.data.results.find(
+                (r) => r.skipType === "op",
+              )
+              const ed = aniskipRes.data.results.find(
+                (r) => r.skipType === "ed",
+              )
+              if (op) {
+                introStart = Math.round(op.interval.startTime)
+                introEnd = Math.round(op.interval.endTime)
+              }
+              if (ed) {
+                outroStart = Math.round(ed.interval.startTime)
+                outroEnd = Math.round(ed.interval.endTime)
+              }
             }
-            // Small delay to prevent hitting AniSkip rate limits (max 10 requests per second)
-            await new Promise(resolve => setTimeout(resolve, 200));
+            // Small delay to prevent hitting AniSkip rate limits
+            await new Promise((resolve) => setTimeout(resolve, 200))
           } catch (aniskipErr) {
-            console.warn(`Could not fetch skip times for ep ${ep.number}:`, aniskipErr.message);
+            console.warn(
+              `Could not fetch skip times for ep ${ep.number}:`,
+              aniskipErr.message,
+            )
           }
         }
 
@@ -403,43 +475,57 @@ const bulkFetchEpisodes = async (req, res, next) => {
           title: ep.title || `Episode ${ep.number}`,
           videoUrl: bestSource.url,
           status: "ready", // M3U8 links are instantly ready
-          introStart, introEnd, outroStart, outroEnd
-        });
-        
-        await newEpisode.save();
-        
+          introStart,
+          introEnd,
+          outroStart,
+          outroEnd,
+        })
+
+        await newEpisode.save()
+
         await Anime.findByIdAndUpdate(animeId, {
-          $push: { episodes: newEpisode._id }
-        });
+          $push: { episodes: newEpisode._id },
+        })
 
         if (global.io) {
           global.io.emit("newEpisode", {
             animeId,
             episodeId: newEpisode._id,
             title: newEpisode.title,
-          });
+          })
         }
-        
-        addedCount++;
+
+        addedCount++
       } catch (epError) {
-        console.error(`Failed to fetch/save episode ${ep.number}:`, epError.message);
+        console.error(
+          `Failed to fetch/save episode ${ep.number}:`,
+          epError.message,
+        )
         // continue to next episode even if one fails
       }
     }
 
-    res.status(200).json({ 
-      success: true, 
-      message: `Bulk fetch complete. Successfully added ${addedCount} new episodes!` 
-    });
+    res.status(200).json({
+      success: true,
+      message: `Bulk fetch complete. Successfully added ${addedCount} new episodes!`,
+    })
   } catch (err) {
-    next(err);
+    next(err)
   }
-};
+}
 
-module.exports = { 
-  createAnime, updateAnime, deleteAnime, 
-  uploadEpisodeMeta, getRecentEpisodes, 
-  getEpisodesByAnime, updateEpisode, deleteEpisode,
-  getQueueStatus, retryJob, deleteJob, addEpisodeLink,
-  bulkFetchEpisodes
-};
+module.exports = {
+  createAnime,
+  updateAnime,
+  deleteAnime,
+  uploadEpisodeMeta,
+  getRecentEpisodes,
+  getEpisodesByAnime,
+  updateEpisode,
+  deleteEpisode,
+  getQueueStatus,
+  retryJob,
+  deleteJob,
+  addEpisodeLink,
+  bulkFetchEpisodes,
+}

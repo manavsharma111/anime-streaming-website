@@ -3,10 +3,10 @@ const {
   PutObjectCommand,
   DeleteObjectCommand,
   ListObjectsV2Command,
-  HeadObjectCommand
-} = require("@aws-sdk/client-s3");
-const { NodeHttpHandler } = require("@smithy/node-http-handler");
-const https = require("https");
+  HeadObjectCommand,
+} = require("@aws-sdk/client-s3")
+const { NodeHttpHandler } = require("@smithy/node-http-handler")
+const https = require("https")
 
 const s3Client = new S3Client({
   region: "auto",
@@ -16,13 +16,13 @@ const s3Client = new S3Client({
     httpsAgent: new https.Agent({
       maxSockets: 50,
       keepAlive: true,
-      timeout: 60000
+      timeout: 60000,
     }),
   }),
   credentials: {
     accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY,
-    secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_KEY
-  }
+    secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_KEY,
+  },
 })
 
 module.exports = {
@@ -30,5 +30,5 @@ module.exports = {
   PutObjectCommand,
   DeleteObjectCommand,
   ListObjectsV2Command,
-  HeadObjectCommand
+  HeadObjectCommand,
 }

@@ -1,15 +1,15 @@
-const User = require("../models/User");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
-const dotenv = require("dotenv");
-dotenv.config();
+const User = require("../models/User")
+const jwt = require("jsonwebtoken")
+const bcrypt = require("bcryptjs")
+const dotenv = require("dotenv")
+dotenv.config()
 
 // Generate Access Token (15 mins)
 const generateAccessToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: "15m",
-  });
-};
+  })
+}
 
 // Generate Refresh Token (7 days)
 const generateRefreshToken = (id) => {
@@ -19,8 +19,8 @@ const generateRefreshToken = (id) => {
     {
       expiresIn: "7d",
     },
-  );
-};
+  )
+}
 
 // Login via Google Auth
 const GoogleAuthLogin = (req, res) => {
@@ -31,26 +31,26 @@ const GoogleAuthLogin = (req, res) => {
     `&response_type=code` +
     `&scope=openid email profile` +
     `&access_type=offline` +
-    `&prompt=select_account`;
+    `&prompt=select_account`
 
-  res.redirect(googleUrl);
-};
+  res.redirect(googleUrl)
+}
 
 // Google Callback handler
 const googleCallback = async (req, res) => {
   try {
-    const code = req.query.code;
+    const code = req.query.code
     if (!code) {
       return res
         .status(400)
-        .json({ message: "Google callback error: No code provided" });
+        .json({ message: "Google callback error: No code provided" })
     }
 
     // Exchange code for tokens
     const response = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         code,
@@ -58,10 +58,10 @@ const googleCallback = async (req, res) => {
         client_secret: process.env.GOOGLE_CLIENT_SECRET,
         redirect_uri: process.env.GOOGLE_CALLBACK,
         grant_type: "authorization_code",
-      })
-    });
-    const data = await response.json();
-    const { access_token } = data;
+      }),
+    })
+    const data = await response.json()
+    const { access_token } = data
 
     // Get user info from Google
     const userInfo = await fetch(
@@ -71,18 +71,18 @@ const googleCallback = async (req, res) => {
           Authorization: `Bearer ${access_token}`,
         },
       },
-    );
-    const userInfoData = await userInfo.json();
-    const { id, email, name, picture } = userInfoData;
+    )
+    const userInfoData = await userInfo.json()
+    const { id, email, name, picture } = userInfoData
 
     // Check if user exists in database
-    let user = await User.findOne({ email });
+    let user = await User.findOne({ email })
     if (!user) {
       //  Auto-Admin Logic
-      let newRole = "user";
-      const adminEmail = process.env.ADMIN_EMAIL 
+      let newRole = "user"
+      const adminEmail = process.env.ADMIN_EMAIL
       if (email === adminEmail) {
-        newRole = "admin";
+        newRole = "admin"
       }
 
       user = new User({
@@ -93,16 +93,16 @@ const googleCallback = async (req, res) => {
         wishlist: [],
         favorites: [],
         history: [],
-      });
-      await user.save();
+      })
+      await user.save()
     }
 
     // Generate application tokens
-    const accessToken = generateAccessToken(user._id);
-    const refreshToken = generateRefreshToken(user._id);
+    const accessToken = generateAccessToken(user._id)
+    const refreshToken = generateRefreshToken(user._id)
 
     // Determine if connection is secure based on environment
-    const isProduction = process.env.NODE_ENV === "production";
+    const isProduction = process.env.NODE_ENV === "production"
 
     // Set access token cookie
     res.cookie("token", accessToken, {
@@ -110,7 +110,7 @@ const googleCallback = async (req, res) => {
       secure: isProduction,
       sameSite: "strict",
       maxAge: 15 * 60 * 1000, // 15 mins
-    });
+    })
 
     // Set refresh token cookie
     res.cookie("refreshToken", refreshToken, {
@@ -118,114 +118,116 @@ const googleCallback = async (req, res) => {
       secure: isProduction,
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    })
 
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173"
     if (user.role === "admin") {
-      res.redirect(`${frontendUrl}/admin`);
+      res.redirect(`${frontendUrl}/admin`)
     } else {
-      res.redirect(`${frontendUrl}/`);
+      res.redirect(`${frontendUrl}/`)
     }
   } catch (error) {
-    console.log("Google Auth Error:", error);
-    res.status(500).json({ message: "Google callback error" });
+    console.log("Google Auth Error:", error)
+    res.status(500).json({ message: "Google callback error" })
   }
-};
+}
 
 // logout
 const logout = (req, res) => {
-  res.clearCookie("token");
-  res.clearCookie("refreshToken");
-  res.json({ message: "Logout successful", success: true });
-};
+  res.clearCookie("token")
+  res.clearCookie("refreshToken")
+  res.json({ message: "Logout successful", success: true })
+}
 // Get Current User Profile
 const getCurrentUser = async (req, res) => {
   try {
     // req.user is populated by the authMiddleware
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user.id).select("-password")
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found" })
     }
-    res.json({ success: true, data: user });
+    res.json({ success: true, data: user })
   } catch (error) {
-    console.error("Get Current User Error:", error);
-    res.status(500).json({ message: "Server Error" });
+    console.error("Get Current User Error:", error)
+    res.status(500).json({ message: "Server Error" })
   }
-};
+}
 
 // Update User Profile
 const updateProfile = async (req, res) => {
   try {
-    const { username, avatar } = req.body;
-    const user = await User.findById(req.user.id);
-    
+    const { username, avatar } = req.body
+    const user = await User.findById(req.user.id)
+
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found" })
     }
 
-    if (username) user.username = username;
-    if (avatar) user.avatar = avatar;
+    if (username) user.username = username
+    if (avatar) user.avatar = avatar
 
-    await user.save();
-    
+    await user.save()
+
     // Return updated user without password
-    const updatedUser = await User.findById(req.user.id).select("-password");
-    res.json({ success: true, data: updatedUser });
+    const updatedUser = await User.findById(req.user.id).select("-password")
+    res.json({ success: true, data: updatedUser })
   } catch (error) {
-    console.error("Update Profile Error:", error);
-    res.status(500).json({ message: "Server Error" });
+    console.error("Update Profile Error:", error)
+    res.status(500).json({ message: "Server Error" })
   }
-};
+}
 
 // Get Notifications
 const getNotifications = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("notifications");
+    const user = await User.findById(req.user.id).select("notifications")
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found" })
     }
     // Sort notifications by newest first
-    const sortedNotifications = user.notifications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    res.json({ success: true, data: sortedNotifications });
+    const sortedNotifications = user.notifications.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+    )
+    res.json({ success: true, data: sortedNotifications })
   } catch (error) {
-    console.error("Get Notifications Error:", error);
-    res.status(500).json({ message: "Server Error" });
+    console.error("Get Notifications Error:", error)
+    res.status(500).json({ message: "Server Error" })
   }
-};
+}
 
 // Mark Notification as Read
 const markNotificationRead = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    const user = await User.findById(req.user.id)
+    if (!user) return res.status(404).json({ message: "User not found" })
 
-    const notification = user.notifications.id(req.params.id);
+    const notification = user.notifications.id(req.params.id)
     if (notification) {
-      notification.read = true;
-      await user.save();
+      notification.read = true
+      await user.save()
     }
-    res.json({ success: true });
+    res.json({ success: true })
   } catch (error) {
-    console.error("Mark Notification Read Error:", error);
-    res.status(500).json({ message: "Server Error" });
+    console.error("Mark Notification Read Error:", error)
+    res.status(500).json({ message: "Server Error" })
   }
-};
+}
 
 // Delete Notification
 const deleteNotification = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    const user = await User.findById(req.user.id)
+    if (!user) return res.status(404).json({ message: "User not found" })
 
-    user.notifications.pull(req.params.id);
-    await user.save();
+    user.notifications.pull(req.params.id)
+    await user.save()
 
-    res.json({ success: true });
+    res.json({ success: true })
   } catch (error) {
-    console.error("Delete Notification Error:", error);
-    res.status(500).json({ message: "Server Error" });
+    console.error("Delete Notification Error:", error)
+    res.status(500).json({ message: "Server Error" })
   }
-};
+}
 
 module.exports = {
   GoogleAuthLogin,
@@ -237,5 +239,5 @@ module.exports = {
   updateProfile,
   getNotifications,
   markNotificationRead,
-  deleteNotification
-};
+  deleteNotification,
+}

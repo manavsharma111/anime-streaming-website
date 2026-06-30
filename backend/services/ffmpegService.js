@@ -4,42 +4,60 @@ const ffmpeg = require("fluent-ffmpeg")
 const ffmpegStatic = require("ffmpeg-static")
 const ffprobeStatic = require("ffprobe-static")
 
-const processAnimeVideo = async (ffmpegPath, inputPath, audioPaths, subtitlePaths, outputDir, job) => {
+const processAnimeVideo = async (
+  ffmpegPath,
+  inputPath,
+  audioPaths,
+  subtitlePaths,
+  outputDir,
+  job,
+) => {
   return new Promise(async (resolve, reject) => {
     try {
       const finalFfmpegPath = ffmpegPath || ffmpegStatic
       ffmpeg.setFfmpegPath(finalFfmpegPath)
       ffmpeg.setFfprobePath(ffprobeStatic.path)
 
-      if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true })
+      if (!fs.existsSync(outputDir))
+        fs.mkdirSync(outputDir, { recursive: true })
 
       const streamDir = path.join(outputDir, "streaming")
       const thumbDir = path.join(outputDir, "thumbnails")
       const downloadDir = path.join(outputDir, "downloads")
 
-      if (!fs.existsSync(streamDir)) fs.mkdirSync(streamDir, { recursive: true })
+      if (!fs.existsSync(streamDir))
+        fs.mkdirSync(streamDir, { recursive: true })
       if (!fs.existsSync(thumbDir)) fs.mkdirSync(thumbDir, { recursive: true })
-      if (!fs.existsSync(downloadDir)) fs.mkdirSync(downloadDir, { recursive: true })
+      if (!fs.existsSync(downloadDir))
+        fs.mkdirSync(downloadDir, { recursive: true })
 
       // Create isolated resolution folders for HLS variants
       const resolutions = ["1080p", "720p", "480p"]
-      resolutions.forEach(res => {
-        if (!fs.existsSync(path.join(streamDir, res))) fs.mkdirSync(path.join(streamDir, res), { recursive: true })
+      resolutions.forEach((res) => {
+        if (!fs.existsSync(path.join(streamDir, res)))
+          fs.mkdirSync(path.join(streamDir, res), { recursive: true })
       })
 
       // Probe input to dynamically count audio/subtitle streams
       const streamCounts = await new Promise((res, rej) => {
         ffmpeg.ffprobe(inputPath, (err, metadata) => {
           if (err) return rej(err)
-          let aCount = 0; let sCount = 0;
+          let aCount = 0
+          let sCount = 0
           let subStreams = []
-          metadata.streams.forEach(s => {
-            if (s.codec_type === 'audio') aCount++
-            if (s.codec_type === 'subtitle') {
+          metadata.streams.forEach((s) => {
+            if (s.codec_type === "audio") aCount++
+            if (s.codec_type === "subtitle") {
               sCount++
               // Only keep text-based subtitles for VTT extraction
-              if (['subrip', 'ass', 'ssa', 'mov_text'].includes(s.codec_name)) {
-                subStreams.push({ index: s.index, lang: (s.tags && s.tags.language) ? s.tags.language : `Track ${sCount}` })
+              if (["subrip", "ass", "ssa", "mov_text"].includes(s.codec_name)) {
+                subStreams.push({
+                  index: s.index,
+                  lang:
+                    s.tags && s.tags.language
+                      ? s.tags.language
+                      : `Track ${sCount}`,
+                })
               }
             }
           })
@@ -55,21 +73,36 @@ const processAnimeVideo = async (ffmpegPath, inputPath, audioPaths, subtitlePath
 
         await new Promise((resSub, rejSub) => {
           const subCommand = ffmpeg(inputPath)
-          console.log(`[FFmpeg] Extracting ${streamCounts.subStreams.length} text subtitles... (This may take a few seconds)`)
+          console.log(
+            `[FFmpeg] Extracting ${streamCounts.subStreams.length} text subtitles... (This may take a few seconds)`,
+          )
           streamCounts.subStreams.forEach((sub, i) => {
             const vttPath = path.join(subsDir, `sub_${i}.vtt`)
-            subCommand.output(vttPath).outputOptions([`-map 0:${sub.index}`, "-c:s webvtt"])
-            
+            subCommand
+              .output(vttPath)
+              .outputOptions([`-map 0:${sub.index}`, "-c:s webvtt"])
+
             const folderId = path.basename(outputDir)
-            extractedSubs.push({ lang: sub.lang, url: `/uploads/processed/${folderId}/subtitles/sub_${i}.vtt` })
+            extractedSubs.push({
+              lang: sub.lang,
+              url: `/uploads/processed/${folderId}/subtitles/sub_${i}.vtt`,
+            })
           })
-          subCommand.on('end', () => {
-            console.log(`[FFmpeg] Subtitles successfully extracted! Starting video encoding...`)
-            resSub()
-          }).on('error', (err) => {
-            console.error("[FFmpeg] Subtitle extraction failed, skipping...", err.message)
-            resSub() // Skip on error so main video doesn't fail
-          }).run()
+          subCommand
+            .on("end", () => {
+              console.log(
+                `[FFmpeg] Subtitles successfully extracted! Starting video encoding...`,
+              )
+              resSub()
+            })
+            .on("error", (err) => {
+              console.error(
+                "[FFmpeg] Subtitle extraction failed, skipping...",
+                err.message,
+              )
+              resSub() // Skip on error so main video doesn't fail
+            })
+            .run()
         })
       }
 
@@ -82,7 +115,7 @@ const processAnimeVideo = async (ffmpegPath, inputPath, audioPaths, subtitlePath
 
       const command = ffmpeg()
       command.input(inputPath)
-      
+
       let lastLoggedFrame = 0
 
       // We no longer rely on var_stream_map with restrictive audio groups.
@@ -92,36 +125,80 @@ const processAnimeVideo = async (ffmpegPath, inputPath, audioPaths, subtitlePath
         // --- 1. ADAPTIVE HLS STREAMING ---
         .output(path.join(streamDir, "%v/manifest.m3u8"))
         .outputOptions([
-          "-map 0:v:0", "-map 0:v:0", "-map 0:v:0",
-          "-map 0:a?", 
-          
+          "-map 0:v:0",
+          "-map 0:v:0",
+          "-map 0:v:0",
+          "-map 0:a?",
+
           // Video quality maps
-          "-s:v:0 1920x1080", "-c:v:0 libx264", "-preset fast", "-b:v:0 3000k",
-          "-s:v:1 1280x720",  "-c:v:1 libx264", "-preset fast", "-b:v:1 1500k",
-          "-s:v:2 854x480",   "-c:v:2 libx264", "-preset fast", "-b:v:2 800k",
-          
-          "-c:a aac", "-b:a 128k",
-          
+          "-s:v:0 1920x1080",
+          "-c:v:0 libx264",
+          "-preset fast",
+          "-b:v:0 3000k",
+          "-s:v:1 1280x720",
+          "-c:v:1 libx264",
+          "-preset fast",
+          "-b:v:1 1500k",
+          "-s:v:2 854x480",
+          "-c:v:2 libx264",
+          "-preset fast",
+          "-b:v:2 800k",
+
+          "-c:a aac",
+          "-b:a 128k",
+
           "-f hls",
           "-hls_time 6",
           "-hls_playlist_type vod",
-          "-hls_segment_filename", path.join(streamDir, "%v/segment%03d.ts"),
+          "-hls_segment_filename",
+          path.join(streamDir, "%v/segment%03d.ts"),
           "-master_pl_name master.m3u8",
-          "-var_stream_map", varStreamMap 
+          "-var_stream_map",
+          varStreamMap,
         ])
 
         // --- 2. DOWNLOAD MP4 CONTAINERS (CRF COMPRESSION ON CPU) ---
         // 1080p
         .output(path.join(downloadDir, "1080p.mp4"))
-        .outputOptions(["-map 0:v:0", "-map 0:a?", "-map 0:s?", "-c:v libx264", "-crf 22", "-preset fast", "-c:a aac", "-c:s mov_text", "-s 1920x1080"])
-        
+        .outputOptions([
+          "-map 0:v:0",
+          "-map 0:a?",
+          "-map 0:s?",
+          "-c:v libx264",
+          "-crf 22",
+          "-preset fast",
+          "-c:a aac",
+          "-c:s mov_text",
+          "-s 1920x1080",
+        ])
+
         // 720p
         .output(path.join(downloadDir, "720p.mp4"))
-        .outputOptions(["-map 0:v:0", "-map 0:a?", "-map 0:s?", "-c:v libx264", "-crf 24", "-preset fast", "-c:a aac", "-c:s mov_text", "-s 1280x720"])
-        
+        .outputOptions([
+          "-map 0:v:0",
+          "-map 0:a?",
+          "-map 0:s?",
+          "-c:v libx264",
+          "-crf 24",
+          "-preset fast",
+          "-c:a aac",
+          "-c:s mov_text",
+          "-s 1280x720",
+        ])
+
         // 480p
         .output(path.join(downloadDir, "480p.mp4"))
-        .outputOptions(["-map 0:v:0", "-map 0:a?", "-map 0:s?", "-c:v libx264", "-crf 26", "-preset fast", "-c:a aac", "-c:s mov_text", "-s 854x480"])
+        .outputOptions([
+          "-map 0:v:0",
+          "-map 0:a?",
+          "-map 0:s?",
+          "-c:v libx264",
+          "-crf 26",
+          "-preset fast",
+          "-c:a aac",
+          "-c:s mov_text",
+          "-s 854x480",
+        ])
 
         // --- 3. THUMBNAILS ---
         .output(path.join(thumbDir, "thumb_%04d.png"))
@@ -130,16 +207,21 @@ const processAnimeVideo = async (ffmpegPath, inputPath, audioPaths, subtitlePath
         .on("progress", (p) => {
           let percent = p.percent ? parseFloat(p.percent.toFixed(2)) : 0
           if (percent >= 100) percent = 99.9
-          
+
           if (p.frames - lastLoggedFrame >= 50 || p.frames < lastLoggedFrame) {
-            console.log(`[FFmpeg] Encoding: ${percent}% | Frames: ${p.frames} | Speed: ${p.currentFps} fps`)
+            console.log(
+              `[FFmpeg] Encoding: ${percent}% | Frames: ${p.frames} | Speed: ${p.currentFps} fps`,
+            )
             lastLoggedFrame = p.frames
           }
-          
+
           if (job && percent > 0) {
             job.updateProgress(percent)
             if (global.io) {
-              global.io.emit("video_progress", { episodeId: job.data.episodeId, percent })
+              global.io.emit("video_progress", {
+                episodeId: job.data.episodeId,
+                percent,
+              })
             }
           }
         })
@@ -162,7 +244,7 @@ const processAnimeVideo = async (ffmpegPath, inputPath, audioPaths, subtitlePath
               480: `${baseFolder}/downloads/480p.mp4`,
             },
             thumbnails: `${baseFolder}/thumbnails/`,
-            embeddedSubtitles: extractedSubs
+            embeddedSubtitles: extractedSubs,
           })
         })
         .run()

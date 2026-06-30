@@ -1,39 +1,39 @@
-import React, { useState, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { Menu } from 'lucide-react'
-import { fetchAnimes } from '../../redux/slice/animeSlice'
-import UploadEpisodeForm from '../../components/AdminDashBoard/UploadEpisode'
-import AdminAnalytics from '../../components/AdminDashBoard/AdminAnalytics'
-import AdminCatalog from '../../components/AdminDashBoard/AdminCatalog'
-import CreateAnime from '../../components/AdminDashBoard/CreateAnime'
-import AdminSidebar from '../../components/AdminDashBoard/AdminSidebar'
-import AdminQueue from '../../components/AdminDashBoard/AdminQueue'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useState, useEffect } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { Menu } from "lucide-react"
+import { fetchAnimes } from "../../redux/slice/animeSlice"
+import UploadEpisodeForm from "../../components/AdminDashBoard/UploadEpisode"
+import AdminAnalytics from "../../components/AdminDashBoard/AdminAnalytics"
+import AdminCatalog from "../../components/AdminDashBoard/AdminCatalog"
+import CreateAnime from "../../components/AdminDashBoard/CreateAnime"
+import AdminSidebar from "../../components/AdminDashBoard/AdminSidebar"
+import AdminQueue from "../../components/AdminDashBoard/AdminQueue"
+import { motion, AnimatePresence } from "framer-motion"
 
 export default function AdminDashboard() {
   const dispatch = useDispatch()
   const { animeList: animes, loading } = useSelector((state) => state.anime)
-  const [activeTab, setActiveTab] = useState('overview')
+  const [activeTab, setActiveTab] = useState("overview")
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
-    dispatch(fetchAnimes({ limit: 500, sort: 'latest' }))
+    dispatch(fetchAnimes({ limit: 500, sort: "latest" }))
   }, [dispatch])
 
   const handleAnimeCreated = () => {
-    setActiveTab('catalog')
-    dispatch(fetchAnimes({ limit: 500, sort: 'latest' }))
-  };
+    setActiveTab("catalog")
+    dispatch(fetchAnimes({ limit: 500, sort: "latest" }))
+  }
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'overview':
+      case "overview":
         return <AdminAnalytics animes={animes} />
-      case 'catalog':
+      case "catalog":
         return <AdminCatalog />
-      case 'create':
+      case "create":
         return <CreateAnime onSuccess={handleAnimeCreated} />
-      case 'upload':
+      case "upload":
         return (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -42,13 +42,13 @@ export default function AdminDashboard() {
           >
             <UploadEpisodeForm animesList={animes} />
           </motion.div>
-        );
-      case 'queue':
-        return <AdminQueue />;
+        )
+      case "queue":
+        return <AdminQueue />
       default:
-        return <AdminAnalytics animes={animes} />;
+        return <AdminAnalytics animes={animes} />
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-[#050505] text-white flex">
@@ -64,7 +64,12 @@ export default function AdminDashboard() {
       </div>
 
       {/* Sidebar */}
-      <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
+      <AdminSidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        isOpen={sidebarOpen}
+        setIsOpen={setSidebarOpen}
+      />
 
       {/* Main Content Area */}
       <main className="flex-1 md:ml-[260px] pt-[80px] min-h-screen pb-[100px] md:pb-0">
@@ -72,9 +77,9 @@ export default function AdminDashboard() {
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0, filter: 'blur(10px)' }}
-              animate={{ opacity: 1, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, filter: 'blur(10px)' }}
+              initial={{ opacity: 0, filter: "blur(10px)" }}
+              animate={{ opacity: 1, filter: "blur(0px)" }}
+              exit={{ opacity: 0, filter: "blur(10px)" }}
               transition={{ duration: 0.3 }}
             >
               {renderContent()}
@@ -83,5 +88,5 @@ export default function AdminDashboard() {
         </div>
       </main>
     </div>
-  );
+  )
 }

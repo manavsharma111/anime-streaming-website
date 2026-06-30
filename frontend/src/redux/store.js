@@ -7,12 +7,12 @@ import wishlistReducer from "./slice/wishlistSlice"
 import reviewReducer from "./slice/reviewSlice"
 
 export const store = configureStore({
-    reducer: {
-        anime: animeReducer,
-        auth: authReducer,
-        episode: episodeReducer,
-        history: historyReducer,
-        wishlist: wishlistReducer,
-        review: reviewReducer,
-    },
+  reducer: {
+    anime: animeReducer,
+    auth: authReducer,
+    episode: episodeReducer,
+    history: historyReducer,
+    wishlist: wishlistReducer,
+    review: reviewReducer,
+  },
 })

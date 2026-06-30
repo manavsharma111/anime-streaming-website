@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 
 const episodeSchema = new mongoose.Schema(
   {
@@ -52,7 +52,7 @@ const episodeSchema = new mongoose.Schema(
     },
     videoUrl: {
       type: String,
-      default: ''
+      default: "",
     },
     subTitle: {
       type: Object,
@@ -117,6 +117,6 @@ const episodeSchema = new mongoose.Schema(
   {
     timestamps: true,
   },
-);
+)
 
-module.exports = mongoose.model("Episode", episodeSchema);
+module.exports = mongoose.model("Episode", episodeSchema)

@@ -1,8 +1,8 @@
-const express = require("express");
-const router = express.Router();
-const adminUpload = require("../middleware/adminUpload");
-const adminMiddleware = require("../middleware/adminMiddleware");
-const { uploadEpisodeMeta } = require("../controllers/adminAnimeController");
+const express = require("express")
+const router = express.Router()
+const adminUpload = require("../middleware/adminUpload")
+const adminMiddleware = require("../middleware/adminMiddleware")
+const { uploadEpisodeMeta } = require("../controllers/adminAnimeController")
 
 // Admin upload endpoint – supports video, thumbnail, subtitles, audios
 router.post(
@@ -15,6 +15,6 @@ router.post(
   ]),
   adminMiddleware,
   uploadEpisodeMeta,
-);
+)
 
-module.exports = router;
+module.exports = router

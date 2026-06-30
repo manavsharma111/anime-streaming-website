@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 
 const userSchema = new mongoose.Schema(
   {
@@ -53,12 +53,12 @@ const userSchema = new mongoose.Schema(
         link: String,
         read: { type: Boolean, default: false },
         createdAt: { type: Date, default: Date.now },
-      }
+      },
     ],
   },
   {
     timestamps: true,
   },
-);
+)
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model("User", userSchema)

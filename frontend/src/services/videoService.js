@@ -19,8 +19,8 @@ const videoService = {
 
   // SUBTITLES STATIC LINKS BINDING
   getSubtitleUrl: (trackUrl) => {
-    return `${VIDEO_BASE}${trackUrl}`;
-  }
-};
+    return `${VIDEO_BASE}${trackUrl}`
+  },
+}
 
-export default videoService;
+export default videoService

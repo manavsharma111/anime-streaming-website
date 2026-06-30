@@ -1,11 +1,17 @@
-import { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { getAnimeReviewsAsync, socketAddReview, socketUpdateReview, socketDeleteReview, clearReviews } from '../../../redux/slice/reviewSlice'
-import { io } from 'socket.io-client'
-import StarRating from './StarRating'
-import ReviewForm from './ReviewForm'
-import ReviewList from './ReviewList'
-import { motion } from 'framer-motion'
+import { useEffect } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import {
+  getAnimeReviewsAsync,
+  socketAddReview,
+  socketUpdateReview,
+  socketDeleteReview,
+  clearReviews,
+} from "../../../redux/slice/reviewSlice"
+import { io } from "socket.io-client"
+import StarRating from "./StarRating"
+import ReviewForm from "./ReviewForm"
+import ReviewList from "./ReviewList"
+import { motion } from "framer-motion"
 
 const ReviewSection = ({ animeId }) => {
   const dispatch = useDispatch()
@@ -15,18 +21,21 @@ const ReviewSection = ({ animeId }) => {
     if (animeId) {
       dispatch(getAnimeReviewsAsync(animeId))
 
-      const socket = io(import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080', {
-        withCredentials: true
-      })
+      const socket = io(
+        import.meta.env.VITE_BACKEND_URL || "http://localhost:8080",
+        {
+          withCredentials: true,
+        },
+      )
 
       // When a new review arrives via socket, add it
-      socket.on('newReview', (review) => {
+      socket.on("newReview", (review) => {
         if (review.anime === animeId) {
-            dispatch(socketAddReview(review))
+          dispatch(socketAddReview(review))
         }
       })
 
-      socket.on('deleteReview', (reviewId) => {
+      socket.on("deleteReview", (reviewId) => {
         dispatch(socketDeleteReview(reviewId))
       })
 
@@ -38,9 +47,12 @@ const ReviewSection = ({ animeId }) => {
   }, [dispatch, animeId])
 
   const totalReviews = reviews.length
-  const averageRating = totalReviews > 0
-    ? (reviews.reduce((acc, curr) => acc + curr.rating, 0) / totalReviews).toFixed(1)
-    : 0
+  const averageRating =
+    totalReviews > 0
+      ? (
+          reviews.reduce((acc, curr) => acc + curr.rating, 0) / totalReviews
+        ).toFixed(1)
+      : 0
 
   return (
     <div className="w-full mt-12 mb-12">
@@ -52,12 +64,18 @@ const ReviewSection = ({ animeId }) => {
         className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 mb-10 pb-6 border-b border-white/10"
       >
         <div>
-          <h2 className="text-3xl font-black text-white tracking-widest mb-4">Reviews & Comments</h2>
+          <h2 className="text-3xl font-black text-white tracking-widest mb-4">
+            Reviews & Comments
+          </h2>
           <div className="flex items-center gap-4">
-            <div className="text-5xl font-black text-[#f33767]">{averageRating}</div>
+            <div className="text-5xl font-black text-[#f33767]">
+              {averageRating}
+            </div>
             <div>
               <StarRating rating={Number(averageRating)} readonly size={20} />
-              <p className="text-sm text-neutral-500 font-bold mt-1">Based on {totalReviews} reviews</p>
+              <p className="text-sm text-neutral-500 font-bold mt-1">
+                Based on {totalReviews} reviews
+              </p>
             </div>
           </div>
         </div>

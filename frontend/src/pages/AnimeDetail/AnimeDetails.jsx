@@ -1,35 +1,49 @@
-import React, { useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchAnimeDetails, clearAnimeDetails } from '../../redux/slice/animeSlice';
-import { Play, Heart, Share2, Star, Download, ChevronRight, MessageSquare, PlayCircle, Plus, ArrowLeft } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { getImageUrl } from '../../utils/image';
-import ReviewSection from '../../components/Anime/ReviewSection/ReviewSection';
-import AnimeInfoBox from '../../components/Watch/AnimeInfoBox';
-import TrendingSidebar from '../../components/Watch/TrendingSidebar';
+import React, { useEffect } from "react"
+import { useParams, useNavigate, Link } from "react-router-dom"
+import { useDispatch, useSelector } from "react-redux"
+import {
+  fetchAnimeDetails,
+  clearAnimeDetails,
+} from "../../redux/slice/animeSlice"
+import {
+  Play,
+  Heart,
+  Share2,
+  Star,
+  Download,
+  ChevronRight,
+  MessageSquare,
+  PlayCircle,
+  Plus,
+  ArrowLeft,
+} from "lucide-react"
+import { motion } from "framer-motion"
+import { getImageUrl } from "../../utils/image"
+import ReviewSection from "../../components/Anime/ReviewSection/ReviewSection"
+import AnimeInfoBox from "../../components/Watch/AnimeInfoBox"
+import TrendingSidebar from "../../components/Watch/TrendingSidebar"
 
 export default function AnimeDetails() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
 
-  const { animeDetails, isLoading, error } = useSelector((state) => state.anime);
-  const { reviews } = useSelector((state) => state.review);
+  const { animeDetails, isLoading, error } = useSelector((state) => state.anime)
+  const { reviews } = useSelector((state) => state.review)
 
   useEffect(() => {
-    dispatch(fetchAnimeDetails(id));
+    dispatch(fetchAnimeDetails(id))
     return () => {
-      dispatch(clearAnimeDetails());
-    };
-  }, [dispatch, id]);
+      dispatch(clearAnimeDetails())
+    }
+  }, [dispatch, id])
 
   if (isLoading || !animeDetails) {
     return (
       <div className="min-h-screen bg-[#110e16] flex justify-center items-center">
         <div className="w-12 h-12 border-4 border-white/10 border-t-[#f33767] rounded-full animate-spin"></div>
       </div>
-    );
+    )
   }
 
   if (error) {
@@ -37,27 +51,31 @@ export default function AnimeDetails() {
       <div className="min-h-screen bg-[#110e16] flex justify-center items-center text-white">
         <h2>Error loading anime details: {error}</h2>
       </div>
-    );
+    )
   }
 
-  const anime = animeDetails;
-  const episodes = anime.episodes || [];
+  const anime = animeDetails
+  const episodes = anime.episodes || []
 
-  const totalReviews = reviews.length;
-  const averageRating = totalReviews > 0
-    ? (reviews.reduce((acc, curr) => acc + curr.rating, 0) / totalReviews).toFixed(1)
-    : (anime.rating || 0).toFixed(1);
+  const totalReviews = reviews.length
+  const averageRating =
+    totalReviews > 0
+      ? (
+          reviews.reduce((acc, curr) => acc + curr.rating, 0) / totalReviews
+        ).toFixed(1)
+      : (anime.rating || 0).toFixed(1)
 
   const getYoutubeId = (url) => {
-    if (!url) return null;
-    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
-    return match ? match[1] : null;
-  };
-  const trailerId = getYoutubeId(anime.trailerUrl);
+    if (!url) return null
+    const match = url.match(
+      /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/,
+    )
+    return match ? match[1] : null
+  }
+  const trailerId = getYoutubeId(anime.trailerUrl)
 
   return (
     <div className="min-h-screen bg-[#0e0b12] text-white pt-24 pb-20 relative overflow-hidden font-sans">
-
       {/* Background Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-[#f33767]/10 blur-[120px] pointer-events-none rounded-full"></div>
 
@@ -68,14 +86,18 @@ export default function AnimeDetails() {
             src={`https://www.youtube.com/embed/${trailerId}?autoplay=1&mute=1&loop=1&playlist=${trailerId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&disablekb=1&fs=0`}
             allow="autoplay; encrypted-media"
             className="w-full h-[120%] object-cover opacity-40 pointer-events-none scale-[1.3] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0"
-            style={{ border: 'none' }}
+            style={{ border: "none" }}
             tabIndex="-1"
           ></iframe>
         ) : (
           <video
-            autoPlay loop muted playsInline controls={false}
+            autoPlay
+            loop
+            muted
+            playsInline
+            controls={false}
             className="w-full h-full object-cover opacity-30 absolute top-0 left-0 z-0 pointer-events-none"
-            style={{ pointerEvents: 'none' }}
+            style={{ pointerEvents: "none" }}
             src="https://assets.mixkit.co/videos/preview/mixkit-animation-of-futuristic-devices-99786-large.mp4"
           ></video>
         )}
@@ -96,10 +118,17 @@ export default function AnimeDetails() {
           <AnimeInfoBox anime={anime} />
 
           {/* EPISODES (Grid for landing page) */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="mt-4 bg-[#110e16] p-6 rounded-2xl border border-white/5">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mt-4 bg-[#110e16] p-6 rounded-2xl border border-white/5"
+          >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-bold text-white">Episodes</h3>
-              <span className="text-xs font-bold text-neutral-500">{episodes.length} Episodes</span>
+              <span className="text-xs font-bold text-neutral-500">
+                {episodes.length} Episodes
+              </span>
             </div>
 
             {episodes.length > 0 ? (
@@ -112,13 +141,17 @@ export default function AnimeDetails() {
                     className="flex flex-col gap-2 p-2 rounded-xl bg-[#1c1c1c] border border-white/5 hover:bg-white/10 transition-colors group"
                   >
                     <div className="w-full aspect-video bg-black rounded-lg overflow-hidden relative shrink-0">
-                      <img 
-                        src={getImageUrl(ep.thumbnailUrl || anime.cover || anime.thumbnail)} 
-                        alt={ep.title} 
-                        className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" 
+                      <img
+                        src={getImageUrl(
+                          ep.thumbnailUrl || anime.cover || anime.thumbnail,
+                        )}
+                        alt={ep.title}
+                        className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity"
                         onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = getImageUrl(anime.cover || anime.thumbnail);
+                          e.target.onerror = null
+                          e.target.src = getImageUrl(
+                            anime.cover || anime.thumbnail,
+                          )
                         }}
                       />
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -138,7 +171,9 @@ export default function AnimeDetails() {
               </div>
             ) : (
               <div className="p-8 text-center bg-[#1c1c1c] rounded-xl border border-white/5">
-                <p className="text-neutral-500 text-sm font-bold">No episodes available yet.</p>
+                <p className="text-neutral-500 text-sm font-bold">
+                  No episodes available yet.
+                </p>
               </div>
             )}
           </motion.div>
@@ -150,6 +185,5 @@ export default function AnimeDetails() {
       </div>
     </div>
     // </div>
-
-  );
+  )
 }

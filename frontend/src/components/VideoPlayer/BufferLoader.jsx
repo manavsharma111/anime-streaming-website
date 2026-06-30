@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React from "react"
+import { motion, AnimatePresence } from "framer-motion"
 
 export default function BufferLoader({ isBuffering }) {
   return (
@@ -16,5 +16,5 @@ export default function BufferLoader({ isBuffering }) {
         </motion.div>
       )}
     </AnimatePresence>
-  );
+  )
 }

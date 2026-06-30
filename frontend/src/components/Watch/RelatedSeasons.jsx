@@ -1,10 +1,9 @@
-import React from 'react';
-import { getImageUrl } from '../../utils/image';
+import React from "react"
+import { getImageUrl } from "../../utils/image"
 
 export default function RelatedSeasons({ seasons, anime }) {
   return (
     <div className="w-full max-w-[1400px] mx-auto mt-8 flex flex-col gap-6 px-4">
-      
       {/* Next Episode Box */}
       <div className="w-full rounded-2xl bg-[#110e16] border border-white/5 p-8 flex items-center justify-center text-center shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#f33767]/5 blur-[80px] rounded-full pointer-events-none -z-10"></div>
@@ -25,15 +24,20 @@ export default function RelatedSeasons({ seasons, anime }) {
         </h3>
         <div className="flex items-center gap-4 overflow-x-auto hide-scrollbar pb-4 [scrollbar-width:none]">
           {seasons.map((s, i) => (
-            <div key={i} className="flex-shrink-0 w-[200px] h-[110px] relative rounded-xl overflow-hidden cursor-pointer group border border-white/5 shadow-lg">
-              <img 
-                src={getImageUrl(anime?.cover || anime?.thumbnail)} 
-                alt={s.title} 
-                className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500" 
+            <div
+              key={i}
+              className="flex-shrink-0 w-[200px] h-[110px] relative rounded-xl overflow-hidden cursor-pointer group border border-white/5 shadow-lg"
+            >
+              <img
+                src={getImageUrl(anime?.cover || anime?.thumbnail)}
+                alt={s.title}
+                className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0e0b12] to-transparent opacity-80 group-hover:opacity-60 transition-opacity" />
               <div className="absolute inset-0 flex flex-col items-center justify-center p-2 z-10">
-                <span className="text-sm font-black text-white mb-1.5 tracking-wider drop-shadow-lg">{s.title}</span>
+                <span className="text-sm font-black text-white mb-1.5 tracking-wider drop-shadow-lg">
+                  {s.title}
+                </span>
                 <span className="text-[9px] font-black uppercase tracking-widest bg-[#f33767] text-white px-2 py-1 rounded-md shadow-[0_0_10px_rgba(243,55,103,0.5)] group-hover:scale-110 transition-transform">
                   {s.eps} Eps
                 </span>
@@ -43,5 +47,5 @@ export default function RelatedSeasons({ seasons, anime }) {
         </div>
       </div>
     </div>
-  );
+  )
 }

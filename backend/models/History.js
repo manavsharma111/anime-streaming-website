@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 
 const History = new mongoose.Schema(
   {
@@ -37,6 +37,6 @@ const History = new mongoose.Schema(
   {
     timestamps: true,
   },
-);
+)
 
-module.exports = mongoose.model("History", History);
+module.exports = mongoose.model("History", History)
