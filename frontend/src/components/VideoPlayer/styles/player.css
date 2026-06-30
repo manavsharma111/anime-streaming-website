@@ -1,0 +1,40 @@
+.player-container {
+  /* Inherits tailwind fonts and variables */
+}
+
+/* Custom range slider styling for volume */
+.volume-slider {
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.2);
+  outline: none;
+  border-radius: 9999px;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.volume-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  border: none;
+}
+
+/* Hide native controls explicitly */
+video::-webkit-media-controls {
+  display: none !important;
+}

@@ -1,0 +1,9 @@
+node_modules
+.env
+.DS_Store
+dist
+build
+.svelte-kit
+coverage
+.vscode
+backend/uploads/
