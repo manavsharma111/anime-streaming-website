@@ -14,7 +14,7 @@
 
 ## 🚀 Overview
 
-Welcome to the **Next-Gen Anime Streaming Platform**, a highly scalable, full-stack web application designed to deliver a seamless and premium anime viewing experience. Built with modern web technologies, this platform features an ultra-fast HLS video player, an intelligent bulk episode fetcher, real-time transcoding queues, and a stunning glassmorphism user interface.
+Welcome to the **Next-Generation Anime Streaming Platform with Adaptive HLS Playback**, a highly scalable, full-stack web application designed to deliver a seamless and premium anime viewing experience. Built with modern web technologies, this platform features an ultra-fast HLS video player, an intelligent bulk episode fetcher, real-time transcoding queues, and a stunning glassmorphism user interface.
 
 Whether you're streaming via third-party providers or encoding raw `.mp4`/`.mkv` files locally into adaptive bitrates (1080p, 720p, 480p), this platform is engineered for high performance and minimal latency.
 
