@@ -110,7 +110,7 @@ const processAnimeVideo = async (ffmpegPath, inputPath, audioPaths, subtitlePath
           "-var_stream_map", varStreamMap 
         ])
 
-        // --- 2. DOWNLOAD MP4 CONTAINERS (CRF COMPRESSION) ---
+        // --- 2. DOWNLOAD MP4 CONTAINERS (CRF COMPRESSION ON CPU) ---
         // 1080p
         .output(path.join(downloadDir, "1080p.mp4"))
         .outputOptions(["-map 0:v:0", "-map 0:a?", "-map 0:s?", "-c:v libx264", "-crf 22", "-preset fast", "-c:a aac", "-c:s mov_text", "-s 1920x1080"])
@@ -143,8 +143,9 @@ const processAnimeVideo = async (ffmpegPath, inputPath, audioPaths, subtitlePath
             }
           }
         })
-        .on("error", (err) => {
-          console.error(`❌ FFmpeg pipeline failure:`, err)
+        .on("error", (err, stdout, stderr) => {
+          console.error(`❌ FFmpeg pipeline failure:`, err.message)
+          console.error(`[FFmpeg STDERR]:`, stderr)
           reject(err)
         })
         .on("end", () => {

@@ -17,12 +17,12 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
-    dispatch(fetchAnimes({ limit: 100 }))
+    dispatch(fetchAnimes({ limit: 500, sort: 'latest' }))
   }, [dispatch])
 
   const handleAnimeCreated = () => {
     setActiveTab('catalog')
-    dispatch(fetchAnimes({ limit: 100 }))
+    dispatch(fetchAnimes({ limit: 500, sort: 'latest' }))
   };
 
   const renderContent = () => {

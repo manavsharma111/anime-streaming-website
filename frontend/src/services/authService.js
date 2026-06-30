@@ -10,7 +10,10 @@ const authService = {
             const response = await axiosInstance.get("/auth/me")
             return response.data
         } catch (error) {
-            console.error("Get Current User Error:", error);
+            // Suppress console.error for expected 401 (Not logged in)
+            if (error.response && error.response.status !== 401) {
+                console.error("Get Current User Error:", error);
+            }
             throw error;
         }
     },

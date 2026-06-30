@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function CustomSelect({ options, value, onChange, placeholder, className, containerClassName, searchable = false }) {
+export default function CustomSelect({ options, value, onChange, placeholder, className, containerClassName, searchable = false, onSearch }) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef(null);
@@ -56,7 +56,10 @@ export default function CustomSelect({ options, value, onChange, placeholder, cl
                     type="text"
                     placeholder="Search..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      if (onSearch) onSearch(e.target.value);
+                    }}
                     onClick={(e) => e.stopPropagation()}
                     className="w-full bg-[#110e16] border border-white/5 rounded-lg pl-8 pr-3 py-2 text-xs text-white focus:outline-none focus:border-[#f33767]/50"
                     autoFocus

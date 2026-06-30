@@ -112,7 +112,15 @@ export default function AnimeDetails() {
                     className="flex flex-col gap-2 p-2 rounded-xl bg-[#1c1c1c] border border-white/5 hover:bg-white/10 transition-colors group"
                   >
                     <div className="w-full aspect-video bg-black rounded-lg overflow-hidden relative shrink-0">
-                      <img src={getImageUrl(ep.thumbnailUrl || anime.cover || anime.thumbnail)} alt={ep.title} className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" />
+                      <img 
+                        src={getImageUrl(ep.thumbnailUrl || anime.cover || anime.thumbnail)} 
+                        alt={ep.title} 
+                        className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" 
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = getImageUrl(anime.cover || anime.thumbnail);
+                        }}
+                      />
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <Play size={24} className="text-white fill-white" />
                       </div>

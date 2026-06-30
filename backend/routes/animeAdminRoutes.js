@@ -10,7 +10,9 @@ const {
   deleteEpisode,
   getQueueStatus,
   retryJob,
-  deleteJob
+  deleteJob,
+  addEpisodeLink,
+  bulkFetchEpisodes
 } = require("../controllers/adminAnimeController");
 const admin = require("../middleware/adminMiddleware");
 const adminUpload = require("../middleware/adminUpload");
@@ -21,6 +23,8 @@ router.delete("/:id", admin, deleteAnime);
 router.get("/recent-episodes", admin, getRecentEpisodes);
 
 // Episode routes
+router.post("/episode/link", admin, addEpisodeLink);
+router.post("/episodes/bulk-fetch", admin, bulkFetchEpisodes);
 router.get("/episodes/:animeId", admin, getEpisodesByAnime);
 router.put("/episode/:id", admin, updateEpisode);
 router.delete("/episode/:id", admin, deleteEpisode);

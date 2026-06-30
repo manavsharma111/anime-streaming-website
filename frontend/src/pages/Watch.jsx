@@ -72,9 +72,15 @@ export default function Watch() {
 
   // Determine the correct stream URL
   const backendUrl = import.meta.env.VITE_BACKEND_URL ? import.meta.env.VITE_BACKEND_URL.replace('/api', '') : 'http://localhost:8080';
+  const getFullUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${backendUrl}${url}`;
+  };
+
   const streamUrl = episode.hlsMasterUrl 
-    ? `${backendUrl}${episode.hlsMasterUrl}` 
-    : `${backendUrl}${episode.videoUrl}`;
+    ? getFullUrl(episode.hlsMasterUrl) 
+    : getFullUrl(episode.videoUrl);
 
   const episodeData = {
     introStart: episode.introStart || 0,

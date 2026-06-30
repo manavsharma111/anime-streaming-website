@@ -279,9 +279,167 @@ const deleteJob = async (req, res, next) => {
   }
 };
 
+// add direct link episode (admin)
+const addEpisodeLink = async (req, res, next) => {
+  const keys = await redisClient.keys('animes:*');
+  if (keys.length > 0) await redisClient.del(keys);
+  try {
+    const { anime, episodeNumber, title, videoUrl, introStart, introEnd, outroStart, outroEnd } = req.body;
+
+    if (!anime || !episodeNumber || !videoUrl) {
+      return res.status(400).json({ message: "Anime, Episode Number, and Video URL are required" });
+    }
+
+    const newEpisode = new Episode({
+      anime,
+      episodeNumber,
+      title: title || `Episode ${episodeNumber}`,
+      videoUrl: videoUrl,
+      status: "ready", // Instantly ready since it's an external link
+      introStart: introStart || 0,
+      introEnd: introEnd || 0,
+      outroStart: outroStart || 0,
+      outroEnd: outroEnd || 0
+    });
+    
+    await newEpisode.save();
+
+    await Anime.findByIdAndUpdate(anime, {
+      $push: { episodes: newEpisode._id }
+    });
+
+    if (global.io) {
+      global.io.emit("newEpisode", {
+        animeId: anime,
+        episodeId: newEpisode._id,
+        title: newEpisode.title,
+      });
+    }
+
+    res.status(201).json({ success: true, data: newEpisode });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const axios = require("axios");
+
+// bulk fetch episodes from Consumet (Zoro provider)
+const bulkFetchEpisodes = async (req, res, next) => {
+  const keys = await redisClient.keys('animes:*');
+  if (keys.length > 0) await redisClient.del(keys);
+  
+  try {
+    const { anime: animeId, title } = req.body;
+    if (!animeId || !title) return res.status(400).json({ message: "Anime ID and title required" });
+
+    // Step 1: Search for the anime on Consumet Zoro provider
+    const searchRes = await axios.get(`https://api.consumet.org/anime/zoro/${encodeURIComponent(title)}`);
+    if (!searchRes.data.results || searchRes.data.results.length === 0) {
+      return res.status(404).json({ message: "Anime not found on Consumet API" });
+    }
+    
+    // Pick the most relevant result (usually the first one)
+    const consumetId = searchRes.data.results[0].id;
+
+    // Step 2: Get anime info to get all episodes
+    const infoRes = await axios.get(`https://api.consumet.org/anime/zoro/info?id=${consumetId}`);
+    const episodesList = infoRes.data.episodes;
+    
+    if (!episodesList || episodesList.length === 0) {
+      return res.status(404).json({ message: "No episodes found for this anime on Consumet" });
+    }
+
+    // Attempt to get MAL ID for AniSkip integration
+    let malId = null;
+    try {
+      const jikanRes = await axios.get(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1`);
+      if (jikanRes.data.data && jikanRes.data.data.length > 0) {
+        malId = jikanRes.data.data[0].mal_id;
+      }
+    } catch (jikanErr) {
+      console.warn("Could not fetch MAL ID from Jikan:", jikanErr.message);
+    }
+
+    let addedCount = 0;
+    
+    // Step 3: Loop through all episodes and fetch streaming links + skip times
+    for (const ep of episodesList) {
+      try {
+        // Check if episode already exists in DB to prevent duplicates
+        const existingEp = await Episode.findOne({ anime: animeId, episodeNumber: ep.number });
+        if (existingEp) continue;
+
+        // Fetch streaming link for the episode
+        const watchRes = await axios.get(`https://api.consumet.org/anime/zoro/watch?episodeId=${ep.id}`);
+        const sources = watchRes.data.sources;
+        
+        // Find the 'auto' quality source (or first available)
+        const bestSource = sources.find(s => s.quality === 'auto') || sources.find(s => s.quality === 'default') || sources[0];
+        
+        if (!bestSource || !bestSource.url) continue;
+
+        // Try to fetch skip times if we have a MAL ID
+        let introStart = 0, introEnd = 0, outroStart = 0, outroEnd = 0;
+        if (malId) {
+          try {
+            const aniskipRes = await axios.get(`https://api.aniskip.com/v2/skip-times/${malId}/${ep.number}?types[]=op&types[]=ed&episodeLength=0`);
+            if (aniskipRes.data.found) {
+              const op = aniskipRes.data.results.find(r => r.skipType === 'op');
+              const ed = aniskipRes.data.results.find(r => r.skipType === 'ed');
+              if (op) { introStart = Math.round(op.interval.startTime); introEnd = Math.round(op.interval.endTime); }
+              if (ed) { outroStart = Math.round(ed.interval.startTime); outroEnd = Math.round(ed.interval.endTime); }
+            }
+            // Small delay to prevent hitting AniSkip rate limits (max 10 requests per second)
+            await new Promise(resolve => setTimeout(resolve, 200));
+          } catch (aniskipErr) {
+            console.warn(`Could not fetch skip times for ep ${ep.number}:`, aniskipErr.message);
+          }
+        }
+
+        const newEpisode = new Episode({
+          anime: animeId,
+          episodeNumber: ep.number,
+          title: ep.title || `Episode ${ep.number}`,
+          videoUrl: bestSource.url,
+          status: "ready", // M3U8 links are instantly ready
+          introStart, introEnd, outroStart, outroEnd
+        });
+        
+        await newEpisode.save();
+        
+        await Anime.findByIdAndUpdate(animeId, {
+          $push: { episodes: newEpisode._id }
+        });
+
+        if (global.io) {
+          global.io.emit("newEpisode", {
+            animeId,
+            episodeId: newEpisode._id,
+            title: newEpisode.title,
+          });
+        }
+        
+        addedCount++;
+      } catch (epError) {
+        console.error(`Failed to fetch/save episode ${ep.number}:`, epError.message);
+        // continue to next episode even if one fails
+      }
+    }
+
+    res.status(200).json({ 
+      success: true, 
+      message: `Bulk fetch complete. Successfully added ${addedCount} new episodes!` 
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = { 
   createAnime, updateAnime, deleteAnime, 
   uploadEpisodeMeta, getRecentEpisodes, 
   getEpisodesByAnime, updateEpisode, deleteEpisode,
-  getQueueStatus, retryJob, deleteJob
+  getQueueStatus, retryJob, deleteJob, addEpisodeLink,
+  bulkFetchEpisodes
 };
