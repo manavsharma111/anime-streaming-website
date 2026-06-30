@@ -26,7 +26,7 @@ Whether you're streaming via third-party providers or encoding raw `.mp4`/`.mkv`
 - **⚡ Dual-Mode Episode Uploads**: 
   - **Direct/Bulk Link**: Instantly fetch episodes and skip-times via native Consumet Extensions & Jikan API.
   - **Local Encode**: Upload raw video files, which are processed by FFmpeg in the background into M3U8 HLS format.
-- ** صف Message Queues**: Background video transcoding managed by **BullMQ** & **Redis** to prevent server blocking.
+- **⚙️ Message Queues**: Background video transcoding managed by **BullMQ** & **Redis** to prevent server blocking.
 - **🔄 Real-Time Updates**: Live transcoding progress tracking sent to the Admin Dashboard via **Socket.io**.
 - **☁️ Cloud Storage**: Seamlessly uploads processed video chunks to **Cloudflare R2 / AWS S3**.
 - **🎨 Premium UI/UX**: Built with **TailwindCSS**, featuring micro-animations, sleek dark mode, and responsive design.
