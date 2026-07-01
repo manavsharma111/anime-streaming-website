@@ -142,11 +142,11 @@ export default function TrendingThisWeek({ animeList = [], loading }) {
                   </div>
 
                   {/* Play Button Overlay */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-50 group-hover:scale-100 pointer-events-auto">
+                  {/* <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-50 group-hover:scale-100 pointer-events-auto">
                     <div className="w-20 h-20 bg-red-600/90 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(220,38,38,0.6)] backdrop-blur-md hover:scale-110 transition-transform">
                       <PlayCircle size={36} className="text-white ml-1" />
                     </div>
-                  </div>
+                  </div> */}
                 </motion.div>
               </motion.div>
             )

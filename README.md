@@ -20,16 +20,40 @@ Whether you're streaming via third-party providers or encoding raw `.mp4`/`.mkv`
 
 ---
 
-## ✨ Key Features
+## 🌟 Comprehensive Feature List
 
-- **🎬 Adaptive HLS Video Player**: Custom-built video player using `hls.js` with quality selection, playback speed controls, and auto-skip capabilities for intros/outros.
-- **⚡ Dual-Mode Episode Uploads**:
-  - **Direct/Bulk Link**: Instantly fetch episodes and skip-times via native Consumet Extensions & Jikan API.
-  - **Local Encode**: Upload raw video files, which are processed by FFmpeg in the background into M3U8 HLS format.
-- **⚙️ Message Queues**: Background video transcoding managed by **BullMQ** & **Redis** to prevent server blocking.
-- **🔄 Real-Time Updates**: Live transcoding progress tracking sent to the Admin Dashboard via **Socket.io**.
-- **☁️ Cloud Storage**: Seamlessly uploads processed video chunks to **Cloudflare R2 / AWS S3**.
-- **🎨 Premium UI/UX**: Built with **TailwindCSS**, featuring micro-animations, sleek dark mode, and responsive design.
+### 🔐 Authentication & Security
+- **Google OAuth2 SSO**: Implemented native OAuth2 flow via Google APIs without heavy libraries like Passport.js.
+- **JWT Token Strategy**: Highly secure stateless authentication using **Access Tokens (15m)** and **Refresh Tokens (7 days)**.
+- **Secure Cookie Storage**: Tokens are stored in `httpOnly`, `secure`, and `sameSite: strict` cookies to prevent XSS and CSRF attacks.
+- **Role-Based Access Control (RBAC)**: Custom middleware to differentiate between `user` and `admin` permissions. Auto-admin assignment based on secure `.env` variables.
+
+### 🎥 Adaptive Video Processing (Backend Pipeline)
+- **Local Encode Engine**: Upload raw `.mp4` / `.mkv` files via **Multer** and transcode them into HLS (`.m3u8`) adaptive bitrates (1080p, 720p, 480p) using **Fluent-FFmpeg**.
+- **Intelligent Audio & Subtitle Mapping**: Explicitly maps all embedded audio tracks (e.g., dual-audio English/Japanese) and soft-subs so they are perfectly preserved in the final HLS stream.
+- **Optimized MP4 Compression**: Utilizes Constant Rate Factor (CRF) for generating highly compressed, high-quality MP4s for direct user downloads.
+- **Message Queues (BullMQ & Redis)**: Background transcoding is fully decoupled from the main thread using Redis-backed queues to prevent server blocking.
+- **Real-Time Progress Tracking**: Emits live encoding metrics to the Admin Dashboard via **Socket.io**.
+- **Cloud Object Storage**: Automatically uploads processed video chunks to **Cloudflare R2 / AWS S3** via `@aws-sdk/client-s3`.
+
+### ⚡ Dual-Mode Episode Management
+- **Bulk Link Fetcher**: Integrates `@consumet/extensions` directly into the backend to instantly scrape streaming sources and skip-times.
+- **Manual Uploads**: Allows admins to upload custom episodes and track their encoding status.
+
+### 🧑‍💻 User Experience & Personalization
+- **Watch History & Resumption**: Tracks user watch timestamps precisely so they can resume episodes seamlessly across devices.
+- **Favorites & Wishlist**: Users can manage a personalized watchlist of their favorite anime.
+- **Reviews & Ratings**: Interactive review system for users to rate and comment on anime.
+- **In-App Notifications**: Real-time notification system (mark as read, delete) for users.
+- **Profile Customization**: Users can update their avatars and usernames.
+
+### 🎨 Premium Frontend UI/UX
+- **Adaptive HLS Player**: Custom React video player using `hls.js` with quality selection, playback speed controls, and auto-skip.
+- **Immersive Design**: Built with **TailwindCSS** featuring glassmorphism, sleek dark mode, and vibrant gradients.
+- **Fluid Animations**: Scroll-based micro-animations powered by **Framer Motion** & **GSAP**.
+- **Smooth Scrolling**: Implemented **Lenis** for a butter-smooth scroll experience.
+- **Intelligent State Management**: Uses **Redux Toolkit** (Slices & Thunks) to manage complex global states (Auth, Catalog, Player).
+- **Admin Dashboard**: Comprehensive control panel featuring analytics (via **Recharts**), server resource tracking, and queue monitoring.
 
 ---
 

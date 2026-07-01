@@ -26,10 +26,13 @@ export default function CinematicTrailer() {
           className="relative w-full md:w-[85vw] h-[60vh] md:h-[85vh] rounded-[2rem] overflow-hidden shadow-2xl border border-white/5 bg-black"
         >
           {/* Authentic High-Quality Anime Aesthetic */}
-          <img 
-            src="https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=2560&auto=format&fit=crop" 
-            alt="Trailer Background"
-            className="w-full h-full object-cover brightness-[0.6] hover:brightness-75 transition-all duration-1000 scale-105"
+          <iframe
+            src="https://www.youtube.com/embed/PWoS5WrXgnc?autoplay=1&mute=1&loop=1&playlist=PWoS5WrXgnc&controls=0&showinfo=0&rel=0&modestbranding=1&disablekb=1&iv_load_policy=3&playsinline=1"
+            title="Trailer Background"
+            className="w-full h-full object-cover brightness-[0.6] pointer-events-none scale-[1.3]"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
           />
           
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none" />

@@ -4,13 +4,31 @@ import { ScrollTrigger } from "gsap/ScrollTrigger"
 
 gsap.registerPlugin(ScrollTrigger)
 
+// const genres = [
+//   { title: "SHONEN", desc: "High-octane battles, unbreakable will, and legendary journeys.", color: "from-red-600 to-orange-500", img: "https://wallpaperaccess.com/full/1915382.jpg" },
+//   { title: "SEINEN", desc: "Dark thrillers, mature themes, and mind-bending plots.", color: "from-purple-600 to-indigo-900", img: "https://otakukart.com/wp-content/uploads/2025/03/Seinen-Anime.jpg" },
+//   { title: "SLICE OF LIFE", desc: "Heartwarming stories of everyday love and friendship.", color: "from-pink-500 to-rose-400", img: "https://wallpapercave.com/wp/wp5921545.jpg" },
+//   { title: "ISEKAI", desc: "Reincarnated into magical new worlds with infinite possibilities.", color: "from-blue-500 to-cyan-400", img: "https://images6.alphacoders.com/130/1303873.png" },
+// ]
 const genres = [
-  { title: "SHONEN", desc: "High-octane battles, unbreakable will, and legendary journeys.", color: "from-red-600 to-orange-500", img: "https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=2560&auto=format&fit=crop" },
-  { title: "SEINEN", desc: "Dark thrillers, mature themes, and mind-bending plots.", color: "from-purple-600 to-indigo-900", img: "https://images.unsplash.com/photo-1554034483-04fda0d3507b?q=80&w=2560&auto=format&fit=crop" },
-  { title: "SLICE OF LIFE", desc: "Heartwarming stories of everyday love and friendship.", color: "from-pink-500 to-rose-400", img: "https://images.unsplash.com/photo-1513628253939-010e64ac66cd?q=80&w=2560&auto=format&fit=crop" },
-  { title: "ISEKAI", desc: "Reincarnated into magical new worlds with infinite possibilities.", color: "from-blue-500 to-cyan-400", img: "https://images.unsplash.com/photo-1528360983277-13d401cdc186?q=80&w=2560&auto=format&fit=crop" },
+  { title: "SHONEN", desc: "High-octane battles, unbreakable will, and legendary journeys.", color: "from-red-600 to-orange-500", img: "https://wallpaperaccess.com/full/1915382.jpg" },
+  { title: "SEINEN", desc: "Dark thrillers, mature themes, and mind-bending plots.", color: "from-purple-600 to-indigo-900", img: "https://otakukart.com/wp-content/uploads/2025/03/Seinen-Anime.jpg" },
+  { title: "SLICE OF LIFE", desc: "Heartwarming stories of everyday love and friendship.", color: "from-pink-500 to-rose-400", img: "https://wallpapercave.com/wp/wp5921545.jpg" },
+  { title: "ISEKAI", desc: "Reincarnated into magical new worlds with infinite possibilities.", color: "from-blue-500 to-cyan-400", img: "https://images6.alphacoders.com/130/1303873.png" },
+  { title: "SPORTS", desc: "Sweat, tears, and intense competition to reach the absolute top.", color: "from-emerald-500 to-teal-700", img: "http://googleusercontent.com/image_collection/image_retrieval/6941899188983204493_0" },
+  { title: "ROMANCE", desc: "Butterfly moments, sweet heartstrings, and emotional rollercoasters.", color: "from-rose-400 to-red-400", img: "http://googleusercontent.com/image_collection/image_retrieval/2968889777273705256_0" },
+  { title: "HORROR / THRILLER", desc: "Eerie atmospheres, psychological dread, and survival against the unknown.", color: "from-zinc-900 to-neutral-700", img: "http://googleusercontent.com/image_collection/image_retrieval/14086258645651018851_0" },
+  { title: "CYBERPUNK / SCI-FI", desc: "Neon-lit dystopias, high-tech hacking, and futuristic chaos.", color: "from-cyan-500 to-fuchsia-600", img: "http://googleusercontent.com/image_collection/image_retrieval/11007577072981295098_0" },
+  { title: "MECHA", desc: "Colossal steel giants, tactical warfare, and epic pilot duels.", color: "from-blue-700 to-slate-800", img: "http://googleusercontent.com/image_collection/image_retrieval/14428173440960670562_0" },
+  { title: "FANTASY / MAGIC", desc: "Spellbinding sorcery, mythical beasts, and ancient kingdoms.", color: "from-amber-500 to-yellow-600", img: "http://googleusercontent.com/image_collection/image_retrieval/10715123913205920866_0" },
+  { title: "MYSTERY / NOIR", desc: "Shadowy conspiracies, brilliant detectives, and unraveling deep secrets.", color: "from-slate-900 to-blue-950", img: "http://googleusercontent.com/image_collection/image_retrieval/17717113551245125484_0" },
+  { title: "MILITARY / WARFARE", desc: "Gritty tactical battles, political intrigue, and the harsh realities of war.", color: "from-olive-600 to-stone-800", img: "https://images3.alphacoders.com/134/1344933.png" }, // Vinland Saga / Attack on Titan vibe
+  { title: "SUPERNATURAL", desc: "Yokai, curses, and hidden spirits lurking just beyond human sight.", color: "from-indigo-900 to-purple-700", img: "https://images5.alphacoders.com/132/1325607.jpeg" }, // Jujutsu Kaisen / Monogatari vibe
+  { title: "COMEDY / PARODY", desc: "Absurd gags, fourth-wall breaks, and non-stop laughing riots.", color: "from-yellow-400 to-orange-500", img: "https://images.alphacoders.com/605/605574.jpg" }, // Gintama / One Punch Man vibe
+  { title: "HISTORICAL / SAMURAI", desc: "Clashing steel, ancient traditions, and legendary tales of old Japan.", color: "from-amber-800 to-zinc-900", img: "https://images3.alphacoders.com/105/1059495.jpg" }, // Demon Slayer / Vagabond vibe
+  { title: "PSYCHOLOGICAL", desc: "Mind games, moral dilemmas, and intense battles of pure intellect.", color: "from-neutral-900 to-red-950", img: "https://images4.alphacoders.com/914/914022.jpg" }, // Monster / Classroom of the Elite vibe
+  { title: "ADVENTURE / EXPLORATION", desc: "Vast uncharted lands, hidden treasures, and the thrill of the open road.", color: "from-lime-600 to-emerald-800", img: "https://images5.alphacoders.com/613/613944.jpg" } // Hunter x Hunter / Made in Abyss vibe
 ]
-
 export default function StackedGenreCards() {
   const containerRef = useRef(null)
   const cardsRef = useRef([])

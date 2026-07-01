@@ -50,7 +50,7 @@ export default function CinematicHero() {
 
         {/* Collage/Background (Your Name official art for cinematic feel) */}
         <img
-          src="https://images.wallpapersden.com/image/download/jujutsu-kaisen-satoru-gojo-hd_bWtpZ26UmZqaraWkpJRobWllrWdma2U.jpg"
+          src="https://image.tmdb.org/t/p/original/1czz0r7urqCPP0CZTAEkCk4TZY1.jpg"
           alt="Hero Background"
           className="w-full h-full object-cover scale-[1.15] filter brightness-75"
         />

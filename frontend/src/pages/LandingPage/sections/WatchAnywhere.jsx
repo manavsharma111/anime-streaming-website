@@ -49,7 +49,7 @@ export default function WatchAnywhere() {
           >
             <div className="w-[300px] md:w-[450px] aspect-video bg-[#111] rounded-2xl border-4 border-[#222] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden relative">
               <img
-                src="https://images.wallpapersden.com/image/download/attack-on-titan-season-4-key-visual_bGtpa2uUmZqaraWkpJRobWllrWdma2U.jpg"
+                src="https://media1.tenor.com/m/bm-59zifr-oAAAAd/reze-chainsaw-man-reze.gif"
                 alt="Laptop View"
                 className="w-full h-full object-cover"
               />
@@ -64,10 +64,10 @@ export default function WatchAnywhere() {
           >
             <div className="w-[200px] md:w-[280px] aspect-[3/4] bg-[#111] rounded-3xl border-8 border-[#222] shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden">
               <img
-                src="https://images.wallpapersden.com/image/download/jujutsu-kaisen-satoru-gojo-hd_bWtpZ26UmZqaraWkpJRobWllrWdma2U.jpg"
+                src="https://media1.tenor.com/images/a9c85354bc73c114b4cc75455abe4dc3/tenor.gif?itemid=19915426"
                 alt="Tablet View"
                 className="w-full h-full object-cover"
-              />
+                />
             </div>
           </motion.div>
 
@@ -75,10 +75,10 @@ export default function WatchAnywhere() {
           <motion.div
             style={{ y: y3 }}
             className="absolute z-30 left-1/4 bottom-10"
-          >
+            >
             <div className="w-[120px] md:w-[160px] aspect-[9/19] bg-[#111] rounded-[2rem] border-8 border-[#222] shadow-[0_40px_80px_rgba(0,0,0,0.9)] overflow-hidden">
               <img
-                src="https://images.wallpapersden.com/image/download/solo-leveling-anime-art_bWtpZmuUmZqaraWkpJRobWllrWdma2U.jpg"
+            src="https://64.media.tumblr.com/7e2453da9674bcb5b18a2b60795dfa07/6ffe034dc5a009bc-9b/s540x810/8eac80d1085f4d86de5c884ab107e79c6f16fc8c.gif"
                 alt="Phone View"
                 className="w-full h-full object-cover"
               />
