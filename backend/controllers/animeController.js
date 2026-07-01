@@ -30,7 +30,7 @@ const getAnimes = async (req, res, next) => {
     }
 
     let query = {}
-    // Search by title 
+    // Search by title
     if (search) query.title = { $regex: search, $options: "i" }
     // Filters
     if (status) query.status = status

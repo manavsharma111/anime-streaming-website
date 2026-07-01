@@ -65,7 +65,7 @@ const runBulkUpload = async () => {
       const episodeNumber = parseInt(match[2], 10)
       const title = match[3].trim()
 
-      // find the anime in db 
+      // find the anime in db
       let animeDoc = await Anime.findOne({
         title: { $regex: new RegExp(`^${animeName}$`, "i") },
       })
@@ -77,7 +77,7 @@ const runBulkUpload = async () => {
         continue
       }
 
-      // check for optional json sidecar for skip timings 
+      // check for optional json sidecar for skip timings
       let introStart = 0,
         introEnd = 0,
         outroStart = 0,

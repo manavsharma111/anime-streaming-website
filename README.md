@@ -23,7 +23,7 @@ Whether you're streaming via third-party providers or encoding raw `.mp4`/`.mkv`
 ## ✨ Key Features
 
 - **🎬 Adaptive HLS Video Player**: Custom-built video player using `hls.js` with quality selection, playback speed controls, and auto-skip capabilities for intros/outros.
-- **⚡ Dual-Mode Episode Uploads**: 
+- **⚡ Dual-Mode Episode Uploads**:
   - **Direct/Bulk Link**: Instantly fetch episodes and skip-times via native Consumet Extensions & Jikan API.
   - **Local Encode**: Upload raw video files, which are processed by FFmpeg in the background into M3U8 HLS format.
 - **⚙️ Message Queues**: Background video transcoding managed by **BullMQ** & **Redis** to prevent server blocking.
@@ -36,6 +36,7 @@ Whether you're streaming via third-party providers or encoding raw `.mp4`/`.mkv`
 ## 🛠️ Tech Stack & Libraries
 
 ### **Frontend**
+
 - **React 18** (Vite) - Core framework for fast rendering.
 - **Redux Toolkit** - Centralized state management for users, anime catalogs, and watch history.
 - **TailwindCSS** - Utility-first styling for a beautiful, responsive layout.
@@ -46,6 +47,7 @@ Whether you're streaming via third-party providers or encoding raw `.mp4`/`.mkv`
 - **Socket.io-client** - Real-time websocket connection for dashboard analytics and encode progress.
 
 ### **Backend**
+
 - **Node.js & Express.js** - High-performance server environment.
 - **MongoDB (Mongoose)** - NoSQL database for flexible data modeling (Anime, Episodes, Users).
 - **Redis & BullMQ** - Robust background job queue for processing heavy FFmpeg tasks.
@@ -88,6 +90,7 @@ Each slice is paired with dedicated Redux Thunks or RTK Query for asynchronous A
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js (v18+)
 - MongoDB instance
 - Redis Server (Running locally or via Docker)
@@ -96,18 +99,21 @@ Each slice is paired with dedicated Redux Thunks or RTK Query for asynchronous A
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/your-username/anime-platform.git
    cd anime-platform
    ```
 
 2. **Install Backend Dependencies**
+
    ```bash
    cd backend
    npm install
    ```
 
 3. **Install Frontend Dependencies**
+
    ```bash
    cd ../frontend
    npm install
@@ -115,6 +121,7 @@ Each slice is paired with dedicated Redux Thunks or RTK Query for asynchronous A
 
 4. **Environment Variables**
    Create a `.env` file in the `backend` directory:
+
    ```env
    PORT=4000
    MONGO_URI=your_mongodb_uri
@@ -129,20 +136,23 @@ Each slice is paired with dedicated Redux Thunks or RTK Query for asynchronous A
 
 5. **Run the Application**
    Open two terminals:
-   
-   *Terminal 1 (Backend)*
+
+   _Terminal 1 (Backend)_
+
    ```bash
    cd backend
    npm run dev
    ```
-   
-   *Terminal 2 (Frontend)*
+
+   _Terminal 2 (Frontend)_
+
    ```bash
    cd frontend
    npm run dev
    ```
 
 ---
+
 <div align="center">
   <i>Built with ❤️ for Anime Lovers</i>
 </div>

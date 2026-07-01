@@ -10,6 +10,7 @@ import Search from "./pages/Search"
 import AdminDashboard from "./pages/AdminDashBoard/AdminDashboard"
 import Wishlist from "./pages/WishList/Wishlist"
 import Profile from "./pages/Profile"
+import LandingPage from "./pages/LandingPage"
 import Lenis from "@studio-freight/lenis"
 import { Toaster, toast } from "react-hot-toast"
 import SmoothScroll from "./components/common/animation/SmoothScroll"
@@ -42,28 +43,7 @@ export default function App() {
     }
   }, [dispatch])
 
-  // Initialize Lenis
-  useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      direction: "vertical",
-      gestureDirection: "vertical",
-      smooth: true,
-      mouseMultiplier: 1,
-      smoothTouch: false,
-      touchMultiplier: 2,
-      infinite: false,
-    })
-
-    function raf(time) {
-      lenis.raf(time)
-      requestAnimationFrame(raf)
-    }
-
-    requestAnimationFrame(raf)
-    return () => lenis.destroy()
-  }, [])
+  // Lenis initialization is handled by SmoothScroll.jsx
 
   // Scroll to top on route change
   useEffect(() => {
@@ -83,10 +63,11 @@ export default function App() {
         }}
       />
       <SmoothScroll>
-        <Navbar />
+        {location.pathname !== "/" && <Navbar />}
 
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/anime/:id" element={<AnimeDetails />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/search" element={<Search />} />

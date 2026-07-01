@@ -7,7 +7,7 @@ import NotificationDropdown from "./Notifications/NotificationDropdown"
 import { useSelector } from "react-redux"
 
 const navItems = [
-  { id: "home", label: "Home", icon: Home, path: "/" },
+  { id: "home", label: "Home", icon: Home, path: "/home" },
   // { id: 'trending', label: 'Trending', icon: Flame, path: '/trending' },
   { id: "explore", label: "Explore", icon: Search, path: "/search" },
   { id: "wishlist", label: "Watchlist", icon: Heart, path: "/wishlist" },
@@ -99,6 +99,18 @@ export default function Navbar() {
         )}
       </AnimatePresence>
 
+      {/* Mobile Top Logo */}
+      {isMobile && (
+        <div
+          className="absolute top-6 left-0 right-0 z-50 flex justify-center pointer-events-auto cursor-pointer"
+          onClick={() => navigate("/")}
+        >
+          <div className="text-xl font-black tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-[#f33767] to-[#ff7eb3] font-mono drop-shadow-[0_0_10px_rgba(243,55,103,0.5)]">
+            ANIME<span className="text-white drop-shadow-md">STREAM</span>
+          </div>
+        </div>
+      )}
+
       <motion.div
         className="fixed z-50 select-none flex items-center justify-center w-full pointer-events-none"
         initial={false}
@@ -160,7 +172,8 @@ export default function Navbar() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, filter: "blur(4px)" }}
                   transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  className="flex-1 flex justify-start"
+                  className="flex-1 flex justify-start cursor-pointer pointer-events-auto"
+                  onClick={() => navigate("/")}
                 >
                   <div className="text-xl font-black tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-[#f33767] to-[#ff7eb3] font-mono drop-shadow-[0_0_10px_rgba(243,55,103,0.5)]">
                     ANIME

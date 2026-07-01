@@ -34,7 +34,7 @@ export default function Home() {
   const recommendedAnime = animeList?.slice(5, 15) || []
 
   return (
-    <div className="min-h-screen bg-[#0e0b12] text-white pt-6 md:pt-[90px] pb-32 md:pb-10 px-4 md:px-8 overflow-hidden relative">
+    <div className="min-h-screen bg-[#0e0b12] text-white pt-[90px] md:pt-[90px] pb-32 md:pb-10 px-4 md:px-8 overflow-hidden relative">
       {/* Abstract Background Glows */}
       <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-[#f33767]/5 to-transparent pointer-events-none -z-10" />
       <div className="absolute top-40 left-[-20%] w-[50%] h-[500px] bg-[#f33767]/5 blur-[120px] rounded-full pointer-events-none -z-10" />

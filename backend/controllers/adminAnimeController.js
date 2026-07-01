@@ -53,7 +53,7 @@ const deleteAnime = async (req, res, next) => {
     next(err)
   }
 }
-// upload episode meta 
+// upload episode meta
 const uploadEpisodeMeta = async (req, res, next) => {
   const keys = await redisClient.keys("animes:*")
   if (keys.length > 0) await redisClient.del(keys)
@@ -468,7 +468,7 @@ const bulkFetchEpisodes = async (req, res, next) => {
           episodeNumber: ep.number,
           title: ep.title || `Episode ${ep.number}`,
           videoUrl: bestSource.url,
-          status: "ready", // M3U8 links 
+          status: "ready", // M3U8 links
           introStart,
           introEnd,
           outroStart,

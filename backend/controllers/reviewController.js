@@ -85,12 +85,10 @@ exports.deleteReview = async (req, res, next) => {
     }
 
     if (review.user.toString() !== req.user.id) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "Not authorized to delete this review",
-        })
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to delete this review",
+      })
     }
 
     const animeId = review.anime
@@ -180,12 +178,10 @@ exports.deleteReply = async (req, res, next) => {
     }
 
     if (reply.user.toString() !== req.user.id && req.user.role !== "admin") {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "Not authorized to delete this reply",
-        })
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to delete this reply",
+      })
     }
 
     review.replies.pull(req.params.replyId)

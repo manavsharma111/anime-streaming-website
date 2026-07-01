@@ -119,7 +119,6 @@ const processAnimeVideo = async (
 
       let lastLoggedFrame = 0
 
-
       command
         // adaptive hls streaming
         .output(path.join(streamDir, "%v/manifest.m3u8"))
@@ -208,7 +207,7 @@ const processAnimeVideo = async (
           if (percent >= 100) percent = 99.9
 
           if (p.frames - lastLoggedFrame >= 50 || p.frames < lastLoggedFrame) {
-            console.log(  
+            console.log(
               `[FFmpeg] Encoding: ${percent}% | Frames: ${p.frames} | Speed: ${p.currentFps} fps`,
             )
             lastLoggedFrame = p.frames
