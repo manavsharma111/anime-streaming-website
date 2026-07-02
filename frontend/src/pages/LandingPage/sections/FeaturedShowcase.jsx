@@ -3,32 +3,44 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Link } from "react-router-dom"
 import { Play, Info } from "lucide-react"
 
-const fallbackItems = [
+const fallbackAnime = [
   {
-    id: 1,
-    title: "One Piece",
-    description:
-      "Gol D. Roger was known as the 'Pirate King', the strongest and most infamous being to have sailed the Grand Line. The capture and execution of Roger by the World Government brought a change throughout the world.",
-    img: "https://images.wallpapersden.com/image/download/one-piece-monkey-d-luffy-gear-5_bWpqZmmUmZqaraWkpJRobWllrWdma2U.jpg",
-    color: "from-blue-900/80",
+    title: "Smoking Behind The Super Market",
+    img: "https://www.otakupt.com/wp-content/uploads/2026/03/Smoking-Behind-the-Supermarket-with-You-anime-pv-animejapan-2026-screenshot-smoking.jpg",
+    rating: 8.7,
+    ep: 12,
+    genre: "Romance",
   },
   {
-    id: 2,
-    title: "Attack on Titan",
-    description:
-      "Centuries ago, mankind was slaughtered to near extinction by monstrous humanoid creatures called Titans. Humanity clung to survival by hiding behind massive concentric walls.",
-    img: "https://images.wallpapersden.com/image/download/attack-on-titan-season-4-key-visual_bGtpa2uUmZqaraWkpJRobWllrWdma2U.jpg",
-    color: "from-red-900/80",
+    title: "Bungou Stray Dogs",
+    img: "https://wallpapercave.com/wp/wp6787215.jpg",
+    rating: 8.9,
+    ep: 26,
+    genre: "Supernatural",
   },
   {
-    id: 3,
     title: "Your Name",
-    description:
-      "Mitsuha Miyamizu, a high school girl, yearns to live the life of a boy in the bustling city of Tokyo—a dream that stands in stark contrast to her present life in the countryside.",
-    img: "https://images.wallpapersden.com/image/download/your-name-anime-movie_bGlma2eUmZqaraWkpJRobWllrWdma2U.jpg",
-    color: "from-indigo-700/80",
+    img: "https://wallpaperaccess.com/full/2397732.png",
+    rating: 8.9,
+    ep: 1,
+    genre: "Romance",
+  },
+  {
+    title: "Jujutsu Kaisen",
+    img: "https://comicbook.com/wp-content/uploads/sites/4/2025/05/Jujutsu-Kaisen-Shibuya-Incident.jpg?resize=2000,1125",
+    rating: 8.7,
+    ep: 24,
+    genre: "Action",
+  },
+  {
+    title: "Chainsaw Man",
+    img: "https://comicbook.com/wp-content/uploads/sites/4/2025/09/Chainsaw-Man-Reze-Arc-movie-release-date-us-anime.jpg?resize=425",
+    rating: 8.2,
+    ep: 12,
+    genre: "Action",
   },
 ]
+
 
 const gradients = [
   "from-blue-900/80",
@@ -41,19 +53,19 @@ const gradients = [
 export default function FeaturedShowcase({ animeList = [], loading }) {
   const [active, setActive] = useState(0)
 
-  const displayList =
-    !loading && animeList.length >= 3
-      ? animeList.slice(0, 3).map((a, i) => ({
-          id: a.mal_id,
-          title: a.title_english || a.title,
-          description: a.synopsis
-            ? a.synopsis.slice(0, 180) + "..."
-            : "No description available.",
-          img:
-            a.images?.webp?.large_image_url || a.images?.jpg?.large_image_url,
-          color: gradients[i % gradients.length],
-        }))
-      : fallbackItems
+  const displayList = fallbackAnime
+    // !loading && animeList.length >= 3
+    //   ? animeList.slice(0, 3).map((a, i) => ({
+    //       id: a.mal_id,
+    //       title: a.title_english || a.title,
+    //       description: a.synopsis
+    //         ? a.synopsis.slice(0, 180) + "..."
+    //         : "No description available.",
+    //       img:
+    //         a.images?.webp?.large_image_url || a.images?.jpg?.large_image_url,
+    //       color: gradients[i % gradients.length],
+    //     }))
+    //   : fallbackAnime
 
   useEffect(() => {
     const timer = setInterval(() => {

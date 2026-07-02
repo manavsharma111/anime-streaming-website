@@ -4,36 +4,36 @@ import { Star, PlayCircle } from "lucide-react"
 
 const fallbackAnime = [
   {
-    title: "Solo Leveling",
-    img: "https://images.wallpapersden.com/image/download/solo-leveling-anime-art_bWtpZmuUmZqaraWkpJRobWllrWdma2U.jpg",
+    title: "Smoking Behind The Super Market",
+    img: "https://www.otakupt.com/wp-content/uploads/2026/03/Smoking-Behind-the-Supermarket-with-You-anime-pv-animejapan-2026-screenshot-smoking.jpg",
     rating: 8.7,
     ep: 12,
-    genre: "Action",
+    genre: "Romance",
   },
   {
-    title: "Demon Slayer",
-    img: "https://images.wallpapersden.com/image/download/demon-slayer-kimetsu-no-yaiba-hd_bGlpZWeUmZqaraWkpJRobWllrWdma2U.jpg",
+    title: "Bungou Stray Dogs",
+    img: "https://wallpapercave.com/wp/wp6787215.jpg",
     rating: 8.9,
     ep: 26,
-    genre: "Action",
+    genre: "Supernatural",
   },
   {
     title: "Your Name",
-    img: "https://images.wallpapersden.com/image/download/your-name-anime-movie_bGlma2eUmZqaraWkpJRobWllrWdma2U.jpg",
+    img: "https://wallpaperaccess.com/full/2397732.png",
     rating: 8.9,
     ep: 1,
     genre: "Romance",
   },
   {
     title: "Jujutsu Kaisen",
-    img: "https://images.wallpapersden.com/image/download/jujutsu-kaisen-satoru-gojo-hd_bWtpZ26UmZqaraWkpJRobWllrWdma2U.jpg",
+    img: "https://comicbook.com/wp-content/uploads/sites/4/2025/05/Jujutsu-Kaisen-Shibuya-Incident.jpg?resize=2000,1125",
     rating: 8.7,
     ep: 24,
     genre: "Action",
   },
   {
     title: "Chainsaw Man",
-    img: "https://images.wallpapersden.com/image/download/makima-chainsaw-man-4k_bWpmZmyUmZqaraWkpJRobWllrWdma2U.jpg",
+    img: "https://comicbook.com/wp-content/uploads/sites/4/2025/09/Chainsaw-Man-Reze-Arc-movie-release-date-us-anime.jpg?resize=425",
     rating: 8.2,
     ep: 12,
     genre: "Action",
@@ -43,17 +43,17 @@ const fallbackAnime = [
 export default function TrendingThisWeek({ animeList = [], loading }) {
   const [hoveredIndex, setHoveredIndex] = useState(0)
 
-  const displayList =
-    !loading && animeList.length > 0
-      ? animeList.slice(0, 5).map((a) => ({
-          title: a.title_english || a.title,
-          img:
-            a.images?.webp?.large_image_url || a.images?.jpg?.large_image_url,
-          rating: a.score || "N/A",
-          ep: a.episodes || "?",
-          genre: a.genres?.[0]?.name || "Anime",
-        }))
-      : fallbackAnime
+  const displayList = fallbackAnime
+    // !loading && animeList.length > 0
+    //   ? animeList.slice(0, 5).map((a) => ({
+    //       title: a.title_english || a.title,
+    //       img:
+    //         a.images?.webp?.large_image_url || a.images?.jpg?.large_image_url,
+    //       rating: a.score || "N/A",
+    //       ep: a.episodes || "?",
+    //       genre: a.genres?.[0]?.name || "Anime",
+    //     }))
+    //   : fallbackAnime
 
   return (
     <section className="py-12 md:py-16 bg-[#050505] relative z-10">
@@ -140,13 +140,6 @@ export default function TrendingThisWeek({ animeList = [], loading }) {
                       {anime.ep} Episodes
                     </span>
                   </div>
-
-                  {/* Play Button Overlay */}
-                  {/* <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-50 group-hover:scale-100 pointer-events-auto">
-                    <div className="w-20 h-20 bg-red-600/90 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(220,38,38,0.6)] backdrop-blur-md hover:scale-110 transition-transform">
-                      <PlayCircle size={36} className="text-white ml-1" />
-                    </div>
-                  </div> */}
                 </motion.div>
               </motion.div>
             )
