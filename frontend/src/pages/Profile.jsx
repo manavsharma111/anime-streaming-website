@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { checkAuth } from "../redux/Slice/authSlice"
+import { checkAuth } from "../redux/slice/authSlice"
 import {
   getWatchHistory,
   deleteAllHistory,
