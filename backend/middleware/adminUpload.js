@@ -4,12 +4,15 @@ const path = require("path")
 const fs = require("fs")
 
 // ensure directories exist
+const isVercel = !!process.env.VERCEL
+const baseDir = isVercel ? "/tmp" : path.join(__dirname, "..", "uploads")
+
 const dirs = {
-  video: path.join(__dirname, "..", "uploads", "raw_videos"),
-  thumbnail: path.join(__dirname, "..", "uploads", "thumbnails"),
-  cover: path.join(__dirname, "..", "uploads", "covers"),
-  subtitles: path.join(__dirname, "..", "uploads", "subtitles"),
-  audios: path.join(__dirname, "..", "uploads", "audios"),
+  video: path.join(baseDir, "raw_videos"),
+  thumbnail: path.join(baseDir, "thumbnails"),
+  cover: path.join(baseDir, "covers"),
+  subtitles: path.join(baseDir, "subtitles"),
+  audios: path.join(baseDir, "audios"),
 }
 Object.values(dirs).forEach((dir) => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
