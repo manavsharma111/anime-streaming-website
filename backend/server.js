@@ -9,7 +9,7 @@ const connectDB = require("./config/db")
 dotenv.config()
 
 // Connect to database (serverless-safe caching is handled inside db.js)
-connectDB()
+connectDB().catch(err => console.error("DB Connection Failed on startup:", err))
 
 // ─── Detect Vercel serverless environment ─────────────────────────────────────
 const isVercel = !!process.env.VERCEL
