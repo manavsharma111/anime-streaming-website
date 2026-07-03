@@ -10,7 +10,7 @@ import {
   Activity,
 } from "lucide-react"
 import { useDispatch } from "react-redux"
-import { logout } from "../../redux/Slice/authSlice"
+import { logout } from "../../redux/slice/authSlice"
 import { useNavigate } from "react-router-dom"
 
 export default function AdminSidebar({

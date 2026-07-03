@@ -6,7 +6,7 @@ import {
   fetchNotifications,
   markNotificationReadAsync,
   deleteNotificationAsync,
-} from "../../../redux/Slice/authSlice"
+} from "../../../redux/slice/authSlice"
 import { useNavigate } from "react-router-dom"
 
 export default function NotificationDropdown({ isOpen, onClose }) {
