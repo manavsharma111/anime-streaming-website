@@ -17,6 +17,7 @@ import SmoothScroll from "./components/common/animation/SmoothScroll"
 import socketService from "./services/socketService"
 import { UploadProvider } from "./context/UploadContext"
 import GlobalUploadProgress from "./components/GlobalUploadProgress"
+import ProtectedRoute from "./components/ProtectedRoute"
 
 export default function App() {
   const dispatch = useDispatch()
@@ -73,11 +74,15 @@ export default function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/home" element={<Home />} />
             <Route path="/anime/:id" element={<AnimeDetails />} />
-            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/search" element={<Search />} />
-            <Route path="/wishlist" element={<Wishlist />} />
-            <Route path="/profile" element={<Profile />} />
             <Route path="/watch/:episodeId" element={<Watch />} />
+            
+            {/* Protected User Routes */}
+            <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            
+            {/* Protected Admin Routes */}
+            <Route path="/admin" element={<ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute>} />
           </Routes>
         </SmoothScroll>
       </div>
