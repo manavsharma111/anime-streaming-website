@@ -38,7 +38,7 @@ const authMiddleware = async (req, res, next) => {
           // Verify refresh token
           const decodedRefresh = jwt.verify(
             refreshToken,
-            process.env.JWT_REFRESH_SECRET,
+            process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
           )
           const user = await User.findById(decodedRefresh.id)
 
