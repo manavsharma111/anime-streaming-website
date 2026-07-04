@@ -57,6 +57,7 @@ const authMiddleware = async (req, res, next) => {
           res.cookie("token", newToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
           })
 
           req.user = user
