@@ -60,6 +60,7 @@ app.use(
         "http://127.0.0.1:5173",
         "http://localhost:4000",
         process.env.CLIENT_URL,
+        "https://anime-streaming-website-seven.vercel.app"
       ].filter(Boolean)
 
       if (!origin || allowedOrigins.includes(origin)) {
