@@ -86,7 +86,7 @@ export default function FeaturesBentoGrid() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[200px]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[240px]">
         {FEATURES.map((feature, i) => {
           let sizeClass = ""
           if (feature.size === "large")
@@ -102,7 +102,7 @@ export default function FeaturesBentoGrid() {
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.7, ease: "easeOut", delay: i * 0.1 }}
-              className={`${sizeClass} group relative bg-[#111] border border-[#222] rounded-3xl p-8 flex flex-col justify-end overflow-hidden transition-all duration-500 cursor-default`}
+              className={`${sizeClass} group relative bg-[#111] border border-[#222] rounded-3xl p-6 md:p-8 flex flex-col justify-end overflow-hidden transition-all duration-500 cursor-default`}
             >
               {/* Large Background Watermark Icon */}
               <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-all duration-500 group-hover:scale-110 transform pointer-events-none">
