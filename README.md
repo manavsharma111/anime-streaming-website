@@ -80,7 +80,7 @@ Whether you're streaming via third-party providers or encoding raw `.mp4`/`.mkv`
 - **@consumet/extensions** - Native web-scraping library for bulk fetching episode links directly on the backend.
 - **Socket.io** - Real-time bi-directional communication.
 
----
+--- 
 
 ## ⚙️ Backend Architecture
 
