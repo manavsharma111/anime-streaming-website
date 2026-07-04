@@ -12,10 +12,12 @@ export default function GlobalUploadProgress() {
         <motion.div
           drag
           dragMomentum={false}
+          dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+          dragElastic={0.1}
           initial={{ opacity: 0, y: 50, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 50, scale: 0.9 }}
-          className="fixed bottom-6 right-6 z-[9999] w-80 bg-[#110e16]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-5 overflow-hidden cursor-grab active:cursor-grabbing"
+          className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[9999] w-[calc(100vw-32px)] md:w-80 bg-[#110e16]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-4 md:p-5 overflow-hidden cursor-grab active:cursor-grabbing touch-none"
         >
           {/* Background progress glow */}
           <div 
