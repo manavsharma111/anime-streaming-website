@@ -10,10 +10,12 @@ export default function GlobalUploadProgress() {
     <AnimatePresence>
       {isUploading && (
         <motion.div
+          drag
+          dragMomentum={false}
           initial={{ opacity: 0, y: 50, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 50, scale: 0.9 }}
-          className="fixed bottom-6 right-6 z-[9999] w-80 bg-[#110e16]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-5 overflow-hidden"
+          className="fixed bottom-6 right-6 z-[9999] w-80 bg-[#110e16]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-5 overflow-hidden cursor-grab active:cursor-grabbing"
         >
           {/* Background progress glow */}
           <div 
