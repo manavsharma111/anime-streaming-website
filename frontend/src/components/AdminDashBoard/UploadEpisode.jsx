@@ -18,6 +18,7 @@ import axiosInstance from "../../services/api"
 import CustomSelect from "../common/CustomSelect"
 import { fetchAnimes } from "../../redux/slice/animeSlice"
 import axios from "axios"
+import { useUpload } from "../../context/UploadContext"
 
 export default function UploadEpisodeForm({ animesList }) {
   const dispatch = useDispatch()
@@ -41,9 +42,8 @@ export default function UploadEpisodeForm({ animesList }) {
     audios: [],
   })
 
-  const [uploadProgress, setUploadProgress] = useState(0)
-  const [isUploading, setIsUploading] = useState(false)
   const [isFetchingSkips, setIsFetchingSkips] = useState(false)
+  const { isUploading: isGlobalUploading, uploadFile } = useUpload()
   const [statusMessage, setStatusMessage] = useState({ type: "", text: "" })
   const [dragActive, setDragActive] = useState(false)
 
@@ -145,7 +145,6 @@ export default function UploadEpisodeForm({ animesList }) {
         text: "Anime not found in list.",
       })
 
-    setIsUploading(true)
     setStatusMessage({
       type: "info",
       text: "Connecting to Consumet API... Fetching all episodes. This might take a minute.",
@@ -165,8 +164,6 @@ export default function UploadEpisodeForm({ animesList }) {
         type: "error",
         text: error.response?.data?.message || "Failed to bulk fetch episodes.",
       })
-    } finally {
-      setIsUploading(false)
     }
   }
 
@@ -197,9 +194,6 @@ export default function UploadEpisodeForm({ animesList }) {
       })
     }
 
-    setIsUploading(true)
-    setUploadProgress(0)
-
     try {
       if (activeTab === "link") {
         setStatusMessage({ type: "info", text: "Saving direct link..." })
@@ -228,7 +222,6 @@ export default function UploadEpisodeForm({ animesList }) {
           outroEnd: "",
         }))
       } else {
-        setStatusMessage({ type: "info", text: "Preparing secure upload..." })
         const payload = new FormData()
         payload.append("anime", formData.anime)
         payload.append("episodeNumber", formData.episodeNumber)
@@ -253,33 +246,20 @@ export default function UploadEpisodeForm({ animesList }) {
           payload.append("outroStart", formData.outroStart)
         if (formData.outroEnd) payload.append("outroEnd", formData.outroEnd)
 
-        await axiosInstance.post("/upload", payload, {
-          headers: { "Content-Type": "multipart/form-data" },
-          onUploadProgress: (progressEvent) => {
-            const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total,
-            )
-            setUploadProgress(percentCompleted)
-            if (percentCompleted === 100)
-              setStatusMessage({
-                type: "info",
-                text: "Upload complete! FFmpeg processing started.",
-              })
-          },
-        })
+        // Trigger background upload
+        uploadFile(payload)
+        
         setStatusMessage({
           type: "success",
-          text: "Episode added to encoding pipeline successfully.",
+          text: "Background upload started! See progress in the bottom right corner.",
         })
         setFiles({ video: null, subtitles: [], audios: [] })
       }
     } catch (error) {
       setStatusMessage({
         type: "error",
-        text: error.response?.data?.message || "Failed to add episode.",
+        text: error.response?.data?.message || "Failed to process request.",
       })
-    } finally {
-      setIsUploading(false)
     }
   }
 
@@ -459,7 +439,7 @@ export default function UploadEpisodeForm({ animesList }) {
                       setFiles({ ...files, video: e.target.files[0] })
                     }
                     className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                    disabled={isUploading}
+                    disabled={isGlobalUploading}
                   />
                   {files.video ? (
                     <div className="flex flex-col items-center gap-3">
@@ -593,25 +573,7 @@ export default function UploadEpisodeForm({ animesList }) {
           </div>
         )}
 
-        {/* Upload Progress */}
-        {isUploading && activeTab === "file" && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            className="w-full space-y-2"
-          >
-            <div className="flex justify-between text-xs font-bold text-neutral-400 tracking-wider">
-              <span>UPLOADING TO PIPELINE</span>
-              <span className="text-indigo-500">{uploadProgress}%</span>
-            </div>
-            <div className="w-full h-1.5 bg-neutral-900 rounded-full overflow-hidden">
-              <div
-                style={{ width: `${uploadProgress}%` }}
-                className="h-full bg-gradient-to-r from-indigo-600 to-purple-500 transition-all duration-300"
-              />
-            </div>
-          </motion.div>
-        )}
+        {/* Upload Progress UI removed (now handled globally) */}
 
         {statusMessage.text && (
           <motion.div
@@ -631,10 +593,10 @@ export default function UploadEpisodeForm({ animesList }) {
         <div className="pt-4 border-t border-white/5">
           <button
             type="submit"
-            disabled={isUploading}
+            disabled={isGlobalUploading && activeTab === "file"}
             className={`w-full py-4 ${activeTab === "link" ? "bg-orange-500 hover:bg-orange-600" : activeTab === "bulk" ? "bg-green-500 hover:bg-green-600" : "bg-white text-black hover:bg-neutral-200"} disabled:opacity-50 rounded-xl font-bold transition-all flex items-center justify-center gap-2`}
           >
-            {isUploading ? (
+            {isGlobalUploading && activeTab === "file" ? (
               <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
             ) : activeTab === "link" ? (
               "Save Direct Link"

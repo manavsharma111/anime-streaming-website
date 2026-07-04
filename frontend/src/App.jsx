@@ -15,6 +15,8 @@ import Lenis from "@studio-freight/lenis"
 import { Toaster, toast } from "react-hot-toast"
 import SmoothScroll from "./components/common/animation/SmoothScroll"
 import socketService from "./services/socketService"
+import { UploadProvider } from "./context/UploadContext"
+import GlobalUploadProgress from "./components/GlobalUploadProgress"
 
 export default function App() {
   const dispatch = useDispatch()
@@ -51,31 +53,34 @@ export default function App() {
   }, [location.pathname])
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] antialiased selection:bg-red-500/30 text-white overflow-x-hidden">
-      <Toaster
-        position="bottom-right"
-        toastOptions={{
-          style: {
-            background: "#1c1c1c",
-            color: "#fff",
-            border: "1px solid rgba(255,255,255,0.1)",
-          },
-        }}
-      />
-      <SmoothScroll>
-        {location.pathname !== "/" && <Navbar />}
+    <UploadProvider>
+      <div className="min-h-screen bg-[#0a0a0a] antialiased selection:bg-red-500/30 text-white overflow-x-hidden">
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            style: {
+              background: "#1c1c1c",
+              color: "#fff",
+              border: "1px solid rgba(255,255,255,0.1)",
+            },
+          }}
+        />
+        <GlobalUploadProgress />
+        <SmoothScroll>
+          {location.pathname !== "/" && <Navbar />}
 
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/anime/:id" element={<AnimeDetails />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/wishlist" element={<Wishlist />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/watch/:episodeId" element={<Watch />} />
-        </Routes>
-      </SmoothScroll>
-    </div>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/anime/:id" element={<AnimeDetails />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/watch/:episodeId" element={<Watch />} />
+          </Routes>
+        </SmoothScroll>
+      </div>
+    </UploadProvider>
   )
 }
