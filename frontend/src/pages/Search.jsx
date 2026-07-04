@@ -26,6 +26,26 @@ export default function Search() {
   const [localSearch, setLocalSearch] = useState(queryParam || "")
   const [surpriseHandled, setSurpriseHandled] = useState(false)
 
+  // Debounce search as you type
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (localSearch !== (queryParam || "")) {
+        const newParams = new URLSearchParams(location.search)
+        if (localSearch.trim()) {
+          newParams.set("q", localSearch.trim())
+          newParams.delete("search")
+        } else {
+          newParams.delete("q")
+          newParams.delete("search")
+        }
+        newParams.set("page", "1")
+        navigate(`/search?${newParams.toString()}`)
+      }
+    }, 500)
+    
+    return () => clearTimeout(timer)
+  }, [localSearch, queryParam, location.search, navigate])
+
   useEffect(() => {
     // Determine fetch parameters based on URL query
     const params = { limit: 30 }

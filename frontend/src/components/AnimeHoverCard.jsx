@@ -9,18 +9,18 @@ export default function AnimeHoverCard({ anime, position = "right" }) {
   // Determine classes based on position
   const positionClasses =
     position === "right"
-      ? "left-[105%] top-1/2 -translate-y-[20%]"
-      : "right-[105%] top-1/2 -translate-y-[20%]"
+      ? "left-full top-1/2 -translate-y-1/2 ml-2 before:absolute before:-left-4 before:top-0 before:h-full before:w-5"
+      : "right-full top-1/2 -translate-y-1/2 mr-2 before:absolute before:-right-4 before:top-0 before:h-full before:w-5"
 
   return (
     <div
-      className={`hidden lg:flex flex-col absolute z-50 w-[300px] bg-[#1c1c1c] rounded-xl border border-white/10 p-5 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 delay-300 pointer-events-none ${positionClasses}`}
+      className={`hidden lg:flex flex-col absolute z-50 w-[300px] bg-[#1c1c1c] rounded-xl border border-white/10 p-4 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 delay-300 ${positionClasses}`}
     >
       <img
         src={getImageUrl(anime.posterPath || anime.cover || anime.thumbnail)}
-        className="w-full h-40 object-cover rounded-xl mb-4"
+        className="w-full h-32 object-cover rounded-xl mb-3"
         alt={anime.title}
-      ></img>
+      />
       <h4 className="text-lg font-bold text-white mb-2 leading-tight">
         {anime.title}
       </h4>
