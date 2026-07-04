@@ -99,7 +99,7 @@ app.use("/api/reviews", reviewRoutes)
 
 // ─── Health Check ──────────────────────────────────────────────────────────────
 app.get("/", (req, res) => {
-  res.json({ status: "ok", message: "Anime Streaming Backend is running ✅" })
+  res.send("<h1>Anime Streaming Backend is running ✅</h1>")
 })
 
 // ─── Global Error Handler ──────────────────────────────────────────────────────
