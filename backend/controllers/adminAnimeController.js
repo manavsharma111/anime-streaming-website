@@ -58,25 +58,39 @@ const uploadEpisodeMeta = async (req, res, next) => {
   const keys = await redisClient.keys("animes:*")
   if (keys.length > 0) await redisClient.del(keys)
   try {
-    const { anime, episodeNumber, title, scheduledAt } = req.body
+    const { anime, episodeNumber, title, scheduledAt, videoKey, originalFilename } = req.body
 
-    if (!req.files || !req.files.video || !req.files.video[0]) {
-      return res.status(400).json({ message: "Video file required" })
+    let rawVideoPath;
+    let videoFilename;
+    if (req.files && req.files.video && req.files.video[0]) {
+      const videoFile = req.files.video[0]
+      rawVideoPath = videoFile.path
+      videoFilename = videoFile.filename
+    } else if (videoKey) {
+      rawVideoPath = videoKey // R2 key
+      videoFilename = originalFilename || path.basename(videoKey)
+    } else {
+      return res.status(400).json({ message: "Video file or videoKey required" })
     }
-    const videoFile = req.files.video[0]
 
     // thumbnail – admin may upload, otherwise auto‑generate
     let thumbnailUrl = ""
-    if (req.files.thumbnail && req.files.thumbnail[0]) {
+    if (req.files && req.files.thumbnail && req.files.thumbnail[0]) {
       thumbnailUrl = `/uploads/thumbnails/${req.files.thumbnail[0].filename}`
     } else {
       const thumbPath = path.join(
+        __dirname,
+        "..",
         "uploads",
         "thumbnails",
-        `${videoFile.filename}.png`,
+        `${videoFilename}.png`,
       )
       await new Promise((resolve, reject) => {
-        ffmpeg(videoFile.path)
+        const inputSource = req.files && req.files.video && req.files.video[0] 
+          ? rawVideoPath 
+          : `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/${videoKey}`
+          
+        ffmpeg(inputSource)
           .screenshots({
             timestamps: ["00:00:02"],
             filename: path.basename(thumbPath),
@@ -103,7 +117,7 @@ const uploadEpisodeMeta = async (req, res, next) => {
       anime,
       episodeNumber,
       title,
-      videoUrl: `/uploads/raw_videos/${videoFile.filename}`,
+      videoUrl: req.files && req.files.video && req.files.video[0] ? `/uploads/raw_videos/${videoFilename}` : `/${videoKey}`,
       thumbnailUrl,
       subtitleTracks,
       audioTracks,
@@ -116,7 +130,8 @@ const uploadEpisodeMeta = async (req, res, next) => {
     await Anime.findByIdAndUpdate(anime, {
       $push: { episodes: newEpisode._id },
     })
-    const rawVideoPath = videoFile.path
+    
+    // rawVideoPath is passed to BullMQ (either local path or R2 key)
     const audioPaths = (req.files.audios || []).map((f) => f.path)
     const subtitlePaths = (req.files.subtitles || []).map((f) => f.path)
 

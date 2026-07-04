@@ -2,6 +2,18 @@ const Episode = require("../models/Episode")
 const { Queue } = require("bullmq")
 const path = require("path")
 const Redis = require("ioredis")
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3")
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner")
+
+// Initialize S3 client for Cloudflare R2
+const s3Client = new S3Client({
+  region: "auto",
+  endpoint: process.env.CLOUDFLARE_R2_ENDPOINT,
+  credentials: {
+    accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY,
+    secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_KEY,
+  },
+})
 
 // Setup BullMQ Queue
 const connection = new Redis(
@@ -82,7 +94,41 @@ const uploadEpisode = async (req, res, next) => {
   }
 }
 
+const getPresignedUrl = async (req, res, next) => {
+  try {
+    const { filename, contentType } = req.body
+    if (!filename || !contentType) {
+      return res.status(400).json({ message: "Filename and content type required" })
+    }
+    
+    // Sanitize and generate unique key
+    const sanitizedOriginalName = filename.replace(/[^a-zA-Z0-9.]/g, "_")
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9)
+    const key = `raw_videos/anime-${uniqueSuffix}-${sanitizedOriginalName}`
+    
+    const command = new PutObjectCommand({
+      Bucket: process.env.CLOUDFLARE_R2_BUCKET,
+      Key: key,
+      ContentType: contentType,
+    })
+    
+    // URL expires in 1 hour
+    const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 })
+    
+    res.status(200).json({
+      success: true,
+      data: {
+        presignedUrl,
+        key
+      }
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 module.exports = {
   uploadEpisode,
+  getPresignedUrl,
   videoQueue,
 }

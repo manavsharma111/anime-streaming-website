@@ -32,9 +32,20 @@ const worker = new Worker(
 
       // Call the ffmpeg service
       // Assuming ffmpeg is installed system-wide, we pass null for ffmpegPath
+      
+      // If the inputPath is an R2 key (starts with raw_videos/), convert it to public URL
+      let finalInputPath = inputPath
+      if (inputPath && inputPath.startsWith("raw_videos/")) {
+        const publicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL
+        if (publicUrl) {
+          finalInputPath = `${publicUrl}/${inputPath}`
+          console.log(`[Worker] Streaming raw video directly from Cloudflare R2: ${finalInputPath}`)
+        }
+      }
+
       const result = await processAnimeVideo(
         null,
-        inputPath,
+        finalInputPath,
         audioPaths || [],
         subtitlePaths || [],
         outputDir,
