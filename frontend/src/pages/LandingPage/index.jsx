@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { motion } from "framer-motion"
 
 // Import all 10 Premium Sections
@@ -21,6 +21,13 @@ import SmoothScroll from "../../components/common/animation/SmoothScroll"
 
 export default function LandingPage() {
   const { topAiring, loading } = useJikanAnime()
+
+  useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual"
+    }
+    window.scrollTo(0, 0)
+  }, [])
 
   return (
     <motion.div

@@ -12,7 +12,7 @@ export default function GlobalUploadProgress() {
         <motion.div
           drag
           dragMomentum={false}
-          dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+          dragConstraints={{ left: -3000, right: 50, top: -2000, bottom: 50 }}
           dragElastic={0.1}
           initial={{ opacity: 0, y: 50, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
