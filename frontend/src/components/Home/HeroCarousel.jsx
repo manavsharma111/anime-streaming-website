@@ -78,7 +78,7 @@ export default function HeroCarousel({ animes }) {
             </div>
 
             {/* Description */}
-            <p className="hidden md:block text-xs md:text-sm text-neutral-300 mb-6 line-clamp-2 md:line-clamp-3 font-medium leading-relaxed max-w-xl">
+            <p className="hidden text-xs md:text-sm text-neutral-300 mb-6 md:line-clamp-4 font-medium leading-relaxed max-w-xl">
               {anime.description?.replace(/<[^>]*>?/gm, "") ||
                 "A breathtaking anime adventure awaits you. Watch the latest episodes in premium quality exclusively on our platform."}
             </p>

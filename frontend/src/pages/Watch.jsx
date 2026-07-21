@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react"
 import { useLocation, useParams, useNavigate } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
-import { addToHistory } from "../redux/slice/historySlice"
+import { addToHistory, getWatchHistory } from "../redux/slice/historySlice"
+import { fetchAnimes, fetchAnimeDetails } from "../redux/slice/animeSlice"
 import VideoPlayer from "../components/VideoPlayer/VideoPlayer"
 import axiosInstance from "../services/api"
 import AnimeSidebar from "../components/Watch/AnimeSidebar"
@@ -18,10 +19,30 @@ export default function Watch() {
 
   const { history } = useSelector((state) => state.history)
   const { isAuthenticated } = useSelector((state) => state.auth)
+  const { animeList, isLoading, animeDetails } = useSelector((state) => state.anime)
 
   // Retrieve episode and anime data from router state
-  const episode = location.state?.episode
-  const anime = location.state?.anime
+  let episode = location.state?.episode
+  let anime = location.state?.anime
+  const fetchAnimeId = location.state?.fetchAnimeId
+
+  // Fallback 1: if we are asked to fetch a specific anime (from Continue Watching)
+  if (!episode && fetchAnimeId && animeDetails && animeDetails._id === fetchAnimeId) {
+    anime = animeDetails
+    episode = animeDetails.episodes?.find((e) => (e._id || e) === episodeId)
+  }
+
+  // Fallback 2: if state is lost (e.g. page refresh), try to find from Redux animeList
+  if (!episode && animeList.length > 0) {
+    for (const a of animeList) {
+      const ep = a.episodes?.find((e) => (e._id || e) === episodeId)
+      if (ep) {
+        anime = a
+        episode = ep
+        break
+      }
+    }
+  }
 
   const [autoNext, setAutoNext] = useState(true)
   const [autoPlay, setAutoPlay] = useState(true)
@@ -29,6 +50,22 @@ export default function Watch() {
   const [activeServer, setActiveServer] = useState(1)
   const [isFocused, setIsFocused] = useState(false)
   const [searchEpisode, setSearchEpisode] = useState("")
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(getWatchHistory())
+    }
+    
+    if (!episode) {
+      if (fetchAnimeId && (!animeDetails || animeDetails._id !== fetchAnimeId)) {
+        // Fetch the specific anime required by the history link
+        dispatch(fetchAnimeDetails(fetchAnimeId))
+      } else if (!fetchAnimeId && animeList.length === 0) {
+        // If no episode is found and we haven't fetched animes yet, fetch them to populate fallback
+        dispatch(fetchAnimes({ limit: 1000 }))
+      }
+    }
+  }, [dispatch, isAuthenticated, episodeId, episode, animeList.length, fetchAnimeId, animeDetails?._id])
 
   // Derive episodes list and current index for Next/Prev functionality
   const episodesList = anime?.episodes || []
@@ -59,6 +96,8 @@ export default function Watch() {
     }
   }
 
+  const hasTrackedView = useRef(false)
+
   const handleVideoEnded = () => {
     if (autoNext) {
       handleNext()
@@ -66,14 +105,22 @@ export default function Watch() {
   }
 
   if (!episode) {
+    if (isLoading) {
+      return (
+        <div className="min-h-screen bg-[#0e0b12] flex flex-col items-center justify-center">
+          <div className="w-12 h-12 border-4 border-white/10 border-t-[#f33767] rounded-full animate-spin"></div>
+        </div>
+      )
+    }
+
     return (
       <div className="min-h-screen bg-[#0e0b12] flex flex-col items-center justify-center text-white font-bold gap-4">
         <h2 className="text-xl">Episode data not found</h2>
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/")}
           className="px-6 py-2.5 bg-[#f33767] rounded-xl uppercase tracking-widest text-xs font-black shadow-[0_0_15px_rgba(243,55,103,0.3)]"
         >
-          Go Back
+          Go Home
         </button>
       </div>
     )
@@ -103,7 +150,6 @@ export default function Watch() {
     subtitleTracks: episode.subtitleTracks || [],
   }
 
-  const hasTrackedView = useRef(false)
 
   // Resume logic
   const historyItem = history?.find(
@@ -177,6 +223,9 @@ export default function Watch() {
                 onBack={() => navigate(-1)}
                 autoPlay={autoPlay}
                 autoSkip={autoSkip}
+                hasNextEpisode={currentIndex < episodesList.length - 1}
+                autoNext={autoNext}
+                onPlayNext={handleNext}
                 onEnded={handleVideoEnded}
               />
             </div>

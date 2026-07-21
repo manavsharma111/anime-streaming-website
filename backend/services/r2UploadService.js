@@ -47,7 +47,23 @@ const getAllFiles = async (dirPath, arrayOfFiles = []) => {
 }
 // upload file to r2
 const uploadFileToR2 = async (localFilePath, s3Key) => {
-  const fileBuffer = await fs.readFile(localFilePath)
+  let fileBuffer = await fs.readFile(localFilePath)
+  if (localFilePath.endsWith('.m3u8')) {
+    let content = fileBuffer.toString('utf8')
+    content = content.replace(/\\/g, '/')
+    
+    // Fix FFmpeg creating video variants for audio tracks
+    if (localFilePath.endsWith('master.m3u8')) {
+      // Strip erroneous video streams that point to audio directories
+      content = content.replace(/#EXT-X-STREAM-INF:.*?[\r\n]+(?!(?:1080p|720p|480p)\/manifest\.m3u8)[^\r\n]+\/manifest\.m3u8[\r\n]*/g, '')
+      
+      // Fix audio track names (FFmpeg hardcodes them as audio_X)
+      // Extract the language code from the URI (e.g. URI="hin/manifest.m3u8") and use it as the NAME
+      content = content.replace(/NAME="audio_\d+"(.*?)URI="([a-zA-Z0-9_-]+)\/manifest\.m3u8"/g, 'NAME="$2"$1URI="$2/manifest.m3u8"')
+    }
+    
+    fileBuffer = Buffer.from(content, 'utf8')
+  }
   const contentType = getContentType(localFilePath)
 
   const command = new PutObjectCommand({
@@ -69,7 +85,7 @@ const uploadDirectoryToR2 = async (localDir, s3Prefix) => {
     console.log(`[R2Upload] Found ${files.length} files to upload.`)
 
     // Upload in batches of 20 to avoid overwhelming network/memory
-    const BATCH_SIZE = 20
+    const BATCH_SIZE = 100
     for (let i = 0; i < files.length; i += BATCH_SIZE) {
       const batch = files.slice(i, i + BATCH_SIZE)
       const uploadPromises = batch.map((file) => {

@@ -25,6 +25,9 @@ export default function VideoPlayer({
   onBack,
   autoPlay = true,
   autoSkip = false,
+  hasNextEpisode = false,
+  autoNext = true,
+  onPlayNext,
   onEnded,
 }) {
   const containerRef = useRef(null)
@@ -194,6 +197,37 @@ export default function VideoPlayer({
     }
   }
 
+  // Countdown Logic
+  const [countdown, setCountdown] = React.useState(null)
+
+  const handleVideoEnded = () => {
+    if (hasNextEpisode && autoNext && onPlayNext) {
+      setCountdown(10)
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(console.error)
+      }
+    } else if (onEnded) {
+      onEnded()
+    }
+  }
+
+  useEffect(() => {
+    if (countdown === null) return
+    if (countdown === 0) {
+      setCountdown(null)
+      if (onPlayNext) onPlayNext()
+      return
+    }
+    const timer = setInterval(() => {
+      setCountdown((prev) => prev - 1)
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [countdown, onPlayNext])
+
+  const cancelCountdown = () => {
+    setCountdown(null)
+  }
+
   // Expose settings props for BottomBar
   const settingsProps = {
     showSettings,
@@ -242,7 +276,7 @@ export default function VideoPlayer({
           onPause={handlePause}
           onWaiting={handleWaiting}
           onPlaying={handlePlaying}
-          onEnded={onEnded}
+          onEnded={handleVideoEnded}
           onClick={() => togglePlay(videoRef.current)}
           className="w-full h-full object-cover"
           playsInline
@@ -253,7 +287,7 @@ export default function VideoPlayer({
             <track
               key={index}
               kind="subtitles"
-              src={`${import.meta.env.VITE_BASE_URL || "http://localhost:4000"}${sub.url}`}
+              src={sub.url.startsWith("http") ? sub.url : `${import.meta.env.VITE_BASE_URL || "http://localhost:4000"}${sub.url}`}
               srcLang={sub.lang}
               label={sub.lang}
               default={index === 0}
@@ -289,20 +323,76 @@ export default function VideoPlayer({
 
       {/* SKIP BUTTONS */}
       <SkipIntroButton
-        show={showSkipIntro}
-        label="Skip Intro"
+        show={showSkipIntro || showSkipOutro}
         onClick={() => {
-          if (videoRef.current) videoRef.current.currentTime = introEnd
+          if (showSkipIntro && introEnd)
+            videoRef.current.currentTime = introEnd
+          if (showSkipOutro && outroEnd)
+            videoRef.current.currentTime = outroEnd
         }}
+        label={showSkipIntro ? "Skip Intro" : "Skip Outro"}
       />
-      <SkipIntroButton
-        show={showSkipOutro}
-        label="Next Episode"
-        onClick={() => {
-          if (videoRef.current) videoRef.current.currentTime = outroEnd
-        }}
-        isIntro={false}
-      />
+
+      {/* Auto-Play Countdown Overlay */}
+      {countdown !== null && (
+        <div className="absolute inset-0 z-[60] flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm pointer-events-auto transition-opacity duration-500">
+          <div className="text-center animate-in fade-in zoom-in duration-300">
+            <h2 className="text-3xl md:text-5xl font-black text-white mb-2 tracking-wider">
+              Up Next
+            </h2>
+            <p className="text-neutral-400 text-sm md:text-base font-medium mb-8">
+              Starting in <span className="text-white font-bold">{countdown}</span> seconds
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center gap-4 justify-center">
+              <button
+                onClick={() => {
+                  setCountdown(null)
+                  if (onPlayNext) onPlayNext()
+                }}
+                className="px-8 py-3 bg-[#f33767] hover:bg-[#ff7eb3] transition-colors rounded-full text-white font-black uppercase tracking-widest text-sm shadow-[0_0_20px_rgba(243,55,103,0.4)]"
+              >
+                Play Now
+              </button>
+              <button
+                onClick={cancelCountdown}
+                className="px-8 py-3 bg-white/10 hover:bg-white/20 border border-white/10 transition-colors rounded-full text-white font-bold uppercase tracking-widest text-sm backdrop-blur-md"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+
+          {/* Circular Progress Indicator */}
+          <div className="absolute top-8 right-8 w-16 h-16 pointer-events-none opacity-50">
+            <svg className="w-full h-full transform -rotate-90">
+              <circle
+                cx="32"
+                cy="32"
+                r="28"
+                stroke="currentColor"
+                strokeWidth="4"
+                fill="transparent"
+                className="text-neutral-800"
+              />
+              <circle
+                cx="32"
+                cy="32"
+                r="28"
+                stroke="currentColor"
+                strokeWidth="4"
+                fill="transparent"
+                strokeDasharray="175"
+                strokeDashoffset={175 - (175 * countdown) / 10}
+                className="text-[#f33767] transition-all duration-1000 ease-linear"
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-lg">
+              {countdown}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

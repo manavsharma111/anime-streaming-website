@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import {
   Settings,
   X,
@@ -44,6 +44,23 @@ export default function SettingsMenu({
     }
   }, [tabs, activeTab])
 
+  const menuRef = useRef(null)
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowSettings(false)
+      }
+    }
+    
+    if (showSettings) {
+      document.addEventListener("mousedown", handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [showSettings, setShowSettings])
+
   const renderList = (
     items,
     currentId,
@@ -52,7 +69,11 @@ export default function SettingsMenu({
     idKey = "id",
     emptyMessage = "Default",
   ) => (
-    <div className="flex flex-col py-2 max-h-[150px] overflow-y-auto custom-scrollbar overscroll-contain pointer-events-auto">
+    <div 
+      className="flex flex-col py-2 max-h-[250px] overflow-y-auto custom-scrollbar overscroll-none pointer-events-auto"
+      onWheel={(e) => e.stopPropagation()}
+      onTouchMove={(e) => e.stopPropagation()}
+    >
       {items.length > 0 ? (
         items.map((item) => {
           const isActive = currentId === item[idKey]
@@ -121,7 +142,7 @@ export default function SettingsMenu({
         }
 
   return (
-    <div className="relative">
+    <div className="relative" ref={menuRef}>
       <button
         onClick={() => setShowSettings(!showSettings)}
         className={cn(
@@ -140,6 +161,8 @@ export default function SettingsMenu({
             exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.15 }}
             className="absolute bottom-10 right-0 w-[280px] bg-[#1c1c1c]/95 backdrop-blur-md rounded shadow-2xl z-50 flex flex-col border border-white/10 overflow-hidden"
+            onWheel={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
           >
             {/* Header / Tabs */}
             <div className="flex items-center justify-between px-2 pt-2 border-b border-white/10">
@@ -229,7 +252,11 @@ export default function SettingsMenu({
               )}
 
               {activeTab === "download" && (
-                <div className="flex flex-col py-2 max-h-[200px] overflow-y-auto">
+                <div 
+                  className="flex flex-col py-2 max-h-[250px] overflow-y-auto custom-scrollbar overscroll-none"
+                  onWheel={(e) => e.stopPropagation()}
+                  onTouchMove={(e) => e.stopPropagation()}
+                >
                   {Object.entries(displayDownloadQualities).map(
                     ([quality, url]) => (
                       <a

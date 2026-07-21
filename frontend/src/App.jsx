@@ -48,9 +48,13 @@ export default function App() {
 
   // Lenis initialization is handled by SmoothScroll.jsx
 
-  // Scroll to top on route change
+  // Scroll to top on route change using Lenis if available
   useEffect(() => {
-    window.scrollTo(0, 0)
+    if (window.lenis) {
+      window.lenis.scrollTo(0, { immediate: true })
+    } else {
+      window.scrollTo(0, 0)
+    }
   }, [location.pathname])
 
   return (

@@ -121,6 +121,10 @@ const uploadEpisodeMeta = async (req, res, next) => {
       thumbnailUrl,
       subtitleTracks,
       audioTracks,
+      introStart: Number(req.body.introStart || 0),
+      introEnd: Number(req.body.introEnd || 0),
+      outroStart: Number(req.body.outroStart || 0),
+      outroEnd: Number(req.body.outroEnd || 0),
       status: scheduledAt ? "scheduled" : "queued",
       scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
     })

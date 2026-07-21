@@ -1,12 +1,16 @@
 import React from "react"
+import ExpandableText from "../common/animation/ExpandableText"
 import { getImageUrl } from "../../utils/image"
 import { useDispatch, useSelector } from "react-redux"
+import { useLocation, useNavigate } from "react-router-dom"
 import { addToWishlist, deleteWishlist } from "../../redux/slice/wishlistSlice"
-import { Heart } from "lucide-react"
+import { Heart, MessageSquare, Mic, Play, Plus } from "lucide-react"
 import toast from "react-hot-toast"
 
 export default function AnimeInfoBox({ anime }) {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const location = useLocation()
   const { wishlist } = useSelector((state) => state.wishlist)
   const { isAuthenticated } = useSelector((state) => state.auth)
 
@@ -37,6 +41,20 @@ export default function AnimeInfoBox({ anime }) {
     }
   }
 
+  const handleWatchClick = () => {
+    if (location.pathname.includes("/watch/")) {
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    } else {
+      if (anime?.episodes && anime.episodes.length > 0) {
+        navigate(`/watch/${anime.episodes[0]._id || anime.episodes[0]}`, {
+          state: { anime, episode: anime.episodes[0] },
+        })
+      } else {
+        toast.error("No episodes available to watch yet")
+      }
+    }
+  }
+
   return (
     <div className="w-full flex flex-col gap-6">
       <div className="flex flex-col md:flex-row gap-6">
@@ -53,68 +71,60 @@ export default function AnimeInfoBox({ anime }) {
 
         {/* Right Side: Details */}
         <div className="flex flex-col flex-grow text-sm text-neutral-400 font-medium">
-          <div className="flex justify-between items-start mb-2">
-            <h1 className="text-3xl font-black text-white leading-tight">
+          <div className="flex flex-col gap-2 mb-4">
+            <h1 className="text-3xl font-black text-[#a67cff] leading-tight">
               {anime?.title}
             </h1>
 
-            <button
-              onClick={handleWishlistToggle}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${
-                isInWishlist
-                  ? "bg-[#f33767]/20 border-[#f33767]/50 text-[#f33767]"
-                  : "bg-white/5 border-white/10 hover:bg-white/10 text-white"
-              }`}
-            >
-              <Heart
-                size={18}
-                fill={isInWishlist ? "#f33767" : "transparent"}
-              />
-              <span className="hidden sm:inline text-xs font-bold tracking-widest uppercase">
-                {isInWishlist ? "In Watchlist" : "Add to List"}
+            <div className="flex items-center gap-2 text-[11px] font-bold mt-1">
+              <span className="border border-white/20 text-neutral-300 px-1.5 py-0.5 rounded-sm">
+                PG-13
               </span>
-            </button>
+              <span className="border border-white/20 text-neutral-300 px-1.5 py-0.5 rounded-sm">
+                HD
+              </span>
+              <span className="bg-[#a67cff] text-white px-1.5 py-0.5 rounded-sm flex items-center gap-1">
+                <MessageSquare size={12} className="fill-current" /> {anime?.episodes?.length || "??"}
+              </span>
+              <span className="bg-[#e4ca67] text-black px-1.5 py-0.5 rounded-sm flex items-center gap-1">
+                <Mic size={12} className="fill-current" /> {anime?.episodes?.length || "??"}
+              </span>
+              <span className="bg-white/20 text-white px-1.5 py-0.5 rounded-sm">
+                ?
+              </span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest mb-4">
-            <span className="bg-white/10 border border-white/20 px-1.5 py-0.5 rounded-sm text-white">
-              PG-13
-            </span>
-            <span className="bg-white/10 border border-white/20 px-1.5 py-0.5 rounded-sm text-white">
-              HD
-            </span>
-            <span className="bg-white/10 border border-white/20 px-1.5 py-0.5 rounded-sm text-white">
-              CC
-            </span>
-          </div>
+          <ExpandableText text={anime?.description} />
 
-          <p className="text-sm leading-relaxed mb-6 line-clamp-3 hover:line-clamp-none transition-all cursor-pointer">
-            {anime?.description ||
-              "No description available for this anime. Please check back later for updates."}
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+          <div className="flex flex-col gap-1.5 text-sm mt-4">
+            {anime?.otherNames && anime.otherNames.length > 0 && (
+              <div>
+                <span className="text-neutral-500 mr-2">Other names:</span>
+                <span className="text-neutral-200">{anime.otherNames.join(", ")}</span>
+              </div>
+            )}
             <div>
-              <span className="text-neutral-500 mr-2">Type:</span>{" "}
-              <span className="text-white">TV</span>
+              <span className="text-neutral-500 mr-2">Scores:</span>
+              <span className="text-neutral-200">{anime?.rating || "N/A"}</span>
             </div>
             <div>
-              <span className="text-neutral-500 mr-2">Scores:</span>{" "}
-              <span className="text-white">{anime?.rating || "N/A"}</span>
+              <span className="text-neutral-500 mr-2">Aired:</span>
+              <span className="text-neutral-200">{anime?.year || "N/A"}</span>
             </div>
             <div>
-              <span className="text-neutral-500 mr-2">Status:</span>{" "}
-              <span className="text-[#f33767] capitalize">
+              <span className="text-neutral-500 mr-2">Duration:</span>
+              <span className="text-neutral-200">{anime?.duration || "24 min"}</span>
+            </div>
+            <div>
+              <span className="text-neutral-500 mr-2">Status:</span>
+              <span className="text-neutral-200 capitalize">
                 {anime?.status || "Completed"}
               </span>
             </div>
             <div>
-              <span className="text-neutral-500 mr-2">Year:</span>{" "}
-              <span className="text-white">{anime?.year || "N/A"}</span>
-            </div>
-            <div>
-              <span className="text-neutral-500 mr-2">Genres:</span>
-              <span className="text-white">
+              <span className="text-neutral-500 mr-2">Genre:</span>
+              <span>
                 {anime?.genres
                   ? [
                       ...new Set(
@@ -124,19 +134,34 @@ export default function AnimeInfoBox({ anime }) {
                       ),
                     ].map((g, i, arr) => (
                       <span key={i}>
-                        <span className="text-neutral-300 hover:text-[#f33767] cursor-pointer transition-colors">
+                        <span className="text-[#a67cff] hover:underline cursor-pointer transition-colors">
                           {g}
                         </span>
-                        {i < arr.length - 1 && ", "}
+                        {i < arr.length - 1 && <span className="text-neutral-200">, </span>}
                       </span>
                     ))
-                  : "N/A"}
+                  : <span className="text-neutral-200">N/A</span>}
               </span>
             </div>
-            <div>
-              <span className="text-neutral-500 mr-2">Views:</span>{" "}
-              <span className="text-white">{anime?.views || 0}</span>
-            </div>
+          </div>
+
+          <div className="flex items-center gap-4 mt-6">
+            <button
+              onClick={handleWatchClick}
+              className="flex-grow max-w-[200px] flex items-center justify-center gap-2 bg-[#a0a0a0] hover:bg-[#b0b0b0] text-black font-bold py-2.5 rounded-full transition-colors"
+            >
+              <Play size={18} className="fill-current" /> Watch
+            </button>
+            <button
+              onClick={handleWishlistToggle}
+              className={`flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-full transition-colors ${
+                isInWishlist
+                  ? "bg-[#f33767]/20 text-[#f33767] border border-[#f33767]/50"
+                  : "bg-white/10 text-white hover:bg-white/20"
+              }`}
+            >
+              {isInWishlist ? <Heart size={20} fill="#f33767" /> : <Plus size={24} />}
+            </button>
           </div>
         </div>
       </div>

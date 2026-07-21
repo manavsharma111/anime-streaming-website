@@ -46,8 +46,15 @@ const processAnimeVideo = async (
           let aCount = 0
           let sCount = 0
           let subStreams = []
+          let audioStreams = []
           metadata.streams.forEach((s) => {
-            if (s.codec_type === "audio") aCount++
+            if (s.codec_type === "audio") {
+              aCount++
+              audioStreams.push({
+                index: s.index,
+                lang: s.tags && s.tags.language ? s.tags.language : `Audio${aCount}`,
+              })
+            }
             if (s.codec_type === "subtitle") {
               sCount++
               // Only keep text-based subtitles for VTT extraction
@@ -62,7 +69,7 @@ const processAnimeVideo = async (
               }
             }
           })
-          res({ aCount, sCount, subStreams })
+          res({ aCount, sCount, subStreams, audioStreams })
         })
       })
 
@@ -110,9 +117,9 @@ const processAnimeVideo = async (
       let audioGroup = streamCounts.aCount > 0 ? ",agroup:audio" : ""
       let varStreamMap = `v:0${audioGroup},name:1080p v:1${audioGroup},name:720p v:2${audioGroup},name:480p`
 
-      for (let i = 0; i < streamCounts.aCount; i++) {
-        varStreamMap += ` a:${i},agroup:audio,name:Audio${i}`
-      }
+      streamCounts.audioStreams.forEach((audio, i) => {
+        varStreamMap += ` a:${i},agroup:audio,name:${audio.lang}`
+      })
 
       const command = ffmpeg()
       command.input(inputPath)
@@ -131,18 +138,28 @@ const processAnimeVideo = async (
           // Video quality maps
           "-s:v:0 1920x1080",
           "-c:v:0 libx264",
-          "-preset fast",
+          "-profile:v:0 main",
+          "-pix_fmt yuv420p",
+          "-preset ultrafast",
+          "-g 48",
+          "-keyint_min 48",
+          "-sc_threshold 0",
           "-b:v:0 3000k",
           "-s:v:1 1280x720",
           "-c:v:1 libx264",
-          "-preset fast",
+          "-profile:v:1 main",
+          "-pix_fmt yuv420p",
+          "-preset ultrafast",
           "-b:v:1 1500k",
           "-s:v:2 854x480",
           "-c:v:2 libx264",
-          "-preset fast",
+          "-profile:v:2 main",
+          "-pix_fmt yuv420p",
+          "-preset ultrafast",
           "-b:v:2 800k",
 
           "-c:a aac",
+          "-ac 2",
           "-b:a 128k",
 
           "-f hls",
@@ -163,9 +180,12 @@ const processAnimeVideo = async (
           "-map 0:a?",
           "-map 0:s?",
           "-c:v libx264",
+          "-profile:v main",
+          "-pix_fmt yuv420p",
           "-crf 22",
-          "-preset fast",
+          "-preset ultrafast",
           "-c:a aac",
+          "-ac 2",
           "-c:s mov_text",
           "-s 1920x1080",
         ])
@@ -177,9 +197,12 @@ const processAnimeVideo = async (
           "-map 0:a?",
           "-map 0:s?",
           "-c:v libx264",
+          "-profile:v main",
+          "-pix_fmt yuv420p",
           "-crf 24",
-          "-preset fast",
+          "-preset ultrafast",
           "-c:a aac",
+          "-ac 2",
           "-c:s mov_text",
           "-s 1280x720",
         ])
@@ -191,9 +214,12 @@ const processAnimeVideo = async (
           "-map 0:a?",
           "-map 0:s?",
           "-c:v libx264",
+          "-profile:v main",
+          "-pix_fmt yuv420p",
           "-crf 26",
-          "-preset fast",
+          "-preset ultrafast",
           "-c:a aac",
+          "-ac 2",
           "-c:s mov_text",
           "-s 854x480",
         ])

@@ -62,6 +62,37 @@ export const useHls = (streamUrl, videoRef) => {
         const subs = hls.subtitleTracks || []
         console.log("Subtitle Tracks parsed:", subs)
         setSubtitleTracks([{ id: -1, name: "Off" }, ...subs])
+
+        // Apply saved preferences if available
+        const savedQuality = localStorage.getItem("preferredQuality")
+        if (savedQuality) {
+          const matchedLevel = levels.find((l) => l.name === savedQuality)
+          if (matchedLevel) {
+            hls.currentLevel = matchedLevel.id
+            setCurrentQuality(matchedLevel.id)
+          }
+        }
+
+        const savedAudio = localStorage.getItem("preferredAudio")
+        if (savedAudio && audios.length > 0) {
+          const matchedAudio = audios.find((a) => a.name === savedAudio || a.lang === savedAudio)
+          if (matchedAudio) {
+            hls.audioTrack = matchedAudio.id
+            setCurrentAudio(matchedAudio.id)
+          }
+        }
+
+        const savedSubtitle = localStorage.getItem("preferredSubtitle")
+        if (savedSubtitle && subs.length > 0) {
+          const matchedSub = subs.find((s) => s.name === savedSubtitle || s.lang === savedSubtitle)
+          if (matchedSub) {
+            hls.subtitleTrack = matchedSub.id
+            setCurrentSubtitle(matchedSub.id)
+          } else if (savedSubtitle === "Off") {
+            hls.subtitleTrack = -1
+            setCurrentSubtitle(-1)
+          }
+        }
       })
 
       // Fetch Audio Tracks when they are updated
@@ -96,6 +127,7 @@ export const useHls = (streamUrl, videoRef) => {
 
       // Handle Errors
       hls.on(Hls.Events.ERROR, (event, data) => {
+        console.error("HLS Error:", data.type, data.details, data)
         if (data.fatal) {
           switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
@@ -133,6 +165,13 @@ export const useHls = (streamUrl, videoRef) => {
     if (hlsRef.current) {
       hlsRef.current.currentLevel = levelId
       setCurrentQuality(levelId)
+      // Save to localStorage
+      if (levelId === -1) {
+        localStorage.setItem("preferredQuality", "Auto")
+      } else {
+        const level = qualities.find((q) => q.id === levelId)
+        if (level) localStorage.setItem("preferredQuality", level.name)
+      }
     }
   }
 
@@ -140,6 +179,9 @@ export const useHls = (streamUrl, videoRef) => {
     if (hlsRef.current) {
       hlsRef.current.audioTrack = trackId
       setCurrentAudio(trackId)
+      // Save to localStorage
+      const track = audioTracks.find((a) => a.id === trackId)
+      if (track) localStorage.setItem("preferredAudio", track.name || track.lang)
     }
   }
 
@@ -147,6 +189,13 @@ export const useHls = (streamUrl, videoRef) => {
     if (hlsRef.current) {
       hlsRef.current.subtitleTrack = trackId
       setCurrentSubtitle(trackId)
+      // Save to localStorage
+      if (trackId === -1) {
+        localStorage.setItem("preferredSubtitle", "Off")
+      } else {
+        const track = subtitleTracks.find((s) => s.id === trackId)
+        if (track) localStorage.setItem("preferredSubtitle", track.name || track.lang)
+      }
     }
   }
 

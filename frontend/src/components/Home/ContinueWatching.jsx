@@ -61,6 +61,7 @@ export default function ContinueWatching() {
           return (
             <Link
               to={`/watch/${item.episode._id || item.episode}`}
+              state={{ fetchAnimeId: item.anime._id || item.anime }}
               key={`${item._id}-${index}`}
               className="flex-shrink-0 w-[280px] sm:w-[320px] snap-start group bg-[#110e16] rounded-xl overflow-hidden border border-white/5 hover:border-white/10 transition-colors block relative"
             >
