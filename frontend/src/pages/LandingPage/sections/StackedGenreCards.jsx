@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react"
+import { useNavigate } from "react-router-dom"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 
@@ -11,27 +12,28 @@ gsap.registerPlugin(ScrollTrigger)
 //   { title: "ISEKAI", desc: "Reincarnated into magical new worlds with infinite possibilities.", color: "from-blue-500 to-cyan-400", img: "https://images6.alphacoders.com/130/1303873.png" },
 // ]
 const genres = [
-  { title: "SHONEN", desc: "High-octane battles, unbreakable will, and legendary journeys.", color: "from-red-600 to-orange-500", img: "https://wallpaperaccess.com/full/1915382.jpg" },
-  { title: "SEINEN", desc: "Dark thrillers, mature themes, and mind-bending plots.", color: "from-purple-600 to-indigo-900", img: "https://otakukart.com/wp-content/uploads/2025/03/Seinen-Anime.jpg" },
-  { title: "SLICE OF LIFE", desc: "Heartwarming stories of everyday love and friendship.", color: "from-pink-500 to-rose-400", img: "https://wallpapercave.com/wp/wp5921545.jpg" },
-  { title: "ISEKAI", desc: "Reincarnated into magical new worlds with infinite possibilities.", color: "from-blue-500 to-cyan-400", img: "https://images6.alphacoders.com/130/1303873.png" },
-  { title: "SPORTS", desc: "Sweat, tears, and intense competition to reach the absolute top.", color: "from-emerald-500 to-teal-700", img: "https://images.wallpapersden.com/image/download/kuroko-no-basket-team-akashi-seijuurou_a2tmZ5SZmpqtpaSklG1qaW6taW5mbQ.jpg" },
-  { title: "ROMANCE", desc: "Butterfly moments, sweet heartstrings, and emotional rollercoasters.", color: "from-rose-400 to-red-400", img: "https://wallpapercave.com/wp/wp15082627.jpg" },
-  { title: "HORROR / THRILLER", desc: "Eerie atmospheres, psychological dread, and survival against the unknown.", color: "from-zinc-900 to-neutral-700", img: "https://tse2.mm.bing.net/th/id/OIP.D1O9rqcA5bMaB_Ue8t_N7gHaEt?r=0&w=4036&h=2568&rs=1&pid=ImgDetMain&o=7&rm=3" },
-  { title: "CYBERPUNK / SCI-FI", desc: "Neon-lit dystopias, high-tech hacking, and futuristic chaos.", color: "from-cyan-500 to-fuchsia-600", img: "https://wallpaperaccess.com/full/7526316.jpg" },
-  { title: "MECHA", desc: "Colossal steel giants, tactical warfare, and epic pilot duels.", color: "from-blue-700 to-slate-800", img: "https://tse3.mm.bing.net/th/id/OIP.GnWblD0CiOFyJ2VogC2hOwHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" },
-  { title: "FANTASY / MAGIC", desc: "Spellbinding sorcery, mythical beasts, and ancient kingdoms.", color: "from-amber-500 to-yellow-600", img: "https://wallpapercave.com/wp/wp14739070.jpg" },
-  { title: "MYSTERY / NOIR", desc: "Shadowy conspiracies, brilliant detectives, and unraveling deep secrets.", color: "from-slate-900 to-blue-950", img: "https://comicbook.com/wp-content/uploads/sites/4/2025/06/mystery-anime_monster-link-click-apothecary-diaries-01.jpg?resize=2000" },
-  { title: "MILITARY / WARFARE", desc: "Gritty tactical battles, political intrigue, and the harsh realities of war.", color: "from-olive-600 to-stone-800", img: "https://a-static.besthdwallpaper.com/86-eighty-six-wallpaper-2560x1440-84185_51.jpg" }, // Vinland Saga / Attack on Titan vibe
-  { title: "SUPERNATURAL", desc: "Yokai, curses, and hidden spirits lurking just beyond human sight.", color: "from-indigo-900 to-purple-700", img: "https://tse2.mm.bing.net/th/id/OIP.FKSV0vdGywwnvU_r3farGgHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" }, // Jujutsu Kaisen / Monogatari vibe
-  { title: "COMEDY / PARODY", desc: "Absurd gags, fourth-wall breaks, and non-stop laughing riots.", color: "from-yellow-400 to-orange-500", img: "https://wallpapers.com/images/hd/spy-x-family-character-poster-v2te3s9dlozrcv6v.jpg" }, // Gintama / One Punch Man vibe
-  { title: "HISTORICAL / SAMURAI", desc: "Clashing steel, ancient traditions, and legendary tales of old Japan.", color: "from-amber-800 to-zinc-900", img: "https://tse3.mm.bing.net/th/id/OIP.xeo-pPUZQ82y1fk6sh557gHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" }, // Demon Slayer / Vagabond vibe
-  { title: "PSYCHOLOGICAL", desc: "Mind games, moral dilemmas, and intense battles of pure intellect.", color: "from-neutral-900 to-red-950", img: "https://tse4.mm.bing.net/th/id/OIP.iT_LrhRwXD-yPs7Ow4IruQHaEK?r=0&w=2560&h=1440&rs=1&pid=ImgDetMain&o=7&rm=3" }, // Monster / Classroom of the Elite vibe
-  { title: "ADVENTURE / EXPLORATION", desc: "Vast uncharted lands, hidden treasures, and the thrill of the open road.", color: "from-lime-600 to-emerald-800", img: "https://wallpapercave.com/wp/wp5428868.jpg" } // Hunter x Hunter / Made in Abyss vibe
+  { title: "SHONEN", searchGenre: "Shounen", desc: "High-octane battles, unbreakable will, and legendary journeys.", color: "from-red-600 to-orange-500", img: "https://wallpaperaccess.com/full/1915382.jpg" },
+  { title: "SEINEN", searchGenre: "Seinen", desc: "Dark thrillers, mature themes, and mind-bending plots.", color: "from-purple-600 to-indigo-900", img: "https://otakukart.com/wp-content/uploads/2025/03/Seinen-Anime.jpg" },
+  { title: "SLICE OF LIFE", searchGenre: "Slice of Life", desc: "Heartwarming stories of everyday love and friendship.", color: "from-pink-500 to-rose-400", img: "https://wallpapercave.com/wp/wp5921545.jpg" },
+  { title: "ISEKAI", searchGenre: "Isekai", desc: "Reincarnated into magical new worlds with infinite possibilities.", color: "from-blue-500 to-cyan-400", img: "https://images6.alphacoders.com/130/1303873.png" },
+  { title: "SPORTS", searchGenre: "Sports", desc: "Sweat, tears, and intense competition to reach the absolute top.", color: "from-emerald-500 to-teal-700", img: "https://images.wallpapersden.com/image/download/kuroko-no-basket-team-akashi-seijuurou_a2tmZ5SZmpqtpaSklG1qaW6taW5mbQ.jpg" },
+  { title: "ROMANCE", searchGenre: "Romance", desc: "Butterfly moments, sweet heartstrings, and emotional rollercoasters.", color: "from-rose-400 to-red-400", img: "https://wallpapercave.com/wp/wp15082627.jpg" },
+  { title: "HORROR / THRILLER", searchGenre: "Horror", desc: "Eerie atmospheres, psychological dread, and survival against the unknown.", color: "from-zinc-900 to-neutral-700", img: "https://tse2.mm.bing.net/th/id/OIP.D1O9rqcA5bMaB_Ue8t_N7gHaEt?r=0&w=4036&h=2568&rs=1&pid=ImgDetMain&o=7&rm=3" },
+  { title: "CYBERPUNK / SCI-FI", searchGenre: "Sci-Fi", desc: "Neon-lit dystopias, high-tech hacking, and futuristic chaos.", color: "from-cyan-500 to-fuchsia-600", img: "https://wallpaperaccess.com/full/7526316.jpg" },
+  { title: "MECHA", searchGenre: "Mecha", desc: "Colossal steel giants, tactical warfare, and epic pilot duels.", color: "from-blue-700 to-slate-800", img: "https://tse3.mm.bing.net/th/id/OIP.GnWblD0CiOFyJ2VogC2hOwHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" },
+  { title: "FANTASY / MAGIC", searchGenre: "Fantasy", desc: "Spellbinding sorcery, mythical beasts, and ancient kingdoms.", color: "from-amber-500 to-yellow-600", img: "https://wallpapercave.com/wp/wp14739070.jpg" },
+  { title: "MYSTERY / NOIR", searchGenre: "Mystery", desc: "Shadowy conspiracies, brilliant detectives, and unraveling deep secrets.", color: "from-slate-900 to-blue-950", img: "https://comicbook.com/wp-content/uploads/sites/4/2025/06/mystery-anime_monster-link-click-apothecary-diaries-01.jpg?resize=2000" },
+  { title: "MILITARY / WARFARE", searchGenre: "Military", desc: "Gritty tactical battles, political intrigue, and the harsh realities of war.", color: "from-olive-600 to-stone-800", img: "https://a-static.besthdwallpaper.com/86-eighty-six-wallpaper-2560x1440-84185_51.jpg" },
+  { title: "SUPERNATURAL", searchGenre: "Supernatural", desc: "Yokai, curses, and hidden spirits lurking just beyond human sight.", color: "from-indigo-900 to-purple-700", img: "https://tse2.mm.bing.net/th/id/OIP.FKSV0vdGywwnvU_r3farGgHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" },
+  { title: "COMEDY / PARODY", searchGenre: "Comedy", desc: "Absurd gags, fourth-wall breaks, and non-stop laughing riots.", color: "from-yellow-400 to-orange-500", img: "https://wallpapers.com/images/hd/spy-x-family-character-poster-v2te3s9dlozrcv6v.jpg" },
+  { title: "HISTORICAL / SAMURAI", searchGenre: "Samurai", desc: "Clashing steel, ancient traditions, and legendary tales of old Japan.", color: "from-amber-800 to-zinc-900", img: "https://tse3.mm.bing.net/th/id/OIP.xeo-pPUZQ82y1fk6sh557gHaEK?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" },
+  { title: "PSYCHOLOGICAL", searchGenre: "Psychological", desc: "Mind games, moral dilemmas, and intense battles of pure intellect.", color: "from-neutral-900 to-red-950", img: "https://tse4.mm.bing.net/th/id/OIP.iT_LrhRwXD-yPs7Ow4IruQHaEK?r=0&w=2560&h=1440&rs=1&pid=ImgDetMain&o=7&rm=3" },
+  { title: "ADVENTURE / EXPLORATION", searchGenre: "Adventure", desc: "Vast uncharted lands, hidden treasures, and the thrill of the open road.", color: "from-lime-600 to-emerald-800", img: "https://wallpapercave.com/wp/wp5428868.jpg" }
 ]
 export default function StackedGenreCards() {
   const containerRef = useRef(null)
   const cardsRef = useRef([])
+  const navigate = useNavigate()
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -111,7 +113,10 @@ export default function StackedGenreCards() {
                 {genre.desc}
               </p>
               
-              <div className="mt-8 px-8 py-3 rounded-full border border-white/20 bg-white/5 backdrop-blur-md text-white font-bold tracking-widest text-sm uppercase cursor-pointer hover:bg-white hover:text-black transition-colors duration-300 pointer-events-auto">
+              <div 
+                className="mt-8 px-8 py-3 rounded-full border border-white/20 bg-white/5 backdrop-blur-md text-white font-bold tracking-widest text-sm uppercase cursor-pointer hover:bg-white hover:text-black transition-colors duration-300 pointer-events-auto"
+                onClick={() => navigate(`/search?genres=${encodeURIComponent(genre.searchGenre)}`)}
+              >
                 Explore Universe
               </div>
             </div>

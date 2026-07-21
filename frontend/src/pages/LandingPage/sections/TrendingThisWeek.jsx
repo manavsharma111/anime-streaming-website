@@ -101,10 +101,13 @@ export default function TrendingThisWeek({ animeList = [], loading }) {
 
                 {/* Vertical title when collapsed (Desktop) */}
                 <div
-                  className="absolute inset-0 hidden md:flex items-end justify-center pb-12 transition-opacity duration-300"
+                  className="absolute inset-0 hidden md:flex items-center justify-center transition-opacity duration-300"
                   style={{ opacity: isActive ? 0 : 1 }}
                 >
-                  <h3 className="text-white font-bold text-xl whitespace-nowrap -rotate-90 origin-bottom transform translate-y-16 tracking-widest uppercase">
+                  <h3 
+                    className="text-white font-bold text-xl tracking-widest uppercase whitespace-nowrap"
+                    style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+                  >
                     {anime.title.length > 20
                       ? anime.title.slice(0, 20) + "..."
                       : anime.title}

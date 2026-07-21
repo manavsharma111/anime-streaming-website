@@ -1,18 +1,29 @@
 import React, { useState, useEffect } from "react"
 import { Search, ChevronDown, Filter } from "lucide-react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import axiosInstance from "../../services/api"
 import CustomSelect from "../common/CustomSelect"
 
 export default function QuickFilter() {
   const navigate = useNavigate()
-
+  const location = useLocation()
+  
   const [filters, setFilters] = useState({
     genres: "",
     year: "",
     status: "",
     sort: "",
   })
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    setFilters({
+      genres: params.get("genres") || "",
+      year: params.get("year") || "",
+      status: params.get("status") || "",
+      sort: params.get("sort") || "",
+    })
+  }, [location.search])
 
   const [availableGenres, setAvailableGenres] = useState([
     "Action",
