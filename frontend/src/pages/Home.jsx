@@ -66,7 +66,6 @@ export default function Home() {
             icon={Clock}
             animes={latestAnime}
             isLoading={isLoading}
-            tabs={["All", "Trending"]}
           />
 
           {/* Three-Column Lists Section */}

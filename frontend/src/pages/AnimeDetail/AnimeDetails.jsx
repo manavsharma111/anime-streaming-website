@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 import {
@@ -35,8 +35,33 @@ export default function AnimeDetails() {
     dispatch(fetchAnimeDetails(id))
     return () => {
       dispatch(clearAnimeDetails())
+      setDynamicTrailerId(null) // Reset trailer ID on unmount/change
     }
   }, [dispatch, id])
+
+  const getYoutubeId = (url) => {
+    if (!url) return null
+    const match = url.match(
+      /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/,
+    )
+    return match ? match[1] : null
+  }
+  
+  const [dynamicTrailerId, setDynamicTrailerId] = useState(null)
+
+  // If no trailer was provided, try to fetch it automatically using the title!
+  useEffect(() => {
+    if (animeDetails && !getYoutubeId(animeDetails.trailerUrl)) {
+      fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(animeDetails.title)}&limit=1`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.data && data.data.length > 0 && data.data[0].trailer?.youtube_id) {
+            setDynamicTrailerId(data.data[0].trailer.youtube_id)
+          }
+        })
+        .catch(err => console.error("Failed to fetch dynamic trailer", err))
+    }
+  }, [animeDetails])
 
   if (isLoading || !animeDetails) {
     return (
@@ -65,28 +90,26 @@ export default function AnimeDetails() {
         ).toFixed(1)
       : (anime.rating || 0).toFixed(1)
 
-  const getYoutubeId = (url) => {
-    if (!url) return null
-    const match = url.match(
-      /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/,
-    )
-    return match ? match[1] : null
-  }
-  const trailerId = getYoutubeId(anime.trailerUrl)
+  const trailerId = getYoutubeId(anime.trailerUrl) || dynamicTrailerId
 
   return (
     <div className="min-h-screen bg-[#0e0b12] text-white pt-24 pb-20 relative overflow-hidden font-sans">
       {/* Background Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-[#f33767]/10 blur-[120px] pointer-events-none rounded-full"></div>
 
-      {/* Background Video */}
-      <div className="absolute top-0 left-0 w-full h-[90vh] overflow-hidden pointer-events-none z-0">
+      {/* Background Video & Image Fallback */}
+      <div className="absolute top-0 left-0 w-full h-[90vh] overflow-hidden pointer-events-none z-0 bg-[#0e0b12]">
+        <img 
+          src={getImageUrl(anime.cover || anime.thumbnail)} 
+          className="absolute inset-0 w-full h-full object-cover opacity-20 blur-2xl transform scale-110" 
+          alt="background fallback" 
+        />
         {trailerId ? (
           <iframe
             src={`https://www.youtube.com/embed/${trailerId}?autoplay=1&mute=1&loop=1&playlist=${trailerId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&disablekb=1&fs=0`}
             allow="autoplay; encrypted-media"
-            className="w-full h-[120%] object-cover opacity-40 pointer-events-none scale-[1.3] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0"
-            style={{ border: "none" }}
+            className="w-full h-[120%] object-cover opacity-30 pointer-events-none scale-[1.3] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+            style={{ border: "none", pointerEvents: "none" }}
             tabIndex="-1"
           ></iframe>
         ) : (
