@@ -152,6 +152,8 @@ const processAnimeVideo = async (
             .on("error", (err, stdout, stderr) => {
               console.error(`❌ FFmpeg pipeline failure [${taskName}]:`, err.message)
               console.error(`[FFmpeg STDERR]:`, stderr)
+              // Modify error message so it gets saved in BullMQ and shown on frontend
+              err.message = `[${taskName}] ${err.message} | Details: ${stderr ? stderr.substring(stderr.length - 200) : "No stderr"}`
               rej(err)
             })
             .on("end", () => {
