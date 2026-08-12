@@ -1,8 +1,8 @@
 const fs = require("fs")
 const path = require("path")
 const ffmpeg = require("fluent-ffmpeg")
-const ffmpegStatic = require("ffmpeg-static")
-const ffprobeStatic = require("ffprobe-static")
+const ffmpegStatic = require("@ffmpeg-installer/ffmpeg")
+const ffprobeStatic = require("@ffprobe-installer/ffprobe")
 
 // ffmpeg service
 const processAnimeVideo = async (
@@ -15,7 +15,7 @@ const processAnimeVideo = async (
 ) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const finalFfmpegPath = ffmpegPath || ffmpegStatic
+      const finalFfmpegPath = ffmpegPath || ffmpegStatic.path
       ffmpeg.setFfmpegPath(finalFfmpegPath)
       ffmpeg.setFfprobePath(ffprobeStatic.path)
 
