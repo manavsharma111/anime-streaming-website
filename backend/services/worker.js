@@ -26,6 +26,9 @@ const worker = new Worker(
       `[Worker] Started processing job ${job.id} for episode ${episodeId}`,
     )
 
+    let finalInputPath = inputPath
+    let tempFilePath = null
+
     try {
       // Update status to processing
       await Episode.findByIdAndUpdate(episodeId, { status: "processing" })
@@ -34,9 +37,6 @@ const worker = new Worker(
       // Assuming ffmpeg is installed system-wide, we pass null for ffmpegPath
 
       // If the inputPath is an R2 key, download it locally first to avoid FFmpeg HTTP streaming memory crash (SIGSEGV)
-      let finalInputPath = inputPath
-      let tempFilePath = null
-      
       if (inputPath && inputPath.startsWith("raw_videos/")) {
         const publicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL
         if (publicUrl) {
