@@ -82,37 +82,6 @@ const uploadEpisodeMeta = async (req, res, next) => {
         .json({ message: "Video file or videoKey required" })
     }
 
-    // thumbnail
-    let thumbnailUrl = ""
-    if (req.files && req.files.thumbnail && req.files.thumbnail[0]) {
-      thumbnailUrl = `/uploads/thumbnails/${req.files.thumbnail[0].filename}`
-    } else {
-      const thumbPath = path.join(
-        __dirname,
-        "..",
-        "uploads",
-        "thumbnails",
-        `${videoFilename}.png`,
-      )
-      await new Promise((resolve, reject) => {
-        const inputSource =
-          req.files && req.files.video && req.files.video[0]
-            ? rawVideoPath
-            : `${process.env.CLOUDFLARE_R2_PUBLIC_URL}/${videoKey}`
-
-        ffmpeg(inputSource)
-          .screenshots({
-            timestamps: ["00:00:02"],
-            filename: path.basename(thumbPath),
-            folder: path.dirname(thumbPath),
-            size: "320x180",
-          })
-          .on("end", resolve)
-          .on("error", reject)
-      })
-      thumbnailUrl = `/uploads/thumbnails/${path.basename(thumbPath)}`
-    }
-
     const subtitleTracks = (req.files.subtitles || []).map((f) => ({
       lang: f.originalname.split(".").shift().toLowerCase(),
       url: `/uploads/subtitles/${f.filename}`,
@@ -131,7 +100,6 @@ const uploadEpisodeMeta = async (req, res, next) => {
         req.files && req.files.video && req.files.video[0]
           ? `/uploads/raw_videos/${videoFilename}`
           : `/${videoKey}`,
-      thumbnailUrl,
       subtitleTracks,
       audioTracks,
       introStart: Number(req.body.introStart || 0),
@@ -141,6 +109,16 @@ const uploadEpisodeMeta = async (req, res, next) => {
       status: scheduledAt ? "scheduled" : "queued",
       scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
     })
+
+    // thumbnail
+    if (req.files && req.files.thumbnail && req.files.thumbnail[0]) {
+      newEpisode.thumbnailUrl = `/uploads/thumbnails/${req.files.thumbnail[0].filename}`
+    } else {
+      // The background worker will generate thumb_0001.png during processing
+      const folderId = newEpisode._id.toString()
+      newEpisode.thumbnailUrl = `/uploads/processed/${folderId}/thumbnails/thumb_0001.png`
+    }
+
     await newEpisode.save()
 
     // Push the newly created episode to the Anime's episodes array
