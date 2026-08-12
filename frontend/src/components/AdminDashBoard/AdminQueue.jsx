@@ -57,7 +57,7 @@ export default function AdminQueue() {
       setJobs((prev) => {
         const newActive = prev.active.map((job) =>
           job.data.episodeId === data.episodeId
-            ? { ...job, progress: data.percent }
+            ? { ...job, progress: data.percent, eta: data.eta, taskName: data.taskName }
             : job,
         )
         return { ...prev, active: newActive }
@@ -102,7 +102,7 @@ export default function AdminQueue() {
         <div className="mt-6">
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
-              Encoding Progress
+              {job.taskName ? `Encoding: ${job.taskName}` : "Encoding Progress"}
             </span>
             <span className="text-sm font-black text-white">
               {job.progress || 0}%
@@ -116,6 +116,13 @@ export default function AdminQueue() {
               className="bg-indigo-500 h-2.5 rounded-full"
             ></motion.div>
           </div>
+          {job.eta && (
+            <div className="mt-2 text-right">
+              <span className="text-xs font-mono text-neutral-500">
+                ETA: {job.eta}
+              </span>
+            </div>
+          )}
         </div>
       )}
 
