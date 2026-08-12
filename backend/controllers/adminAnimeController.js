@@ -160,7 +160,7 @@ const uploadEpisodeMeta = async (req, res, next) => {
         animeId: anime,
         episodeId: newEpisode._id,
         title,
-        thumbnailUrl,
+        thumbnailUrl: newEpisode.thumbnailUrl,
         subtitleTracks,
         audioTracks,
       })
