@@ -33,15 +33,44 @@ const worker = new Worker(
       // Call the ffmpeg service
       // Assuming ffmpeg is installed system-wide, we pass null for ffmpegPath
 
-      // If the inputPath is an R2 key (starts with raw_videos/), convert it to public URL
+      // If the inputPath is an R2 key, download it locally first to avoid FFmpeg HTTP streaming memory crash (SIGSEGV)
       let finalInputPath = inputPath
+      let tempFilePath = null
+      
       if (inputPath && inputPath.startsWith("raw_videos/")) {
         const publicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL
         if (publicUrl) {
-          finalInputPath = `${publicUrl}/${inputPath}`
-          console.log(
-            `[Worker] Streaming raw video directly from Cloudflare R2: ${finalInputPath}`,
-          )
+          const r2Url = `${publicUrl}/${inputPath}`
+          console.log(`[Worker] Downloading video locally from R2 to save memory: ${r2Url}`)
+          
+          const axios = require("axios")
+          const fs = require("fs")
+          const path = require("path")
+          
+          // Create temp directory if it doesn't exist
+          const tempDir = path.join(__dirname, "..", "uploads", "temp")
+          if (!fs.existsSync(tempDir)) {
+            fs.mkdirSync(tempDir, { recursive: true })
+          }
+          
+          tempFilePath = path.join(tempDir, `temp_${Date.now()}.mp4`)
+          
+          const response = await axios({
+            url: r2Url,
+            method: 'GET',
+            responseType: 'stream'
+          })
+          
+          const writer = fs.createWriteStream(tempFilePath)
+          response.data.pipe(writer)
+          
+          await new Promise((resolve, reject) => {
+            writer.on('finish', resolve)
+            writer.on('error', reject)
+          })
+          
+          finalInputPath = tempFilePath
+          console.log(`[Worker] Download complete. Processing local file: ${finalInputPath}`)
         }
       }
 
@@ -116,11 +145,22 @@ const worker = new Worker(
         await Episode.findByIdAndUpdate(episodeId, updateData)
       }
 
+      if (tempFilePath && fs.existsSync(tempFilePath)) {
+        console.log(`[Worker] Deleting temporary downloaded file: ${tempFilePath}`)
+        fs.unlinkSync(tempFilePath)
+      }
+
       console.log(`[Worker] Database updated for episode ${episodeId}`)
       return result
     } catch (error) {
       console.error(`[Worker] Job ${job.id} failed:`, error)
       await Episode.findByIdAndUpdate(episodeId, { status: "failed" })
+      
+      if (tempFilePath && require("fs").existsSync(tempFilePath)) {
+        console.log(`[Worker] Deleting temporary downloaded file after error: ${tempFilePath}`)
+        require("fs").unlinkSync(tempFilePath)
+      }
+      
       throw error
     }
   },
