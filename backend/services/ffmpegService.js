@@ -191,9 +191,9 @@ const processAnimeVideo = async (
         mp41080Cmd
           .output(path.join(downloadDir, "1080p.mp4"))
           .outputOptions([
-            "-map 0:v:0", "-map 0:a?", "-map 0:s?",
+            "-map 0:v:0", "-map 0:a?",
             "-c:v libx264", "-profile:v main", "-pix_fmt yuv420p", "-crf 22", "-preset ultrafast", "-threads 1",
-            "-c:a aac", "-ac 2", "-c:s mov_text", "-s 1920x1080",
+            "-c:a aac", "-ac 2", "-s 1920x1080",
           ])
         await runFfmpegCommand(mp41080Cmd, "MP4 1080p", 0.2, overallProgress)
         overallProgress.base += 20
@@ -203,9 +203,9 @@ const processAnimeVideo = async (
         mp4720Cmd
           .output(path.join(downloadDir, "720p.mp4"))
           .outputOptions([
-            "-map 0:v:0", "-map 0:a?", "-map 0:s?",
+            "-map 0:v:0", "-map 0:a?",
             "-c:v libx264", "-profile:v main", "-pix_fmt yuv420p", "-crf 24", "-preset ultrafast", "-threads 1",
-            "-c:a aac", "-ac 2", "-c:s mov_text", "-s 1280x720",
+            "-c:a aac", "-ac 2", "-s 1280x720",
           ])
         await runFfmpegCommand(mp4720Cmd, "MP4 720p", 0.2, overallProgress)
         overallProgress.base += 20
@@ -215,9 +215,9 @@ const processAnimeVideo = async (
         mp4480Cmd
           .output(path.join(downloadDir, "480p.mp4"))
           .outputOptions([
-            "-map 0:v:0", "-map 0:a?", "-map 0:s?",
+            "-map 0:v:0", "-map 0:a?",
             "-c:v libx264", "-profile:v main", "-pix_fmt yuv420p", "-crf 26", "-preset ultrafast", "-threads 1",
-            "-c:a aac", "-ac 2", "-c:s mov_text", "-s 854x480",
+            "-c:a aac", "-ac 2", "-s 854x480",
           ])
         await runFfmpegCommand(mp4480Cmd, "MP4 480p", 0.15, overallProgress)
         overallProgress.base += 15
