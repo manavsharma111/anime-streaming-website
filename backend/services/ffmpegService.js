@@ -179,7 +179,7 @@ const processAnimeVideo = async (
             "-s:v:0 1920x1080", "-c:v:0 libx264", "-profile:v:0 main", "-pix_fmt yuv420p", "-preset ultrafast", "-threads 1", "-g 48", "-keyint_min 48", "-sc_threshold 0", "-b:v:0 3000k",
             "-s:v:1 1280x720", "-c:v:1 libx264", "-profile:v:1 main", "-pix_fmt yuv420p", "-preset ultrafast", "-threads 1", "-b:v:1 1500k",
             "-s:v:2 854x480", "-c:v:2 libx264", "-profile:v:2 main", "-pix_fmt yuv420p", "-preset ultrafast", "-threads 1", "-b:v:2 800k",
-            "-c:a aac", "-ac 2", "-b:a 128k",
+            "-c:a", "aac", "-ar", "48000", "-ac", "2", "-b:a", "128k",
             "-f hls", "-hls_time 6", "-hls_playlist_type vod",
             "-hls_segment_filename", path.join(streamDir, "%v/segment%03d.ts"),
             "-master_pl_name master.m3u8",
@@ -195,7 +195,7 @@ const processAnimeVideo = async (
           .outputOptions([
             "-map 0:v:0", "-map 0:a?",
             "-c:v libx264", "-profile:v main", "-pix_fmt yuv420p", "-crf 22", "-preset ultrafast", "-threads 1",
-            "-c:a aac", "-ac 2", "-s 1920x1080",
+            "-c:a", "aac", "-ar", "48000", "-ac", "2", "-s 1920x1080",
           ])
         await runFfmpegCommand(mp41080Cmd, "MP4 1080p", 0.2, overallProgress)
         overallProgress.base += 20
@@ -207,7 +207,7 @@ const processAnimeVideo = async (
           .outputOptions([
             "-map 0:v:0", "-map 0:a?",
             "-c:v libx264", "-profile:v main", "-pix_fmt yuv420p", "-crf 24", "-preset ultrafast", "-threads 1",
-            "-c:a aac", "-ac 2", "-s 1280x720",
+            "-c:a", "aac", "-ar", "48000", "-ac", "2", "-s 1280x720",
           ])
         await runFfmpegCommand(mp4720Cmd, "MP4 720p", 0.2, overallProgress)
         overallProgress.base += 20
@@ -219,7 +219,7 @@ const processAnimeVideo = async (
           .outputOptions([
             "-map 0:v:0", "-map 0:a?",
             "-c:v libx264", "-profile:v main", "-pix_fmt yuv420p", "-crf 26", "-preset ultrafast", "-threads 1",
-            "-c:a aac", "-ac 2", "-s 854x480",
+            "-c:a", "aac", "-ar", "48000", "-ac", "2", "-s 854x480",
           ])
         await runFfmpegCommand(mp4480Cmd, "MP4 480p", 0.15, overallProgress)
         overallProgress.base += 15
