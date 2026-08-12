@@ -93,13 +93,23 @@ The backend is designed using an event-driven, queue-based architecture to handl
 
 1. **RESTful API**: Clean architecture separating Controllers, Services, and Routes.
 2. **Video Processing Pipeline**:
-   - When a user uploads a video via "Local Encode", the file is saved temporarily.
+   - When a user uploads a video via "Local Encode", the file is directly streamed to **Cloudflare R2** to bypass backend server storage limits.
    - A job is added to **BullMQ** (backed by Redis).
-   - A background worker picks up the job and uses **FFmpeg** to convert the video into 3 resolutions (1080p, 720p, 480p) and generates a master `.m3u8` playlist.
+   - A background worker picks up the job. To prevent Out-Of-Memory (OOM) crashes on constrained servers (e.g., 512MB RAM), the worker dynamically downloads the raw video locally via memory-efficient streams.
+   - **FFmpeg** converts the video into 3 resolutions (1080p, 720p, 480p) and generates a master `.m3u8` playlist. CPU threads and muxing queues are strictly limited to prevent server saturation.
    - Progress is emitted via **Socket.io** back to the admin frontend.
-   - Once completed, the files are streamed to **Cloudflare R2** and local temp files are deleted.
+   - Once completed, the HLS segments are streamed back to **Cloudflare R2** and local temp files are securely purged.
 3. **Automated Fetching**: Uses `@consumet/extensions` natively to bypass rate limits and fetch streaming sources directly from providers.
 4. **Authentication**: Secured using **JWT** (JSON Web Tokens) and **Bcrypt** for password hashing.
+
+---
+
+## 🏆 Engineering Challenges Solved (Placement Highlights)
+
+- **Handling Strict Memory Constraints**: Successfully ran heavy FFmpeg HLS encoding on a **512MB RAM server**. Avoided HTTP streaming `SIGSEGV` memory leaks by implementing a "local-first" streaming download architecture before pushing to FFmpeg.
+- **HLS Keyframe Synchronization**: Resolved critical HLS segmenter crashes by strictly syncing `-g 48` and `-keyint_min 48` across all video resolutions, ensuring adaptive bitrate streaming switches perfectly without buffering.
+- **Audio Sample Rate Downmixing**: Fixed AAC encoder `NaN` crashes by natively downmixing unpredictable MKV audio (FLAC/TrueHD) to a standardized 48kHz stereo format.
+- **Asynchronous Task Queues**: Built a scalable system where long-running encoding tasks run in the background (BullMQ) so the main Node.js event loop is never blocked, keeping the website ultra-fast for other users.
 
 ---
 
