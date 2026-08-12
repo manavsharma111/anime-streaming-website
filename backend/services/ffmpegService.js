@@ -116,36 +116,42 @@ const processAnimeVideo = async (
             })
             .run()
         })
-      }
-
-      let audioGroup = streamCounts.aCount > 0 ? ",agroup:audio" : ""
-      let varStreamMap = `v:0${audioGroup} v:1${audioGroup} v:2${audioGroup}`
-
-      streamCounts.audioStreams.forEach((audio, i) => {
-        varStreamMap += ` a:${i},agroup:audio`
-      })
-
       // Helper function to run an ffmpeg command as a Promise
       const runFfmpegCommand = (cmd, taskName, weight, overallProgress) => {
         return new Promise((res, rej) => {
           let lastLoggedFrame = 0
+          const startTime = Date.now()
+          
           cmd
             .on("progress", (p) => {
               let percent = p.percent ? parseFloat(p.percent.toFixed(2)) : 0
               if (percent >= 100) percent = 99.9
 
+              let etaStr = "Calculating..."
+              if (percent > 0) {
+                const elapsedSec = (Date.now() - startTime) / 1000
+                const estimatedTotalSec = elapsedSec / (percent / 100)
+                const remainingSec = Math.max(0, estimatedTotalSec - elapsedSec)
+                const mins = Math.floor(remainingSec / 60)
+                const secs = Math.floor(remainingSec % 60)
+                etaStr = `${mins}m ${secs}s`
+              }
+
               if (p.frames - lastLoggedFrame >= 50 || p.frames < lastLoggedFrame) {
-                console.log(`[FFmpeg - ${taskName}] Encoding: ${percent}% | Frames: ${p.frames} | Speed: ${p.currentFps} fps`)
+                console.log(`[FFmpeg - ${taskName}] Encoding: ${percent}% | Frames: ${p.frames} | Speed: ${p.currentFps} fps | ETA: ${etaStr}`)
                 lastLoggedFrame = p.frames
               }
 
               if (job && percent > 0) {
                 const totalPercent = overallProgress.base + (percent * weight)
-                job.updateProgress(totalPercent)
+                const formattedPercent = parseFloat(totalPercent.toFixed(2))
+                job.updateProgress(formattedPercent)
                 if (global.io) {
                   global.io.emit("video_progress", {
                     episodeId: job.data.episodeId,
-                    percent: totalPercent,
+                    percent: formattedPercent,
+                    eta: etaStr,
+                    taskName: taskName
                   })
                 }
               }
@@ -168,37 +174,55 @@ const processAnimeVideo = async (
       let overallProgress = { base: 0 }
 
       try {
-        // 1. HLS Task
-        let hlsOutputOptions = [
-          "-map 0:v:0",
-          "-map 0:v:0",
-          "-map 0:v:0"
-        ]
-
+        // 1. HLS 1080p Task
+        let audioMaps = []
         if (streamCounts.aCount > 0) {
-          streamCounts.audioStreams.forEach(a => {
-            hlsOutputOptions.push(`-map 0:${a.index}`)
-          })
+          streamCounts.audioStreams.forEach(a => audioMaps.push(`-map 0:${a.index}`))
         }
-
-        hlsOutputOptions = hlsOutputOptions.concat([
-          "-s:v:0 1920x1080", "-c:v:0 libx264", "-profile:v:0 main", "-pix_fmt yuv420p", "-preset ultrafast", "-threads 1", "-b:v:0 3000k",
-          "-s:v:1 1280x720", "-c:v:1 libx264", "-profile:v:1 main", "-pix_fmt yuv420p", "-preset ultrafast", "-threads 1", "-b:v:1 1500k",
-          "-s:v:2 854x480", "-c:v:2 libx264", "-profile:v:2 main", "-pix_fmt yuv420p", "-preset ultrafast", "-threads 1", "-b:v:2 800k",
+        
+        let baseHlsOptions = [
+          "-c:v libx264", "-profile:v main", "-pix_fmt yuv420p", "-preset ultrafast", "-threads 1",
           "-g 48", "-keyint_min 48", "-sc_threshold 0",
           "-c:a", "aac", "-ar", "48000", "-ac", "2", "-b:a", "128k",
-          "-f", "hls", "-hls_time", "6", "-hls_playlist_type", "vod",
-          "-hls_segment_filename", path.join(streamDir, "%v/segment%03d.ts"),
-          "-master_pl_name", "master.m3u8",
-          "-var_stream_map", varStreamMap
-        ])
+          "-f", "hls", "-hls_time", "6", "-hls_playlist_type", "vod"
+        ]
 
-        const hlsCmd = ffmpeg().input(inputPath)
-        hlsCmd
-          .output(path.join(streamDir, "%v/manifest.m3u8"))
-          .outputOptions(hlsOutputOptions)
-        await runFfmpegCommand(hlsCmd, "HLS Streaming", 0.4, overallProgress)
-        overallProgress.base += 40
+        const hls1080Cmd = ffmpeg().input(inputPath)
+        hls1080Cmd.output(path.join(streamDir, "0/manifest.m3u8")).outputOptions([
+          "-map 0:v:0", ...audioMaps,
+          "-s:v:0 1920x1080", "-b:v:0 3000k", ...baseHlsOptions,
+          "-hls_segment_filename", path.join(streamDir, "0/segment%03d.ts")
+        ])
+        await runFfmpegCommand(hls1080Cmd, "HLS 1080p", 0.15, overallProgress)
+        overallProgress.base += 15
+
+        // 2. HLS 720p Task
+        const hls720Cmd = ffmpeg().input(inputPath)
+        hls720Cmd.output(path.join(streamDir, "1/manifest.m3u8")).outputOptions([
+          "-map 0:v:0", ...audioMaps,
+          "-s:v:0 1280x720", "-b:v:0 1500k", ...baseHlsOptions,
+          "-hls_segment_filename", path.join(streamDir, "1/segment%03d.ts")
+        ])
+        await runFfmpegCommand(hls720Cmd, "HLS 720p", 0.15, overallProgress)
+        overallProgress.base += 15
+
+        // 3. HLS 480p Task
+        const hls480Cmd = ffmpeg().input(inputPath)
+        hls480Cmd.output(path.join(streamDir, "2/manifest.m3u8")).outputOptions([
+          "-map 0:v:0", ...audioMaps,
+          "-s:v:0 854x480", "-b:v:0 800k", ...baseHlsOptions,
+          "-hls_segment_filename", path.join(streamDir, "2/segment%03d.ts")
+        ])
+        await runFfmpegCommand(hls480Cmd, "HLS 480p", 0.10, overallProgress)
+        overallProgress.base += 10
+
+        // Manually write master.m3u8
+        let masterPlaylist = "#EXTM3U\n"
+        masterPlaylist += "#EXT-X-STREAM-INF:BANDWIDTH=3000000,RESOLUTION=1920x1080\n0/manifest.m3u8\n"
+        masterPlaylist += "#EXT-X-STREAM-INF:BANDWIDTH=1500000,RESOLUTION=1280x720\n1/manifest.m3u8\n"
+        masterPlaylist += "#EXT-X-STREAM-INF:BANDWIDTH=800000,RESOLUTION=854x480\n2/manifest.m3u8\n"
+        fs.writeFileSync(path.join(streamDir, "master.m3u8"), masterPlaylist)
+
 
         // 2. 1080p MP4 Task
         const mp41080Cmd = ffmpeg().input(inputPath)
