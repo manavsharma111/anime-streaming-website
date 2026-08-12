@@ -84,10 +84,12 @@ export default function AnimeInfoBox({ anime }) {
                 HD
               </span>
               <span className="bg-[#a67cff] text-white px-1.5 py-0.5 rounded-sm flex items-center gap-1">
-                <MessageSquare size={12} className="fill-current" /> {anime?.episodes?.length || "??"}
+                <MessageSquare size={12} className="fill-current" />{" "}
+                {anime?.episodes?.length || "??"}
               </span>
               <span className="bg-[#e4ca67] text-black px-1.5 py-0.5 rounded-sm flex items-center gap-1">
-                <Mic size={12} className="fill-current" /> {anime?.episodes?.length || "??"}
+                <Mic size={12} className="fill-current" />{" "}
+                {anime?.episodes?.length || "??"}
               </span>
               <span className="bg-white/20 text-white px-1.5 py-0.5 rounded-sm">
                 ?
@@ -101,7 +103,9 @@ export default function AnimeInfoBox({ anime }) {
             {anime?.otherNames && anime.otherNames.length > 0 && (
               <div>
                 <span className="text-neutral-500 mr-2">Other names:</span>
-                <span className="text-neutral-200">{anime.otherNames.join(", ")}</span>
+                <span className="text-neutral-200">
+                  {anime.otherNames.join(", ")}
+                </span>
               </div>
             )}
             <div>
@@ -114,7 +118,9 @@ export default function AnimeInfoBox({ anime }) {
             </div>
             <div>
               <span className="text-neutral-500 mr-2">Duration:</span>
-              <span className="text-neutral-200">{anime?.duration || "24 min"}</span>
+              <span className="text-neutral-200">
+                {anime?.duration || "24 min"}
+              </span>
             </div>
             <div>
               <span className="text-neutral-500 mr-2">Status:</span>
@@ -125,22 +131,26 @@ export default function AnimeInfoBox({ anime }) {
             <div>
               <span className="text-neutral-500 mr-2">Genre:</span>
               <span>
-                {anime?.genres
-                  ? [
-                      ...new Set(
-                        anime?.genres
-                          .flatMap((g) => g.split(",").map((s) => s.trim()))
-                          .filter(Boolean),
-                      ),
-                    ].map((g, i, arr) => (
-                      <span key={i}>
-                        <span className="text-[#a67cff] hover:underline cursor-pointer transition-colors">
-                          {g}
-                        </span>
-                        {i < arr.length - 1 && <span className="text-neutral-200">, </span>}
+                {anime?.genres ? (
+                  [
+                    ...new Set(
+                      anime?.genres
+                        .flatMap((g) => g.split(",").map((s) => s.trim()))
+                        .filter(Boolean),
+                    ),
+                  ].map((g, i, arr) => (
+                    <span key={i}>
+                      <span className="text-[#a67cff] hover:underline cursor-pointer transition-colors">
+                        {g}
                       </span>
-                    ))
-                  : <span className="text-neutral-200">N/A</span>}
+                      {i < arr.length - 1 && (
+                        <span className="text-neutral-200">, </span>
+                      )}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-neutral-200">N/A</span>
+                )}
               </span>
             </div>
           </div>
@@ -160,7 +170,11 @@ export default function AnimeInfoBox({ anime }) {
                   : "bg-white/10 text-white hover:bg-white/20"
               }`}
             >
-              {isInWishlist ? <Heart size={20} fill="#f33767" /> : <Plus size={24} />}
+              {isInWishlist ? (
+                <Heart size={20} fill="#f33767" />
+              ) : (
+                <Plus size={24} />
+              )}
             </button>
           </div>
         </div>

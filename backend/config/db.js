@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 
-// Serverless connection caching — reuse existing connection across warm invocations
+
 let cached = global.mongoose
 
 if (!cached) {

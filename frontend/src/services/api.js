@@ -6,11 +6,11 @@ const axiosInstance = axios.create({
   baseURL: BASE_URL,
   headers: {
     "Content-Type": "application/json",
+    "Bypass-Tunnel-Reminder": "true"
   },
   withCredentials: true,
 })
 
-// Optional: Add a simple interceptor to handle 401s (redirect to login)
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {

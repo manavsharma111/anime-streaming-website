@@ -46,20 +46,26 @@ export default function AnimeDetails() {
     )
     return match ? match[1] : null
   }
-  
+
   const [dynamicTrailerId, setDynamicTrailerId] = useState(null)
 
   // If no trailer was provided, try to fetch it automatically using the title!
   useEffect(() => {
     if (animeDetails && !getYoutubeId(animeDetails.trailerUrl)) {
-      fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(animeDetails.title)}&limit=1`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.data && data.data.length > 0 && data.data[0].trailer?.youtube_id) {
+      fetch(
+        `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(animeDetails.title)}&limit=1`,
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          if (
+            data.data &&
+            data.data.length > 0 &&
+            data.data[0].trailer?.youtube_id
+          ) {
             setDynamicTrailerId(data.data[0].trailer.youtube_id)
           }
         })
-        .catch(err => console.error("Failed to fetch dynamic trailer", err))
+        .catch((err) => console.error("Failed to fetch dynamic trailer", err))
     }
   }, [animeDetails])
 
@@ -99,10 +105,10 @@ export default function AnimeDetails() {
 
       {/* Background Video & Image Fallback */}
       <div className="absolute top-0 left-0 w-full h-[90vh] overflow-hidden pointer-events-none z-0 bg-[#0e0b12]">
-        <img 
-          src={getImageUrl(anime.cover || anime.thumbnail)} 
-          className="absolute inset-0 w-full h-full object-cover opacity-20 blur-2xl transform scale-110" 
-          alt="background fallback" 
+        <img
+          src={getImageUrl(anime.cover || anime.thumbnail)}
+          className="absolute inset-0 w-full h-full object-cover opacity-20 blur-2xl transform scale-110"
+          alt="background fallback"
         />
         {trailerId ? (
           <iframe

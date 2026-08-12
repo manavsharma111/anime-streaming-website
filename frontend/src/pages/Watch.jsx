@@ -19,7 +19,9 @@ export default function Watch() {
 
   const { history } = useSelector((state) => state.history)
   const { isAuthenticated } = useSelector((state) => state.auth)
-  const { animeList, isLoading, animeDetails } = useSelector((state) => state.anime)
+  const { animeList, isLoading, animeDetails } = useSelector(
+    (state) => state.anime,
+  )
 
   // Retrieve episode and anime data from router state
   let episode = location.state?.episode
@@ -27,7 +29,12 @@ export default function Watch() {
   const fetchAnimeId = location.state?.fetchAnimeId
 
   // Fallback 1: if we are asked to fetch a specific anime (from Continue Watching)
-  if (!episode && fetchAnimeId && animeDetails && animeDetails._id === fetchAnimeId) {
+  if (
+    !episode &&
+    fetchAnimeId &&
+    animeDetails &&
+    animeDetails._id === fetchAnimeId
+  ) {
     anime = animeDetails
     episode = animeDetails.episodes?.find((e) => (e._id || e) === episodeId)
   }
@@ -55,9 +62,12 @@ export default function Watch() {
     if (isAuthenticated) {
       dispatch(getWatchHistory())
     }
-    
+
     if (!episode) {
-      if (fetchAnimeId && (!animeDetails || animeDetails._id !== fetchAnimeId)) {
+      if (
+        fetchAnimeId &&
+        (!animeDetails || animeDetails._id !== fetchAnimeId)
+      ) {
         // Fetch the specific anime required by the history link
         dispatch(fetchAnimeDetails(fetchAnimeId))
       } else if (!fetchAnimeId && animeList.length === 0) {
@@ -65,7 +75,15 @@ export default function Watch() {
         dispatch(fetchAnimes({ limit: 1000 }))
       }
     }
-  }, [dispatch, isAuthenticated, episodeId, episode, animeList.length, fetchAnimeId, animeDetails?._id])
+  }, [
+    dispatch,
+    isAuthenticated,
+    episodeId,
+    episode,
+    animeList.length,
+    fetchAnimeId,
+    animeDetails?._id,
+  ])
 
   // Derive episodes list and current index for Next/Prev functionality
   const episodesList = anime?.episodes || []
@@ -149,7 +167,6 @@ export default function Watch() {
     videoUrl: episode.videoUrl,
     subtitleTracks: episode.subtitleTracks || [],
   }
-
 
   // Resume logic
   const historyItem = history?.find(

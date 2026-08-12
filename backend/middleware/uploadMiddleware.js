@@ -3,7 +3,9 @@ const path = require("path")
 const fs = require("fs")
 
 const isVercel = !!process.env.VERCEL
-const uploadDir = isVercel ? "/tmp" : path.join(__dirname, "..", "uploads", "raw_videos")
+const uploadDir = isVercel
+  ? "/tmp"
+  : path.join(__dirname, "..", "uploads", "raw_videos")
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true })

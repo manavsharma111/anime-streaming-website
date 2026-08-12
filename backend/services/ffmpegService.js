@@ -52,7 +52,10 @@ const processAnimeVideo = async (
               aCount++
               audioStreams.push({
                 index: s.index,
-                lang: s.tags && s.tags.language ? s.tags.language : `Audio${aCount}`,
+                lang:
+                  s.tags && s.tags.language
+                    ? s.tags.language
+                    : `Audio${aCount}`,
               })
             }
             if (s.codec_type === "subtitle") {
@@ -121,157 +124,129 @@ const processAnimeVideo = async (
         varStreamMap += ` a:${i},agroup:audio,name:${audio.lang}`
       })
 
-      const command = ffmpeg()
-      command.input(inputPath)
+      // Helper function to run an ffmpeg command as a Promise
+      const runFfmpegCommand = (cmd, taskName, weight, overallProgress) => {
+        return new Promise((res, rej) => {
+          let lastLoggedFrame = 0
+          cmd
+            .on("progress", (p) => {
+              let percent = p.percent ? parseFloat(p.percent.toFixed(2)) : 0
+              if (percent >= 100) percent = 99.9
 
-      let lastLoggedFrame = 0
+              if (p.frames - lastLoggedFrame >= 50 || p.frames < lastLoggedFrame) {
+                console.log(`[FFmpeg - ${taskName}] Encoding: ${percent}% | Frames: ${p.frames} | Speed: ${p.currentFps} fps`)
+                lastLoggedFrame = p.frames
+              }
 
-      command
-        // adaptive hls streaming
-        .output(path.join(streamDir, "%v/manifest.m3u8"))
-        .outputOptions([
-          "-map 0:v:0",
-          "-map 0:v:0",
-          "-map 0:v:0",
-          "-map 0:a?",
-
-          // Video quality maps
-          "-s:v:0 1920x1080",
-          "-c:v:0 libx264",
-          "-profile:v:0 main",
-          "-pix_fmt yuv420p",
-          "-preset ultrafast",
-          "-g 48",
-          "-keyint_min 48",
-          "-sc_threshold 0",
-          "-b:v:0 3000k",
-          "-s:v:1 1280x720",
-          "-c:v:1 libx264",
-          "-profile:v:1 main",
-          "-pix_fmt yuv420p",
-          "-preset ultrafast",
-          "-b:v:1 1500k",
-          "-s:v:2 854x480",
-          "-c:v:2 libx264",
-          "-profile:v:2 main",
-          "-pix_fmt yuv420p",
-          "-preset ultrafast",
-          "-b:v:2 800k",
-
-          "-c:a aac",
-          "-ac 2",
-          "-b:a 128k",
-
-          "-f hls",
-          "-hls_time 6",
-          "-hls_playlist_type vod",
-          "-hls_segment_filename",
-          path.join(streamDir, "%v/segment%03d.ts"),
-          "-master_pl_name master.m3u8",
-          "-var_stream_map",
-          varStreamMap,
-        ])
-
-        // download mp4 containers (crf compression on cpu)
-        // 1080p
-        .output(path.join(downloadDir, "1080p.mp4"))
-        .outputOptions([
-          "-map 0:v:0",
-          "-map 0:a?",
-          "-map 0:s?",
-          "-c:v libx264",
-          "-profile:v main",
-          "-pix_fmt yuv420p",
-          "-crf 22",
-          "-preset ultrafast",
-          "-c:a aac",
-          "-ac 2",
-          "-c:s mov_text",
-          "-s 1920x1080",
-        ])
-
-        // 720p
-        .output(path.join(downloadDir, "720p.mp4"))
-        .outputOptions([
-          "-map 0:v:0",
-          "-map 0:a?",
-          "-map 0:s?",
-          "-c:v libx264",
-          "-profile:v main",
-          "-pix_fmt yuv420p",
-          "-crf 24",
-          "-preset ultrafast",
-          "-c:a aac",
-          "-ac 2",
-          "-c:s mov_text",
-          "-s 1280x720",
-        ])
-
-        // 480p
-        .output(path.join(downloadDir, "480p.mp4"))
-        .outputOptions([
-          "-map 0:v:0",
-          "-map 0:a?",
-          "-map 0:s?",
-          "-c:v libx264",
-          "-profile:v main",
-          "-pix_fmt yuv420p",
-          "-crf 26",
-          "-preset ultrafast",
-          "-c:a aac",
-          "-ac 2",
-          "-c:s mov_text",
-          "-s 854x480",
-        ])
-
-        //  thumbnails
-        .output(path.join(thumbDir, "thumb_%04d.png"))
-        .outputOptions(["-vf fps=1/60", "-vframes 5"])
-
-        .on("progress", (p) => {
-          let percent = p.percent ? parseFloat(p.percent.toFixed(2)) : 0
-          if (percent >= 100) percent = 99.9
-
-          if (p.frames - lastLoggedFrame >= 50 || p.frames < lastLoggedFrame) {
-            console.log(
-              `[FFmpeg] Encoding: ${percent}% | Frames: ${p.frames} | Speed: ${p.currentFps} fps`,
-            )
-            lastLoggedFrame = p.frames
-          }
-
-          if (job && percent > 0) {
-            job.updateProgress(percent)
-            if (global.io) {
-              global.io.emit("video_progress", {
-                episodeId: job.data.episodeId,
-                percent,
-              })
-            }
-          }
+              if (job && percent > 0) {
+                const totalPercent = overallProgress.base + (percent * weight)
+                job.updateProgress(totalPercent)
+                if (global.io) {
+                  global.io.emit("video_progress", {
+                    episodeId: job.data.episodeId,
+                    percent: totalPercent,
+                  })
+                }
+              }
+            })
+            .on("error", (err, stdout, stderr) => {
+              console.error(`❌ FFmpeg pipeline failure [${taskName}]:`, err.message)
+              console.error(`[FFmpeg STDERR]:`, stderr)
+              rej(err)
+            })
+            .on("end", () => {
+              console.log(`[FFmpeg] Finished task: ${taskName}`)
+              res()
+            })
+            .run()
         })
-        .on("error", (err, stdout, stderr) => {
-          console.error(`❌ FFmpeg pipeline failure:`, err.message)
-          console.error(`[FFmpeg STDERR]:`, stderr)
-          reject(err)
-        })
-        .on("end", () => {
-          const pathSegments = outputDir.split(path.sep)
-          const folderId = pathSegments[pathSegments.indexOf("processed") + 1]
-          const baseFolder = `/uploads/processed/${folderId}`
+      }
 
-          // Match the Episode.js Schema exactly
-          resolve({
-            hlsMaster: `${baseFolder}/streaming/master.m3u8`,
-            downloads: {
-              1080: `${baseFolder}/downloads/1080p.mp4`,
-              720: `${baseFolder}/downloads/720p.mp4`,
-              480: `${baseFolder}/downloads/480p.mp4`,
-            },
-            thumbnails: `${baseFolder}/thumbnails/`,
-            embeddedSubtitles: extractedSubs,
-          })
+      let overallProgress = { base: 0 }
+
+      try {
+        // 1. HLS Task
+        const hlsCmd = ffmpeg().input(inputPath)
+        hlsCmd
+          .output(path.join(streamDir, "%v/manifest.m3u8"))
+          .outputOptions([
+            "-map 0:v:0",
+            "-map 0:v:0",
+            "-map 0:v:0",
+            "-map 0:a?",
+            "-s:v:0 1920x1080", "-c:v:0 libx264", "-profile:v:0 main", "-pix_fmt yuv420p", "-preset ultrafast", "-g 48", "-keyint_min 48", "-sc_threshold 0", "-b:v:0 3000k",
+            "-s:v:1 1280x720", "-c:v:1 libx264", "-profile:v:1 main", "-pix_fmt yuv420p", "-preset ultrafast", "-b:v:1 1500k",
+            "-s:v:2 854x480", "-c:v:2 libx264", "-profile:v:2 main", "-pix_fmt yuv420p", "-preset ultrafast", "-b:v:2 800k",
+            "-c:a aac", "-ac 2", "-b:a 128k",
+            "-f hls", "-hls_time 6", "-hls_playlist_type vod",
+            "-hls_segment_filename", path.join(streamDir, "%v/segment%03d.ts"),
+            "-master_pl_name master.m3u8",
+            "-var_stream_map", varStreamMap,
+          ])
+        await runFfmpegCommand(hlsCmd, "HLS Streaming", 0.4, overallProgress)
+        overallProgress.base += 40
+
+        // 2. 1080p MP4 Task
+        const mp41080Cmd = ffmpeg().input(inputPath)
+        mp41080Cmd
+          .output(path.join(downloadDir, "1080p.mp4"))
+          .outputOptions([
+            "-map 0:v:0", "-map 0:a?", "-map 0:s?",
+            "-c:v libx264", "-profile:v main", "-pix_fmt yuv420p", "-crf 22", "-preset ultrafast",
+            "-c:a aac", "-ac 2", "-c:s mov_text", "-s 1920x1080",
+          ])
+        await runFfmpegCommand(mp41080Cmd, "MP4 1080p", 0.2, overallProgress)
+        overallProgress.base += 20
+
+        // 3. 720p MP4 Task
+        const mp4720Cmd = ffmpeg().input(inputPath)
+        mp4720Cmd
+          .output(path.join(downloadDir, "720p.mp4"))
+          .outputOptions([
+            "-map 0:v:0", "-map 0:a?", "-map 0:s?",
+            "-c:v libx264", "-profile:v main", "-pix_fmt yuv420p", "-crf 24", "-preset ultrafast",
+            "-c:a aac", "-ac 2", "-c:s mov_text", "-s 1280x720",
+          ])
+        await runFfmpegCommand(mp4720Cmd, "MP4 720p", 0.2, overallProgress)
+        overallProgress.base += 20
+
+        // 4. 480p MP4 Task
+        const mp4480Cmd = ffmpeg().input(inputPath)
+        mp4480Cmd
+          .output(path.join(downloadDir, "480p.mp4"))
+          .outputOptions([
+            "-map 0:v:0", "-map 0:a?", "-map 0:s?",
+            "-c:v libx264", "-profile:v main", "-pix_fmt yuv420p", "-crf 26", "-preset ultrafast",
+            "-c:a aac", "-ac 2", "-c:s mov_text", "-s 854x480",
+          ])
+        await runFfmpegCommand(mp4480Cmd, "MP4 480p", 0.15, overallProgress)
+        overallProgress.base += 15
+
+        // 5. Thumbnails Task
+        const thumbCmd = ffmpeg().input(inputPath)
+        thumbCmd
+          .output(path.join(thumbDir, "thumb_%04d.png"))
+          .outputOptions(["-vf fps=1/60", "-vframes 5"])
+        await runFfmpegCommand(thumbCmd, "Thumbnails", 0.05, overallProgress)
+
+        const pathSegments = outputDir.split(path.sep)
+        const folderId = pathSegments[pathSegments.indexOf("processed") + 1]
+        const baseFolder = `/uploads/processed/${folderId}`
+
+        // Match the Episode.js Schema exactly
+        resolve({
+          hlsMaster: `${baseFolder}/streaming/master.m3u8`,
+          downloads: {
+            1080: `${baseFolder}/downloads/1080p.mp4`,
+            720: `${baseFolder}/downloads/720p.mp4`,
+            480: `${baseFolder}/downloads/480p.mp4`,
+          },
+          thumbnails: `${baseFolder}/thumbnails/`,
+          embeddedSubtitles: extractedSubs,
         })
-        .run()
+      } catch (err) {
+        reject(err)
+      }
     } catch (error) {
       reject(error)
     }

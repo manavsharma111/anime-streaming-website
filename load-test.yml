@@ -1,0 +1,9 @@
+config:
+  target: "http://localhost:4000" # NEWTUBE ka default port 4000 hota hai, agar alag ho toh change kar lena
+  phases:
+    - duration: 20
+      arrivalRate: 50
+scenarios:
+  - flow:
+      - get:
+          url: "/api/health" # Agar health endpoint na ho toh "/" use kar sakte ho

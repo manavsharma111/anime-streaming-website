@@ -75,7 +75,9 @@ export const useHls = (streamUrl, videoRef) => {
 
         const savedAudio = localStorage.getItem("preferredAudio")
         if (savedAudio && audios.length > 0) {
-          const matchedAudio = audios.find((a) => a.name === savedAudio || a.lang === savedAudio)
+          const matchedAudio = audios.find(
+            (a) => a.name === savedAudio || a.lang === savedAudio,
+          )
           if (matchedAudio) {
             hls.audioTrack = matchedAudio.id
             setCurrentAudio(matchedAudio.id)
@@ -84,7 +86,9 @@ export const useHls = (streamUrl, videoRef) => {
 
         const savedSubtitle = localStorage.getItem("preferredSubtitle")
         if (savedSubtitle && subs.length > 0) {
-          const matchedSub = subs.find((s) => s.name === savedSubtitle || s.lang === savedSubtitle)
+          const matchedSub = subs.find(
+            (s) => s.name === savedSubtitle || s.lang === savedSubtitle,
+          )
           if (matchedSub) {
             hls.subtitleTrack = matchedSub.id
             setCurrentSubtitle(matchedSub.id)
@@ -181,7 +185,8 @@ export const useHls = (streamUrl, videoRef) => {
       setCurrentAudio(trackId)
       // Save to localStorage
       const track = audioTracks.find((a) => a.id === trackId)
-      if (track) localStorage.setItem("preferredAudio", track.name || track.lang)
+      if (track)
+        localStorage.setItem("preferredAudio", track.name || track.lang)
     }
   }
 
@@ -194,7 +199,8 @@ export const useHls = (streamUrl, videoRef) => {
         localStorage.setItem("preferredSubtitle", "Off")
       } else {
         const track = subtitleTracks.find((s) => s.id === trackId)
-        if (track) localStorage.setItem("preferredSubtitle", track.name || track.lang)
+        if (track)
+          localStorage.setItem("preferredSubtitle", track.name || track.lang)
       }
     }
   }

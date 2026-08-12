@@ -44,16 +44,16 @@ export default function TrendingThisWeek({ animeList = [], loading }) {
   const [hoveredIndex, setHoveredIndex] = useState(0)
 
   const displayList = fallbackAnime
-    // !loading && animeList.length > 0
-    //   ? animeList.slice(0, 5).map((a) => ({
-    //       title: a.title_english || a.title,
-    //       img:
-    //         a.images?.webp?.large_image_url || a.images?.jpg?.large_image_url,
-    //       rating: a.score || "N/A",
-    //       ep: a.episodes || "?",
-    //       genre: a.genres?.[0]?.name || "Anime",
-    //     }))
-    //   : fallbackAnime
+  // !loading && animeList.length > 0
+  //   ? animeList.slice(0, 5).map((a) => ({
+  //       title: a.title_english || a.title,
+  //       img:
+  //         a.images?.webp?.large_image_url || a.images?.jpg?.large_image_url,
+  //       rating: a.score || "N/A",
+  //       ep: a.episodes || "?",
+  //       genre: a.genres?.[0]?.name || "Anime",
+  //     }))
+  //   : fallbackAnime
 
   return (
     <section className="py-12 md:py-16 bg-[#050505] relative z-10">
@@ -104,9 +104,12 @@ export default function TrendingThisWeek({ animeList = [], loading }) {
                   className="absolute inset-0 hidden md:flex items-center justify-center transition-opacity duration-300"
                   style={{ opacity: isActive ? 0 : 1 }}
                 >
-                  <h3 
+                  <h3
                     className="text-white font-bold text-xl tracking-widest uppercase whitespace-nowrap"
-                    style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+                    style={{
+                      writingMode: "vertical-rl",
+                      transform: "rotate(180deg)",
+                    }}
                   >
                     {anime.title.length > 20
                       ? anime.title.slice(0, 20) + "..."

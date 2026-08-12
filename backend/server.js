@@ -9,7 +9,9 @@ const connectDB = require("./config/db")
 dotenv.config()
 
 // Connect to database (serverless-safe caching is handled inside db.js)
-connectDB().catch(err => console.error("DB Connection Failed on startup:", err))
+connectDB().catch((err) =>
+  console.error("DB Connection Failed on startup:", err),
+)
 
 // ─── Detect Vercel serverless environment ─────────────────────────────────────
 const isVercel = !!process.env.VERCEL
@@ -60,7 +62,7 @@ app.use(
         "http://127.0.0.1:5173",
         "http://localhost:4000",
         process.env.CLIENT_URL,
-        "https://anime-streaming-website-seven.vercel.app"
+        "https://anime-streaming-website-seven.vercel.app",
       ].filter(Boolean)
 
       if (!origin || allowedOrigins.includes(origin)) {
@@ -114,4 +116,3 @@ app.use((err, req, res, next) => {
 
 // ─── Export for Vercel Serverless ─────────────────────────────────────────────
 module.exports = app
-

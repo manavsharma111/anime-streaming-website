@@ -41,7 +41,6 @@ const fallbackAnime = [
   },
 ]
 
-
 const gradients = [
   "from-blue-900/80",
   "from-red-900/80",
@@ -54,18 +53,18 @@ export default function FeaturedShowcase({ animeList = [], loading }) {
   const [active, setActive] = useState(0)
 
   const displayList = fallbackAnime
-    // !loading && animeList.length >= 3
-    //   ? animeList.slice(0, 3).map((a, i) => ({
-    //       id: a.mal_id,
-    //       title: a.title_english || a.title,
-    //       description: a.synopsis
-    //         ? a.synopsis.slice(0, 180) + "..."
-    //         : "No description available.",
-    //       img:
-    //         a.images?.webp?.large_image_url || a.images?.jpg?.large_image_url,
-    //       color: gradients[i % gradients.length],
-    //     }))
-    //   : fallbackAnime
+  // !loading && animeList.length >= 3
+  //   ? animeList.slice(0, 3).map((a, i) => ({
+  //       id: a.mal_id,
+  //       title: a.title_english || a.title,
+  //       description: a.synopsis
+  //         ? a.synopsis.slice(0, 180) + "..."
+  //         : "No description available.",
+  //       img:
+  //         a.images?.webp?.large_image_url || a.images?.jpg?.large_image_url,
+  //       color: gradients[i % gradients.length],
+  //     }))
+  //   : fallbackAnime
 
   useEffect(() => {
     const timer = setInterval(() => {

@@ -248,7 +248,7 @@ export default function UploadEpisodeForm({ animesList }) {
 
         // Trigger background upload
         uploadFile(payload)
-        
+
         setStatusMessage({
           type: "success",
           text: "Background upload started! See progress in the bottom right corner.",

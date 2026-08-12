@@ -98,29 +98,33 @@ const getPresignedUrl = async (req, res, next) => {
   try {
     const { filename, contentType } = req.body
     if (!filename || !contentType) {
-      return res.status(400).json({ message: "Filename and content type required" })
+      return res
+        .status(400)
+        .json({ message: "Filename and content type required" })
     }
-    
+
     // Sanitize and generate unique key
     const sanitizedOriginalName = filename.replace(/[^a-zA-Z0-9.]/g, "_")
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9)
     const key = `raw_videos/anime-${uniqueSuffix}-${sanitizedOriginalName}`
-    
+
     const command = new PutObjectCommand({
       Bucket: process.env.CLOUDFLARE_R2_BUCKET,
       Key: key,
       ContentType: contentType,
     })
-    
+
     // URL expires in 1 hour
-    const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 })
-    
+    const presignedUrl = await getSignedUrl(s3Client, command, {
+      expiresIn: 3600,
+    })
+
     res.status(200).json({
       success: true,
       data: {
         presignedUrl,
-        key
-      }
+        key,
+      },
     })
   } catch (error) {
     next(error)

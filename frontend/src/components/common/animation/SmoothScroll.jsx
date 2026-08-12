@@ -20,7 +20,6 @@ const SmoothScroll = ({ children }) => {
       syncTouch: true,
       touchMultiplier: 1.5, // Thoda kam kiya taaki touch par ekdam se na bhaage
       smoothTouch: true,
-      
     })
 
     // Make lenis globally available to allow modals to pause it

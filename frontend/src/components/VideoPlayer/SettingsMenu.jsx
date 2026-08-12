@@ -52,7 +52,7 @@ export default function SettingsMenu({
         setShowSettings(false)
       }
     }
-    
+
     if (showSettings) {
       document.addEventListener("mousedown", handleClickOutside)
     }
@@ -69,7 +69,7 @@ export default function SettingsMenu({
     idKey = "id",
     emptyMessage = "Default",
   ) => (
-    <div 
+    <div
       className="flex flex-col py-2 max-h-[250px] overflow-y-auto custom-scrollbar overscroll-none pointer-events-auto"
       onWheel={(e) => e.stopPropagation()}
       onTouchMove={(e) => e.stopPropagation()}
@@ -252,7 +252,7 @@ export default function SettingsMenu({
               )}
 
               {activeTab === "download" && (
-                <div 
+                <div
                   className="flex flex-col py-2 max-h-[250px] overflow-y-auto custom-scrollbar overscroll-none"
                   onWheel={(e) => e.stopPropagation()}
                   onTouchMove={(e) => e.stopPropagation()}

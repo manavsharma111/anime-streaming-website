@@ -42,7 +42,7 @@ export default function Search() {
         navigate(`/search?${newParams.toString()}`)
       }
     }, 500)
-    
+
     return () => clearTimeout(timer)
   }, [localSearch, queryParam, location.search, navigate])
 

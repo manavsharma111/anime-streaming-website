@@ -124,7 +124,11 @@ export default function AnimeHoverCard({ anime, position = "right" }) {
               : "bg-white/10 text-white hover:bg-white/20"
           }`}
         >
-          {isInWishlist ? <Heart size={18} fill="#f33767" /> : <Plus size={20} />}
+          {isInWishlist ? (
+            <Heart size={18} fill="#f33767" />
+          ) : (
+            <Plus size={20} />
+          )}
         </button>
       </div>
     </div>

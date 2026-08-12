@@ -287,7 +287,11 @@ export default function VideoPlayer({
             <track
               key={index}
               kind="subtitles"
-              src={sub.url.startsWith("http") ? sub.url : `${import.meta.env.VITE_BASE_URL || "http://localhost:4000"}${sub.url}`}
+              src={
+                sub.url.startsWith("http")
+                  ? sub.url
+                  : `${import.meta.env.VITE_BASE_URL || "http://localhost:4000"}${sub.url}`
+              }
               srcLang={sub.lang}
               label={sub.lang}
               default={index === 0}
@@ -325,10 +329,8 @@ export default function VideoPlayer({
       <SkipIntroButton
         show={showSkipIntro || showSkipOutro}
         onClick={() => {
-          if (showSkipIntro && introEnd)
-            videoRef.current.currentTime = introEnd
-          if (showSkipOutro && outroEnd)
-            videoRef.current.currentTime = outroEnd
+          if (showSkipIntro && introEnd) videoRef.current.currentTime = introEnd
+          if (showSkipOutro && outroEnd) videoRef.current.currentTime = outroEnd
         }}
         label={showSkipIntro ? "Skip Intro" : "Skip Outro"}
       />
@@ -341,7 +343,8 @@ export default function VideoPlayer({
               Up Next
             </h2>
             <p className="text-neutral-400 text-sm md:text-base font-medium mb-8">
-              Starting in <span className="text-white font-bold">{countdown}</span> seconds
+              Starting in{" "}
+              <span className="text-white font-bold">{countdown}</span> seconds
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-4 justify-center">

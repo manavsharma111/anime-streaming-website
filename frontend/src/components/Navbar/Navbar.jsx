@@ -48,9 +48,9 @@ export default function Navbar() {
     if (currentItem) {
       setActiveTab(currentItem.id)
       prevTab.current = currentItem.id
-    } else if (location.pathname === '/' || location.pathname === '/home') {
-      setActiveTab('home')
-      prevTab.current = 'home'
+    } else if (location.pathname === "/" || location.pathname === "/home") {
+      setActiveTab("home")
+      prevTab.current = "home"
     } else {
       // Clear active tab if route doesn't match any navbar item (e.g., /admin)
       setActiveTab(null)
@@ -143,28 +143,28 @@ export default function Navbar() {
           animate={
             !isMobile
               ? {
-                borderRadius: isScrolled ? "9999px" : "0px",
-                backgroundColor: isScrolled
-                  ? "rgba(17,14,22,0.7)"
-                  : "rgba(17,14,22,0.0)",
-                borderColor: isScrolled
-                  ? "rgba(255,255,255,0.05)"
-                  : "transparent",
-                borderWidth: isScrolled ? "1px" : "0px",
-                boxShadow: isScrolled
-                  ? "0 10px 40px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.05)"
-                  : "none",
-                backdropFilter: "blur(24px)",
-              }
+                  borderRadius: isScrolled ? "9999px" : "0px",
+                  backgroundColor: isScrolled
+                    ? "rgba(17,14,22,0.7)"
+                    : "rgba(17,14,22,0.0)",
+                  borderColor: isScrolled
+                    ? "rgba(255,255,255,0.05)"
+                    : "transparent",
+                  borderWidth: isScrolled ? "1px" : "0px",
+                  boxShadow: isScrolled
+                    ? "0 10px 40px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.05)"
+                    : "none",
+                  backdropFilter: "blur(24px)",
+                }
               : {
-                borderRadius: "0px",
-                backgroundColor: "rgba(17,14,22,0.6)",
-                borderColor: "transparent",
-                borderWidth: "0px",
-                borderTopWidth: "1px",
-                backdropFilter: "blur(24px)",
-                boxShadow: "none",
-              }
+                  borderRadius: "0px",
+                  backgroundColor: "rgba(17,14,22,0.6)",
+                  borderColor: "transparent",
+                  borderWidth: "0px",
+                  borderTopWidth: "1px",
+                  backdropFilter: "blur(24px)",
+                  boxShadow: "none",
+                }
           }
           transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
           className="relative flex items-center justify-center pointer-events-auto"

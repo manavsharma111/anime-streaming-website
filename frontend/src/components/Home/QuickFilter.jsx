@@ -7,7 +7,7 @@ import CustomSelect from "../common/CustomSelect"
 export default function QuickFilter() {
   const navigate = useNavigate()
   const location = useLocation()
-  
+
   const [filters, setFilters] = useState({
     genres: "",
     year: "",

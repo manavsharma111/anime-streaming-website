@@ -6,7 +6,6 @@ export default function ModernFooter() {
   return (
     <footer className="bg-[#020202] border-t border-white/[0.06] py-16 px-6 relative z-10">
       <div className="max-w-4xl mx-auto flex flex-col items-center gap-6 text-center">
-
         {/* Brand */}
         <p className="text-white/20 text-xs tracking-[0.5em] uppercase font-bold">
           Anime Stream
@@ -30,7 +29,10 @@ export default function ModernFooter() {
           whileHover={{ scale: 1.04 }}
           whileTap={{ scale: 0.97 }}
         >
-          <Mail size={15} className="text-white/40 group-hover:text-white transition-colors duration-300" />
+          <Mail
+            size={15}
+            className="text-white/40 group-hover:text-white transition-colors duration-300"
+          />
           Contact Him
         </motion.a>
 
@@ -41,7 +43,6 @@ export default function ModernFooter() {
         <p className="text-white/15 text-xs tracking-widest">
           © {new Date().getFullYear()} Anime Stream. All rights reserved.
         </p>
-
       </div>
     </footer>
   )

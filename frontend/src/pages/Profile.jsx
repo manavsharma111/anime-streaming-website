@@ -203,7 +203,9 @@ export default function Profile() {
                         <div className="flex flex-col justify-center flex-1 py-1">
                           <Link
                             to={`/watch/${item.episode._id || item.episode}`}
-                            state={{ fetchAnimeId: item.anime._id || item.anime }}
+                            state={{
+                              fetchAnimeId: item.anime._id || item.anime,
+                            }}
                           >
                             <h4 className="text-base font-bold text-white line-clamp-1 hover:text-[#f33767] transition-colors">
                               {item.anime.title}

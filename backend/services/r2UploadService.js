@@ -48,21 +48,27 @@ const getAllFiles = async (dirPath, arrayOfFiles = []) => {
 // upload file to r2
 const uploadFileToR2 = async (localFilePath, s3Key) => {
   let fileBuffer = await fs.readFile(localFilePath)
-  if (localFilePath.endsWith('.m3u8')) {
-    let content = fileBuffer.toString('utf8')
-    content = content.replace(/\\/g, '/')
-    
+  if (localFilePath.endsWith(".m3u8")) {
+    let content = fileBuffer.toString("utf8")
+    content = content.replace(/\\/g, "/")
+
     // Fix FFmpeg creating video variants for audio tracks
-    if (localFilePath.endsWith('master.m3u8')) {
+    if (localFilePath.endsWith("master.m3u8")) {
       // Strip erroneous video streams that point to audio directories
-      content = content.replace(/#EXT-X-STREAM-INF:.*?[\r\n]+(?!(?:1080p|720p|480p)\/manifest\.m3u8)[^\r\n]+\/manifest\.m3u8[\r\n]*/g, '')
-      
+      content = content.replace(
+        /#EXT-X-STREAM-INF:.*?[\r\n]+(?!(?:1080p|720p|480p)\/manifest\.m3u8)[^\r\n]+\/manifest\.m3u8[\r\n]*/g,
+        "",
+      )
+
       // Fix audio track names (FFmpeg hardcodes them as audio_X)
       // Extract the language code from the URI (e.g. URI="hin/manifest.m3u8") and use it as the NAME
-      content = content.replace(/NAME="audio_\d+"(.*?)URI="([a-zA-Z0-9_-]+)\/manifest\.m3u8"/g, 'NAME="$2"$1URI="$2/manifest.m3u8"')
+      content = content.replace(
+        /NAME="audio_\d+"(.*?)URI="([a-zA-Z0-9_-]+)\/manifest\.m3u8"/g,
+        'NAME="$2"$1URI="$2/manifest.m3u8"',
+      )
     }
-    
-    fileBuffer = Buffer.from(content, 'utf8')
+
+    fileBuffer = Buffer.from(content, "utf8")
   }
   const contentType = getContentType(localFilePath)
 

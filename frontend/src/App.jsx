@@ -80,13 +80,34 @@ export default function App() {
             <Route path="/anime/:id" element={<AnimeDetails />} />
             <Route path="/search" element={<Search />} />
             <Route path="/watch/:episodeId" element={<Watch />} />
-            
+
             {/* Protected User Routes */}
-            <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
-            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-            
+            <Route
+              path="/wishlist"
+              element={
+                <ProtectedRoute>
+                  <Wishlist />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Protected Admin Routes */}
-            <Route path="/admin" element={<ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute>} />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute requireAdmin={true}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </SmoothScroll>
       </div>

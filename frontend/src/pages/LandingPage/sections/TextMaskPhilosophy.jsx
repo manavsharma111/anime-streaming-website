@@ -10,20 +10,25 @@ export default function TextMaskPhilosophy() {
   })
 
   // Smooth, snappy scaling
-  const scale = useTransform(scrollYProgress, [0, 0.8], [1, 200]);
-  
+  const scale = useTransform(scrollYProgress, [0, 0.8], [1, 200])
+
   // The mask fades out precisely at the end, ensuring no lingering black screens
-  const maskOpacity = useTransform(scrollYProgress, [0.8, 1], [1, 0]);
+  const maskOpacity = useTransform(scrollYProgress, [0.8, 1], [1, 0])
 
   // A slight parallax on the background image itself for depth
-  const bgScale = useTransform(scrollYProgress, [0, 1], [1.1, 1]);
+  const bgScale = useTransform(scrollYProgress, [0, 1], [1.1, 1])
 
   return (
-    <section ref={containerRef} className="relative w-full h-[200vh] bg-[#050505]">
+    <section
+      ref={containerRef}
+      className="relative w-full h-[200vh] bg-[#050505]"
+    >
       <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
-        
         {/* Dynamic Authentic Anime Visual */}
-        <motion.div style={{ scale: bgScale }} className="absolute inset-0 w-full h-full z-0">
+        <motion.div
+          style={{ scale: bgScale }}
+          className="absolute inset-0 w-full h-full z-0"
+        >
           <img
             src="https://images.unsplash.com/photo-1541562232579-512a21360020?q=80&w=2560&auto=format&fit=crop"
             alt="Anime Aesthetic"
@@ -40,9 +45,9 @@ export default function TextMaskPhilosophy() {
           className="absolute inset-0 z-10 flex items-center justify-center bg-black mix-blend-multiply text-white pointer-events-none"
         >
           <motion.h1
-            style={{ 
+            style={{
               scale,
-              transformOrigin: "center center"
+              transformOrigin: "center center",
             }}
             className="text-[14vw] font-black tracking-tighter leading-none whitespace-nowrap"
           >
