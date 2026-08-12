@@ -153,7 +153,7 @@ const processAnimeVideo = async (
               console.error(`❌ FFmpeg pipeline failure [${taskName}]:`, err.message)
               console.error(`[FFmpeg STDERR]:`, stderr)
               // Modify error message so it gets saved in BullMQ and shown on frontend
-              err.message = `[${taskName}] ${err.message} | Details: ${stderr ? stderr.substring(stderr.length - 200) : "No stderr"}`
+              err.message = `[${taskName}] ${err.message} | Details: ${stderr ? stderr.substring(stderr.length - 1500) : "No stderr"}`
               rej(err)
             })
             .on("end", () => {
@@ -168,23 +168,34 @@ const processAnimeVideo = async (
 
       try {
         // 1. HLS Task
+        let hlsOutputOptions = [
+          "-map 0:v:0",
+          "-map 0:v:0",
+          "-map 0:v:0"
+        ]
+
+        if (streamCounts.aCount > 0) {
+          streamCounts.audioStreams.forEach(a => {
+            hlsOutputOptions.push(`-map 0:${a.index}`)
+          })
+        }
+
+        hlsOutputOptions = hlsOutputOptions.concat([
+          "-s:v:0 1920x1080", "-c:v:0 libx264", "-profile:v:0 main", "-pix_fmt yuv420p", "-preset ultrafast", "-threads 1", "-b:v:0 3000k",
+          "-s:v:1 1280x720", "-c:v:1 libx264", "-profile:v:1 main", "-pix_fmt yuv420p", "-preset ultrafast", "-threads 1", "-b:v:1 1500k",
+          "-s:v:2 854x480", "-c:v:2 libx264", "-profile:v:2 main", "-pix_fmt yuv420p", "-preset ultrafast", "-threads 1", "-b:v:2 800k",
+          "-g 48", "-keyint_min 48", "-sc_threshold 0",
+          "-c:a", "aac", "-ar", "48000", "-ac", "2", "-b:a", "128k",
+          "-f", "hls", "-hls_time", "6", "-hls_playlist_type", "vod",
+          "-hls_segment_filename", path.join(streamDir, "%v/segment%03d.ts"),
+          "-master_pl_name", "master.m3u8",
+          "-var_stream_map", varStreamMap
+        ])
+
         const hlsCmd = ffmpeg().input(inputPath)
         hlsCmd
           .output(path.join(streamDir, "%v/manifest.m3u8"))
-          .outputOptions([
-            "-map 0:v:0",
-            "-map 0:v:0",
-            "-map 0:v:0",
-            "-map 0:a?",
-            "-s:v:0 1920x1080", "-c:v:0 libx264", "-profile:v:0 main", "-pix_fmt yuv420p", "-preset ultrafast", "-threads 1", "-g 48", "-keyint_min 48", "-sc_threshold 0", "-b:v:0 3000k",
-            "-s:v:1 1280x720", "-c:v:1 libx264", "-profile:v:1 main", "-pix_fmt yuv420p", "-preset ultrafast", "-threads 1", "-b:v:1 1500k",
-            "-s:v:2 854x480", "-c:v:2 libx264", "-profile:v:2 main", "-pix_fmt yuv420p", "-preset ultrafast", "-threads 1", "-b:v:2 800k",
-            "-c:a", "aac", "-ar", "48000", "-ac", "2", "-b:a", "128k",
-            "-f hls", "-hls_time 6", "-hls_playlist_type vod",
-            "-hls_segment_filename", path.join(streamDir, "%v/segment%03d.ts"),
-            "-master_pl_name master.m3u8",
-            "-var_stream_map", varStreamMap,
-          ])
+          .outputOptions(hlsOutputOptions)
         await runFfmpegCommand(hlsCmd, "HLS Streaming", 0.4, overallProgress)
         overallProgress.base += 40
 
