@@ -33,7 +33,8 @@ const processAnimeVideo = async (
         fs.mkdirSync(downloadDir, { recursive: true })
 
       // Create isolated resolution folders for HLS variants
-      const resolutions = ["1080p", "720p", "480p"]
+      // FFmpeg 4.0.2 does not support 'name:' in var_stream_map, so %v resolves to 0, 1, 2, 3, etc.
+      const resolutions = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
       resolutions.forEach((res) => {
         if (!fs.existsSync(path.join(streamDir, res)))
           fs.mkdirSync(path.join(streamDir, res), { recursive: true })
@@ -118,10 +119,10 @@ const processAnimeVideo = async (
       }
 
       let audioGroup = streamCounts.aCount > 0 ? ",agroup:audio" : ""
-      let varStreamMap = `v:0${audioGroup},name:1080p v:1${audioGroup},name:720p v:2${audioGroup},name:480p`
+      let varStreamMap = `v:0${audioGroup} v:1${audioGroup} v:2${audioGroup}`
 
       streamCounts.audioStreams.forEach((audio, i) => {
-        varStreamMap += ` a:${i},agroup:audio,name:${audio.lang}`
+        varStreamMap += ` a:${i},agroup:audio`
       })
 
       // Helper function to run an ffmpeg command as a Promise
