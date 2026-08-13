@@ -122,17 +122,19 @@ const processAnimeVideo = async (
       const runFfmpegCommand = (cmd, taskName, weight, overallProgress) => {
         return new Promise((res, rej) => {
           let lastLoggedFrame = 0
-          const startTime = Date.now()
           
           cmd
             .on("progress", (p) => {
               let percent = p.percent ? parseFloat(p.percent.toFixed(2)) : 0
               if (percent >= 100) percent = 99.9
+              
+              const totalPercent = overallProgress.base + (percent * weight)
+              const formattedPercent = parseFloat(totalPercent.toFixed(2))
 
               let etaStr = "Calculating..."
-              if (percent > 0) {
-                const elapsedSec = (Date.now() - startTime) / 1000
-                const estimatedTotalSec = elapsedSec / (percent / 100)
+              if (formattedPercent > 0) {
+                const elapsedSec = (Date.now() - overallProgress.startTime) / 1000
+                const estimatedTotalSec = elapsedSec / (formattedPercent / 100)
                 const remainingSec = Math.max(0, estimatedTotalSec - elapsedSec)
                 const mins = Math.floor(remainingSec / 60)
                 const secs = Math.floor(remainingSec % 60)
@@ -145,8 +147,6 @@ const processAnimeVideo = async (
               }
 
               if (job && percent > 0) {
-                const totalPercent = overallProgress.base + (percent * weight)
-                const formattedPercent = parseFloat(totalPercent.toFixed(2))
                 job.updateProgress(formattedPercent)
                 if (global.io) {
                   global.io.emit("video_progress", {
@@ -173,7 +173,7 @@ const processAnimeVideo = async (
         })
       }
 
-      let overallProgress = { base: 0 }
+      let overallProgress = { base: 0, startTime: Date.now() }
 
       try {
         // 1. HLS 1080p Task
