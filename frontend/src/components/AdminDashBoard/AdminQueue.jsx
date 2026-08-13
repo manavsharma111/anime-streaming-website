@@ -19,7 +19,27 @@ export default function AdminQueue() {
     try {
       const res = await axiosInstance.get("/anime-admin/queue")
       if (res.data.success) {
-        setJobs(res.data.data)
+        setJobs((prev) => {
+          const newData = res.data.data;
+          
+          // Preserve eta and taskName from socket for active jobs
+          const newActive = newData.active.map(newJob => {
+            const existingJob = prev.active.find(j => j.id === newJob.id);
+            if (existingJob) {
+              return {
+                ...newJob,
+                eta: existingJob.eta,
+                taskName: existingJob.taskName
+              };
+            }
+            return newJob;
+          });
+          
+          return {
+            ...newData,
+            active: newActive
+          };
+        })
       }
     } catch (err) {
       console.error("Failed to fetch queue", err)
