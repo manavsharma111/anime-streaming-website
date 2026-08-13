@@ -124,7 +124,7 @@ const googleCallback = async (req, res) => {
     if (user.role === "admin") {
       res.redirect(`${frontendUrl}/admin`)
     } else {
-      res.redirect(`${frontendUrl}/`)
+      res.redirect(`${frontendUrl}/home`)
     }
   } catch (error) {
     console.log("Google Auth Error:", error)
