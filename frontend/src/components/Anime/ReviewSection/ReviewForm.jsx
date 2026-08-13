@@ -33,7 +33,8 @@ const ReviewForm = ({ animeId }) => {
   const handleGoogleLogin = () => {
     const backendUrl =
       import.meta.env.VITE_BACKEND_URL || "http://localhost:4000/api"
-    window.location.href = `${backendUrl}/auth/google`
+    const currentPath = window.location.pathname + window.location.search
+    window.location.href = `${backendUrl}/auth/google?returnTo=${encodeURIComponent(currentPath)}`
   }
 
   if (!user) {

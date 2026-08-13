@@ -24,6 +24,7 @@ const generateRefreshToken = (id) => {
 
 // Login via Google Auth
 const GoogleAuthLogin = (req, res) => {
+  const returnTo = req.query.returnTo || "/home"
   const googleUrl =
     `https://accounts.google.com/o/oauth2/v2/auth?` +
     `client_id=${process.env.GOOGLE_CLIENT_ID}` +
@@ -31,7 +32,8 @@ const GoogleAuthLogin = (req, res) => {
     `&response_type=code` +
     `&scope=openid email profile` +
     `&access_type=offline` +
-    `&prompt=select_account`
+    `&prompt=select_account` +
+    `&state=${encodeURIComponent(returnTo)}`
 
   res.redirect(googleUrl)
 }
@@ -121,11 +123,14 @@ const googleCallback = async (req, res) => {
     })
 
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173"
+    
+    // Read the original route from state
+    let returnTo = req.query.state || "/home"
     if (user.role === "admin") {
-      res.redirect(`${frontendUrl}/admin`)
-    } else {
-      res.redirect(`${frontendUrl}/home`)
+      returnTo = "/admin"
     }
+
+    res.redirect(`${frontendUrl}${returnTo}`)
   } catch (error) {
     console.log("Google Auth Error:", error)
     res.status(500).json({ message: "Google callback error" })
