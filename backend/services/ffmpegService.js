@@ -116,6 +116,8 @@ const processAnimeVideo = async (
             })
             .run()
         })
+      }
+
       // Helper function to run an ffmpeg command as a Promise
       const runFfmpegCommand = (cmd, taskName, weight, overallProgress) => {
         return new Promise((res, rej) => {
