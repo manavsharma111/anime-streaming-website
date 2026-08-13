@@ -195,8 +195,8 @@ const processAnimeVideo = async (
           "-s:v:0 1920x1080", "-b:v:0 3000k", ...baseHlsOptions,
           "-hls_segment_filename", path.join(streamDir, "0/segment%03d.ts")
         ])
-        await runFfmpegCommand(hls1080Cmd, "HLS 1080p", 0.40, overallProgress)
-        overallProgress.base += 40
+        await runFfmpegCommand(hls1080Cmd, "HLS 1080p", 0.15, overallProgress)
+        overallProgress.base += 15
 
         // 2. HLS 720p Task
         const hls720Cmd = ffmpeg().input(inputPath)
@@ -205,17 +205,28 @@ const processAnimeVideo = async (
           "-s:v:0 1280x720", "-b:v:0 1500k", ...baseHlsOptions,
           "-hls_segment_filename", path.join(streamDir, "1/segment%03d.ts")
         ])
-        await runFfmpegCommand(hls720Cmd, "HLS 720p", 0.30, overallProgress)
-        overallProgress.base += 30
+        await runFfmpegCommand(hls720Cmd, "HLS 720p", 0.15, overallProgress)
+        overallProgress.base += 15
+        
+        // 3. HLS 480p Task
+        const hls480Cmd = ffmpeg().input(inputPath)
+        hls480Cmd.output(path.join(streamDir, "2/manifest.m3u8")).outputOptions([
+          "-map 0:v:0", ...audioMaps,
+          "-s:v:0 854x480", "-b:v:0 800k", ...baseHlsOptions,
+          "-hls_segment_filename", path.join(streamDir, "2/segment%03d.ts")
+        ])
+        await runFfmpegCommand(hls480Cmd, "HLS 480p", 0.10, overallProgress)
+        overallProgress.base += 10
 
         // Manually write master.m3u8
         let masterPlaylist = "#EXTM3U\n"
         masterPlaylist += "#EXT-X-STREAM-INF:BANDWIDTH=3000000,RESOLUTION=1920x1080\n0/manifest.m3u8\n"
         masterPlaylist += "#EXT-X-STREAM-INF:BANDWIDTH=1500000,RESOLUTION=1280x720\n1/manifest.m3u8\n"
+        masterPlaylist += "#EXT-X-STREAM-INF:BANDWIDTH=800000,RESOLUTION=854x480\n2/manifest.m3u8\n"
         fs.writeFileSync(path.join(streamDir, "master.m3u8"), masterPlaylist)
 
 
-        // 3. 1080p MP4 Task
+        // 4. 1080p MP4 Task
         const mp41080Cmd = ffmpeg().input(inputPath)
         mp41080Cmd
           .output(path.join(downloadDir, "1080p.mp4"))
@@ -224,10 +235,34 @@ const processAnimeVideo = async (
             "-c:v libx264", "-profile:v main", "-pix_fmt yuv420p", "-crf 22", "-preset ultrafast", "-threads 2",
             "-c:a", "aac", "-ar", "48000", "-ac", "2", "-s 1920x1080",
           ])
-        await runFfmpegCommand(mp41080Cmd, "MP4 1080p", 0.25, overallProgress)
-        overallProgress.base += 25
+        await runFfmpegCommand(mp41080Cmd, "MP4 1080p", 0.20, overallProgress)
+        overallProgress.base += 20
+        
+        // 5. 720p MP4 Task
+        const mp4720Cmd = ffmpeg().input(inputPath)
+        mp4720Cmd
+          .output(path.join(downloadDir, "720p.mp4"))
+          .outputOptions([
+            "-map 0:v:0", "-map 0:a?",
+            "-c:v libx264", "-profile:v main", "-pix_fmt yuv420p", "-crf 24", "-preset ultrafast", "-threads 2",
+            "-c:a", "aac", "-ar", "48000", "-ac", "2", "-s 1280x720",
+          ])
+        await runFfmpegCommand(mp4720Cmd, "MP4 720p", 0.20, overallProgress)
+        overallProgress.base += 20
+        
+        // 6. 480p MP4 Task
+        const mp4480Cmd = ffmpeg().input(inputPath)
+        mp4480Cmd
+          .output(path.join(downloadDir, "480p.mp4"))
+          .outputOptions([
+            "-map 0:v:0", "-map 0:a?",
+            "-c:v libx264", "-profile:v main", "-pix_fmt yuv420p", "-crf 26", "-preset ultrafast", "-threads 2",
+            "-c:a", "aac", "-ar", "48000", "-ac", "2", "-s 854x480",
+          ])
+        await runFfmpegCommand(mp4480Cmd, "MP4 480p", 0.15, overallProgress)
+        overallProgress.base += 15
 
-        // 4. Thumbnails Task
+        // 7. Thumbnails Task
         const thumbCmd = ffmpeg().input(inputPath)
         thumbCmd
           .output(path.join(thumbDir, "thumb_%04d.png"))
@@ -242,7 +277,9 @@ const processAnimeVideo = async (
         resolve({
           hlsMaster: `${baseFolder}/streaming/master.m3u8`,
           downloads: {
-            1080: `${baseFolder}/downloads/1080p.mp4`
+            1080: `${baseFolder}/downloads/1080p.mp4`,
+            720: `${baseFolder}/downloads/720p.mp4`,
+            480: `${baseFolder}/downloads/480p.mp4`,
           },
           thumbnails: `${baseFolder}/thumbnails/`,
           embeddedSubtitles: extractedSubs,
