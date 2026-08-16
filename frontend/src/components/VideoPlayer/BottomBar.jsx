@@ -54,7 +54,7 @@ export default function BottomBar({
         </div>
 
         <div className="flex items-center gap-4">
-          <SettingsMenu {...settingsProps} />
+          <SettingsMenu {...settingsProps} isFullscreen={isFullscreen} />
           <PictureInPictureButton videoRef={videoRef} />
           <FullscreenButton
             isFullscreen={isFullscreen}
