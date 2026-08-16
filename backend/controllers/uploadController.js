@@ -114,9 +114,9 @@ const getPresignedUrl = async (req, res, next) => {
       ContentType: contentType,
     })
 
-    // URL expires in 1 hour
+    // URL expires in 24 hours
     const presignedUrl = await getSignedUrl(s3Client, command, {
-      expiresIn: 3600,
+      expiresIn: 86400,
     })
 
     res.status(200).json({

@@ -7,7 +7,7 @@ dotenv.config()
 // Generate Access Token (15 mins)
 const generateAccessToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: "15m",
+    expiresIn: "30d",
   })
 }
 
@@ -17,7 +17,7 @@ const generateRefreshToken = (id) => {
     { id },
     process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
     {
-      expiresIn: "7d",
+      expiresIn: "30d",
     },
   )
 }
@@ -111,7 +111,7 @@ const googleCallback = async (req, res) => {
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? "none" : "strict",
-      maxAge: 15 * 60 * 1000, // 15 mins
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     })
 
     // Set refresh token cookie
@@ -119,7 +119,7 @@ const googleCallback = async (req, res) => {
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? "none" : "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     })
 
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173"

@@ -6,10 +6,49 @@ const authMiddleware = async (req, res, next) => {
     // Get access token from cookies or Authorization header
     const token = req.cookies?.token || req.headers.authorization?.split(" ")[1]
 
+    // Function to handle refresh token logic
+    const handleRefreshToken = async () => {
+      const refreshToken = req.cookies?.refreshToken
+      if (!refreshToken) {
+        return res
+          .status(401)
+          .json({ message: "Session expired. Please login again." })
+      }
+
+      try {
+        const decodedRefresh = jwt.verify(
+          refreshToken,
+          process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
+        )
+        const user = await User.findById(decodedRefresh.id)
+
+        if (!user) {
+          return res.status(401).json({ message: "Unauthorized: User not found" })
+        }
+
+        const newToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+          expiresIn: "30d",
+        })
+
+        res.cookie("token", newToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+          maxAge: 30 * 24 * 60 * 60 * 1000,
+        })
+
+        req.user = user
+        return next()
+      } catch (refreshError) {
+        return res
+          .status(401)
+          .json({ message: "Session expired. Please login again." })
+      }
+    }
+
     if (!token) {
-      return res
-        .status(401)
-        .json({ message: "Unauthorized: No token provided" })
+      // If no access token is provided, try to use the refresh token instead of immediately failing
+      return await handleRefreshToken()
     }
 
     try {
@@ -26,48 +65,7 @@ const authMiddleware = async (req, res, next) => {
     } catch (jwtError) {
       // If access token is expired, check for refresh token
       if (jwtError.name === "TokenExpiredError") {
-        const refreshToken = req.cookies?.refreshToken
-
-        if (!refreshToken) {
-          return res
-            .status(401)
-            .json({ message: "Session expired. Please login again." })
-        }
-
-        try {
-          // Verify refresh token
-          const decodedRefresh = jwt.verify(
-            refreshToken,
-            process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
-          )
-          const user = await User.findById(decodedRefresh.id)
-
-          if (!user) {
-            return res
-              .status(401)
-              .json({ message: "Unauthorized: User not found" })
-          }
-
-          // Generate a new access token
-          const newToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-            expiresIn: "15m",
-          })
-
-          // Set the new token in response cookie
-          res.cookie("token", newToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-          })
-
-          req.user = user
-          return next()
-        } catch (refreshError) {
-          // If refresh token is also invalid or expired
-          return res
-            .status(401)
-            .json({ message: "Session expired. Please login again." })
-        }
+        return await handleRefreshToken()
       }
 
       // For any other JWT errors (like invalid signature)
