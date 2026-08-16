@@ -55,8 +55,9 @@ const uploadFileToR2 = async (localFilePath, s3Key) => {
     // Fix FFmpeg creating video variants for audio tracks
     if (localFilePath.endsWith("master.m3u8")) {
       // Strip erroneous video streams that point to audio directories
+      // Actual HLS variant dirs are named 0, 1, 2 (not 1080p, 720p, 480p)
       content = content.replace(
-        /#EXT-X-STREAM-INF:.*?[\r\n]+(?!(?:1080p|720p|480p)\/manifest\.m3u8)[^\r\n]+\/manifest\.m3u8[\r\n]*/g,
+        /#EXT-X-STREAM-INF:.*?[\r\n]+(?![012]\/manifest\.m3u8)[^\r\n]+\/manifest\.m3u8[\r\n]*/g,
         "",
       )
 

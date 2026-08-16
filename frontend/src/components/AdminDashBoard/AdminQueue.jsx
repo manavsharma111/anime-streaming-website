@@ -122,7 +122,12 @@ export default function AdminQueue() {
         <div className="mt-6">
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
-              {job.taskName ? `Encoding: ${job.taskName}` : "Encoding Progress"}
+              {job.taskName
+                ? job.taskName.startsWith("Uploading") || job.taskName.startsWith("Saving")
+                  ? `⚡ ${job.taskName}`
+                  : `Encoding: ${job.taskName}`
+                : "Encoding Progress"
+              }
             </span>
             <span className="text-sm font-black text-white">
               {job.progress || 0}%

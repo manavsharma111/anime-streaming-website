@@ -89,11 +89,20 @@ const worker = new Worker(
       const publicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL
       if (publicUrl) {
         const { uploadDirectoryToR2 } = require("./r2UploadService")
-        // we need to construct the s3 prefix from the outputDir, e.g., 'uploads/processed/folderId'
-        // outputDir is like c:\NEWTUBE\backend\public\uploads\processed\6a42...
         const path = require("path")
         const folderId = path.basename(outputDir)
         const s3Prefix = `uploads/processed/${folderId}`
+
+        // Notify frontend that R2 upload is starting
+        await job.updateProgress(99)
+        if (global.io) {
+          global.io.emit("video_progress", {
+            episodeId: job.data.episodeId,
+            percent: 99,
+            eta: "Uploading to CDN...",
+            taskName: "Uploading to CDN",
+          })
+        }
 
         const uploadSuccess = await uploadDirectoryToR2(outputDir, s3Prefix)
 
@@ -129,6 +138,17 @@ const worker = new Worker(
       console.log(
         `[Worker] Job ${job.id} finished processing. Updating database...`,
       )
+
+      // Notify frontend that DB is being updated
+      await job.updateProgress(99.9)
+      if (global.io) {
+        global.io.emit("video_progress", {
+          episodeId: job.data.episodeId,
+          percent: 99.9,
+          eta: "Saving to database...",
+          taskName: "Saving to database",
+        })
+      }
 
       // Update database with the URLs returned (now potentially R2 URLs)
       const updateData = {
