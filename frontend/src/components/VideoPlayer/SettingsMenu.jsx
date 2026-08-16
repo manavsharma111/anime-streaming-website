@@ -70,7 +70,7 @@ export default function SettingsMenu({
     emptyMessage = "Default",
   ) => (
     <div
-      className="flex flex-col py-2 max-h-[250px] overflow-y-auto custom-scrollbar overscroll-none pointer-events-auto"
+      className="flex flex-col py-2 max-h-[140px] sm:max-h-[250px] overflow-y-auto custom-scrollbar overscroll-none pointer-events-auto"
       onWheel={(e) => e.stopPropagation()}
       onTouchMove={(e) => e.stopPropagation()}
     >
@@ -160,7 +160,7 @@ export default function SettingsMenu({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.15 }}
-            className="absolute bottom-full mb-2 right-0 sm:-right-4 md:right-0 w-[260px] sm:w-[280px] max-w-[90vw] max-h-[60vh] sm:max-h-[80vh] bg-[#1c1c1c]/95 backdrop-blur-md rounded-xl shadow-2xl z-50 flex flex-col border border-white/10 overflow-hidden origin-bottom-right"
+            className="absolute bottom-full mb-2 right-0 sm:-right-4 md:right-0 w-[240px] sm:w-[280px] max-w-[90vw] max-h-[180px] sm:max-h-[60vh] md:max-h-[80vh] bg-[#1c1c1c]/95 backdrop-blur-md rounded-xl shadow-2xl z-50 flex flex-col border border-white/10 overflow-hidden origin-bottom-right"
             onWheel={(e) => e.stopPropagation()}
             onTouchMove={(e) => e.stopPropagation()}
           >
@@ -253,7 +253,7 @@ export default function SettingsMenu({
 
               {activeTab === "download" && (
                 <div
-                  className="flex flex-col py-2 max-h-[250px] overflow-y-auto custom-scrollbar overscroll-none"
+                  className="flex flex-col py-2 max-h-[140px] sm:max-h-[250px] overflow-y-auto custom-scrollbar overscroll-none"
                   onWheel={(e) => e.stopPropagation()}
                   onTouchMove={(e) => e.stopPropagation()}
                 >
