@@ -5,6 +5,7 @@ const dotenv = require("dotenv")
 const { processAnimeVideo } = require("./ffmpegService")
 const Episode = require("../models/Episode")
 const connectDB = require("../config/db")
+const fs = require("fs")
 
 dotenv.config()
 connectDB()
@@ -44,7 +45,6 @@ const worker = new Worker(
           console.log(`[Worker] Downloading video locally from R2 to save memory: ${r2Url}`)
           
           const axios = require("axios")
-          const fs = require("fs")
           const path = require("path")
           
           // Create temp directory if it doesn't exist
@@ -99,8 +99,8 @@ const worker = new Worker(
           console.log(
             `[Worker] Upload to R2 successful. Deleting local files...`,
           )
-          const fs = require("fs/promises")
-          await fs.rm(outputDir, { recursive: true, force: true })
+          const fsPromises = require("fs/promises")
+          await fsPromises.rm(outputDir, { recursive: true, force: true })
 
           // Rewrite local URLs to R2 Public URLs
           const rewriteUrl = (url) => (url ? `${publicUrl}${url}` : url)
@@ -156,9 +156,9 @@ const worker = new Worker(
       console.error(`[Worker] Job ${job.id} failed:`, error)
       await Episode.findByIdAndUpdate(episodeId, { status: "failed" })
       
-      if (tempFilePath && require("fs").existsSync(tempFilePath)) {
+      if (tempFilePath && fs.existsSync(tempFilePath)) {
         console.log(`[Worker] Deleting temporary downloaded file after error: ${tempFilePath}`)
-        require("fs").unlinkSync(tempFilePath)
+        fs.unlinkSync(tempFilePath)
       }
       
       throw error
