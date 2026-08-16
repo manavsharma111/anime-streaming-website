@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
+import { useSearchParams } from "react-router-dom"
 import { Menu } from "lucide-react"
 import { fetchAnimes } from "../../redux/slice/animeSlice"
 import UploadEpisodeForm from "../../components/AdminDashBoard/UploadEpisode"
@@ -13,7 +14,12 @@ import { motion, AnimatePresence } from "framer-motion"
 export default function AdminDashboard() {
   const dispatch = useDispatch()
   const { animeList: animes, loading } = useSelector((state) => state.anime)
-  const [activeTab, setActiveTab] = useState("overview")
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeTab = searchParams.get("tab") || "overview"
+  
+  const setActiveTab = (tab) => {
+    setSearchParams({ tab })
+  }
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
