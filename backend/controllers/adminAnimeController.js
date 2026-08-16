@@ -152,6 +152,8 @@ const uploadEpisodeMeta = async (req, res, next) => {
         delay: scheduledAt
           ? Math.max(0, new Date(scheduledAt) - Date.now())
           : 0,
+        attempts: 2,              // retry once if it fails
+        backoff: { type: "fixed", delay: 5000 },
       },
     )
 

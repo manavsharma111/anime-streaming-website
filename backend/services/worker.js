@@ -58,7 +58,9 @@ const worker = new Worker(
           const response = await axios({
             url: r2Url,
             method: 'GET',
-            responseType: 'stream'
+            responseType: 'stream',
+            timeout: 0, // No timeout for large video files
+            maxRedirects: 5,
           })
           
           const writer = fs.createWriteStream(tempFilePath)
@@ -164,7 +166,11 @@ const worker = new Worker(
       throw error
     }
   },
-  { connection },
+  {
+    connection,
+    lockDuration: 10800000, // 3 hours lock (prevents job from being re-queued while still processing)
+    lockRenewTime: 60000,   // Renew lock every 60 seconds
+  },
 )
 
 worker.on("completed", (job) => {
