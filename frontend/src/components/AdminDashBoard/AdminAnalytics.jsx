@@ -186,7 +186,7 @@ export default function AdminAnalytics({ animes }) {
             </button>
           </div>
 
-          <div className="flex-1 bg-black/40 rounded-2xl p-4 overflow-y-auto custom-scrollbar border border-white/5">
+          <div className="flex-1 min-h-0 bg-black/40 rounded-2xl p-4 overflow-y-auto custom-scrollbar border border-white/5">
             <div className="text-purple-400 text-xs font-mono mb-4 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
               System metrics polling active

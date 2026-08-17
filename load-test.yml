@@ -1,9 +1,28 @@
 config:
-  target: "http://localhost:4000" # NEWTUBE ka default port 4000 hota hai, agar alag ho toh change kar lena
+  target: "https://anime-streaming-website-q60l.onrender.com" # Directly testing your live Render server!
   phases:
-    - duration: 20
-      arrivalRate: 50
+    - name: "Warm up (Low Traffic)"
+      duration: 10
+      arrivalRate: 5
+    - name: "Spike (High Traffic)"
+      duration: 20
+      arrivalRate: 30
+
 scenarios:
-  - flow:
+  - name: "Real User Browsing Journey"
+    flow:
+      # Step 1: User loads the homepage and fetches latest animes
       - get:
-          url: "/api/health" # Agar health endpoint na ho toh "/" use kar sakte ho
+          url: "/api/anime?limit=12&sort=latest"
+          capture:
+            - json: "$.data[0]._id"
+              as: "firstAnimeId"
+      
+      # Step 2: User scrolls and loads popular animes
+      - get:
+          url: "/api/anime?limit=10&sort=popular"
+      
+      # Step 3: User clicks on the first anime from the homepage to see details
+      - get:
+          url: "/api/anime/{{ firstAnimeId }}"
+          ifTrue: "firstAnimeId"
