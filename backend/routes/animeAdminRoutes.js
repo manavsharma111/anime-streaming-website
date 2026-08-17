@@ -13,6 +13,7 @@ const {
   deleteJob,
   addEpisodeLink,
   bulkFetchEpisodes,
+  getSystemStats,
 } = require("../controllers/adminAnimeController")
 const admin = require("../middleware/adminMiddleware")
 const adminUpload = require("../middleware/adminUpload")
@@ -37,6 +38,7 @@ router.put(
 )
 router.delete("/:id", admin, deleteAnime)
 router.get("/recent-episodes", admin, getRecentEpisodes)
+router.get("/system-stats", admin, getSystemStats)
 
 // Episode routes
 router.post("/episode/link", admin, addEpisodeLink)

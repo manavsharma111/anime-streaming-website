@@ -520,6 +520,24 @@ const bulkFetchEpisodes = async (req, res, next) => {
   }
 }
 
+// get system benchmark stats
+const getSystemStats = async (req, res, next) => {
+  try {
+    const os = require("os")
+    const stats = {
+      cpuCount: os.cpus().length,
+      cpuModel: os.cpus()[0]?.model || "Unknown CPU",
+      totalMem: os.totalmem(),
+      freeMem: os.freemem(),
+      loadAvg: os.loadavg(),
+      uptime: os.uptime(),
+    }
+    res.status(200).json({ success: true, data: stats })
+  } catch (err) {
+    next(err)
+  }
+}
+
 module.exports = {
   createAnime,
   updateAnime,
@@ -534,4 +552,5 @@ module.exports = {
   deleteJob,
   addEpisodeLink,
   bulkFetchEpisodes,
+  getSystemStats,
 }

@@ -8,53 +8,46 @@ const connectDB = require("./config/db")
 // Load env vars
 dotenv.config()
 
-// Connect to database (serverless-safe caching is handled inside db.js)
+// Connect to database
 connectDB().catch((err) =>
   console.error("DB Connection Failed on startup:", err),
 )
 
-// ─── Detect Vercel serverless environment ─────────────────────────────────────
-const isVercel = !!process.env.VERCEL
-
-// ─── Background Worker (only in non-serverless) ───────────────────────────────
-if (!isVercel) {
-  try {
-    require("./services/worker")
-  } catch (err) {
-    console.warn("[Server] Worker could not be started:", err.message)
-  }
+// Start the background worker for video processing
+try {
+  require("./services/worker")
+} catch (err) {
+  console.warn("[Server] Worker could not be started:", err.message)
 }
 
 const app = express()
 
-// ─── Socket.io (only in non-serverless) ──────────────────────────────────────
-if (!isVercel) {
-  const http = require("http")
-  const { Server } = require("socket.io")
-  const server = http.createServer(app)
+// Initialize WebSocket server
+const http = require("http")
+const { Server } = require("socket.io")
+const server = http.createServer(app)
 
-  const io = new Server(server, {
-    cors: {
-      origin: [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:4000",
-        process.env.CLIENT_URL,
-        "https://anime-streaming-website-seven.vercel.app",
-      ].filter(Boolean),
-      credentials: true,
-    },
-  })
+const io = new Server(server, {
+  cors: {
+    origin: [
+      "http://localhost:5173",
+      "http://127.0.0.1:5173",
+      "http://localhost:4000",
+      process.env.CLIENT_URL,
+      "https://anime-streaming-website-seven.vercel.app",
+    ].filter(Boolean),
+    credentials: true,
+  },
+})
 
-  global.io = io
+global.io = io
 
-  const PORT = process.env.PORT || 4000
-  server.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on port ${PORT}`)
-  })
-}
+const PORT = process.env.PORT || 4000
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`)
+})
 
-// ─── Middleware ────────────────────────────────────────────────────────────────
+// Setup global middleware
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -79,10 +72,10 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
-// Serve uploads statically (only useful locally; on Vercel use R2)
+// Serve uploads 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")))
 
-// ─── Routes ───────────────────────────────────────────────────────────────────
+// Register API routes
 const videoRoutes = require("./routes/videoRoutes")
 const authRoutes = require("./routes/authRoutes")
 const historyRoutes = require("./routes/historyRoutes")
@@ -101,12 +94,12 @@ app.use("/api/upload", uploadRoutes)
 app.use("/api/anime-admin", animeAdminRoutes)
 app.use("/api/reviews", reviewRoutes)
 
-// ─── Health Check ──────────────────────────────────────────────────────────────
+// Basic health check endpoint
 app.get("/", (req, res) => {
   res.send("<h1>Anime Streaming Backend is running ✅</h1>")
 })
 
-// ─── Global Error Handler ──────────────────────────────────────────────────────
+// Catch-all error handler
 app.use((err, req, res, next) => {
   console.error(err.stack)
   res.status(err.status || 500).json({
@@ -115,5 +108,5 @@ app.use((err, req, res, next) => {
   })
 })
 
-// ─── Export for Vercel Serverless ─────────────────────────────────────────────
+// Export the Express app
 module.exports = app
