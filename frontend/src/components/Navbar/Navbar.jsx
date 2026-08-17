@@ -116,7 +116,7 @@ export default function Navbar() {
       </AnimatePresence>
 
       {/* Mobile Top Logo */}
-      {isMobile && (
+      {isMobile && !location.pathname.startsWith("/admin") && (
         <div
           className="absolute top-6 left-0 right-0 z-[60] flex justify-center pointer-events-auto cursor-pointer"
           onClick={() => navigate("/")}
