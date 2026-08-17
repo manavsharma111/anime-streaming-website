@@ -45,10 +45,13 @@ const getAllFiles = async (dirPath, arrayOfFiles = []) => {
   }
   return arrayOfFiles
 }
+const fsSync = require("fs")
+
 // upload file to r2
 const uploadFileToR2 = async (localFilePath, s3Key) => {
-  let fileBuffer = await fs.readFile(localFilePath)
+  let body
   if (localFilePath.endsWith(".m3u8")) {
+    let fileBuffer = await fs.readFile(localFilePath)
     let content = fileBuffer.toString("utf8")
     content = content.replace(/\\/g, "/")
 
@@ -69,14 +72,17 @@ const uploadFileToR2 = async (localFilePath, s3Key) => {
       )
     }
 
-    fileBuffer = Buffer.from(content, "utf8")
+    body = Buffer.from(content, "utf8")
+  } else {
+    // For media files (.ts, .mp4), stream them to avoid OOM crashes
+    body = fsSync.createReadStream(localFilePath)
   }
   const contentType = getContentType(localFilePath)
 
   const command = new PutObjectCommand({
     Bucket: process.env.CLOUDFLARE_R2_BUCKET,
     Key: s3Key,
-    Body: fileBuffer,
+    Body: body,
     ContentType: contentType,
   })
 
@@ -91,8 +97,8 @@ const uploadDirectoryToR2 = async (localDir, s3Prefix) => {
     const files = await getAllFiles(localDir)
     console.log(`[R2Upload] Found ${files.length} files to upload.`)
 
-    // Upload in batches of 20 to avoid overwhelming network/memory
-    const BATCH_SIZE = 100
+    // Upload in batches of 10 to avoid overwhelming network/memory (OOM)
+    const BATCH_SIZE = 10
     for (let i = 0; i < files.length; i += BATCH_SIZE) {
       const batch = files.slice(i, i + BATCH_SIZE)
       const uploadPromises = batch.map((file) => {
