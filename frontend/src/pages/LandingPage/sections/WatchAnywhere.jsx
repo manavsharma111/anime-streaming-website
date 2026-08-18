@@ -1,9 +1,17 @@
-import React, { useRef } from "react"
+import React, { useRef, useState, useEffect } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { Link } from "react-router-dom"
 
 export default function WatchAnywhere() {
   const containerRef = useRef(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024)
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -40,11 +48,11 @@ export default function WatchAnywhere() {
 
         <div className="flex-1 relative h-[450px] lg:h-[600px] w-full flex items-center justify-center mt-10 lg:mt-0">
           {/* Decorative glowing orb */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] lg:w-[400px] h-[300px] lg:h-[400px] bg-red-600/20 rounded-full blur-[80px] lg:blur-[100px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] lg:w-[400px] h-[300px] lg:h-[400px] bg-red-600/20 rounded-full blur-[60px] lg:blur-[100px]" />
 
           {/* Laptop Mockup */}
           <motion.div
-            style={{ y: y1 }}
+            style={isMobile ? {} : { y: y1 }}
             className="absolute z-10 left-1/2 -translate-x-1/2 lg:translate-x-0 lg:-left-10 top-4 lg:top-10"
           >
             <div className="w-[280px] md:w-[400px] lg:w-[450px] aspect-video bg-[#111] rounded-2xl border-4 border-[#222] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden relative">
@@ -59,7 +67,7 @@ export default function WatchAnywhere() {
 
           {/* Tablet Mockup */}
           <motion.div
-            style={{ y: y2 }}
+            style={isMobile ? {} : { y: y2 }}
             className="absolute z-20 -right-4 md:right-10 lg:-right-10 top-1/2 -translate-y-1/2"
           >
             <div className="w-[150px] md:w-[240px] lg:w-[280px] aspect-[3/4] bg-[#111] rounded-2xl lg:rounded-3xl border-[6px] lg:border-8 border-[#222] shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden">
@@ -73,7 +81,7 @@ export default function WatchAnywhere() {
 
           {/* Phone Mockup */}
           <motion.div
-            style={{ y: y3 }}
+            style={isMobile ? {} : { y: y3 }}
             className="absolute z-30 left-0 md:left-20 lg:left-1/4 bottom-0 lg:bottom-10"
           >
             <div className="w-[100px] md:w-[140px] lg:w-[160px] aspect-[9/19] bg-[#111] rounded-[1.5rem] lg:rounded-[2rem] border-[6px] lg:border-8 border-[#222] shadow-[0_40px_80px_rgba(0,0,0,0.9)] overflow-hidden">
