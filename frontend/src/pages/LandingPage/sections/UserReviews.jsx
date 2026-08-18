@@ -38,7 +38,7 @@ const reviews = [
 export default function UserReviews() {
   return (
     <section className="py-32 bg-[#050505] relative z-10 border-t border-white/5 overflow-hidden">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] bg-white/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] bg-white/5 rounded-full blur-[60px] md:blur-[120px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 mb-20 text-center md:text-left">
         <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tighter">
@@ -53,12 +53,12 @@ export default function UserReviews() {
         <motion.div
           animate={{ x: [0, -2400] }}
           transition={{ repeat: Infinity, ease: "linear", duration: 30 }}
-          className="flex gap-6 px-6 items-center"
+          className="flex gap-6 px-6 items-center will-change-transform"
         >
           {[...reviews, ...reviews, ...reviews].map((review, i) => (
             <div
               key={i}
-              className="bg-white/[0.02] backdrop-blur-xl border border-white/10 p-8 rounded-3xl hover:bg-white/[0.04] transition-colors w-[350px] md:w-[450px] flex-shrink-0"
+              className="bg-[#111] md:bg-white/[0.02] md:backdrop-blur-xl border border-white/10 p-8 rounded-3xl hover:bg-white/[0.04] transition-colors w-[350px] md:w-[450px] flex-shrink-0"
             >
               <div className="flex gap-1 mb-6">
                 {[1, 2, 3, 4, 5].map((star) => (

@@ -26,7 +26,7 @@ const AnimeCard = ({ anime }) => {
 
         {/* Top Right: Type (TV/Movie) */}
         <div className="absolute top-2 right-2 z-10">
-          <span className="bg-[#f33767]/90 backdrop-blur-md text-white text-[10px] font-black tracking-wider px-2 py-1 rounded-md shadow-lg uppercase">
+          <span className="bg-[#f33767]/90 md:backdrop-blur-md text-white text-[10px] font-black tracking-wider px-2 py-1 rounded-md shadow-lg uppercase">
             {anime.type || "TV"}
           </span>
         </div>
@@ -36,22 +36,22 @@ const AnimeCard = ({ anime }) => {
 
         {/* Bottom Tags: Ep / Sub / Dub */}
         <div className="absolute bottom-2 left-2 flex items-center z-10 font-black text-[10px] tracking-wider rounded-md overflow-hidden shadow-lg border border-white/10">
-          <div className="flex items-center gap-1 bg-[#8b5cf6]/90 backdrop-blur-md text-white px-1.5 py-0.5">
+          <div className="flex items-center gap-1 bg-[#8b5cf6]/90 md:backdrop-blur-md text-white px-1.5 py-0.5">
             <Captions size={10} />
             <span>{anime.totalEpisodes || anime.episodes?.length || "?"}</span>
           </div>
-          <div className="flex items-center gap-1 bg-[#eab308]/90 backdrop-blur-md text-white px-1.5 py-0.5 border-l border-white/20">
+          <div className="flex items-center gap-1 bg-[#eab308]/90 md:backdrop-blur-md text-white px-1.5 py-0.5 border-l border-white/20">
             <Mic size={10} />
             <span>{anime.totalEpisodes || anime.episodes?.length || "?"}</span>
           </div>
-          <div className="bg-black/60 backdrop-blur-md text-neutral-300 px-1.5 py-0.5 border-l border-white/20">
+          <div className="bg-[#111] md:bg-black/60 md:backdrop-blur-md text-neutral-300 px-1.5 py-0.5 border-l border-white/20">
             {anime.totalEpisodes || anime.episodes?.length || "?"}
           </div>
         </div>
 
         {/* Play Icon Hover overlay */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20">
-          <div className="w-14 h-14 rounded-full bg-[#f33767]/90 backdrop-blur-md flex items-center justify-center pl-1 text-white border border-white/20 shadow-[0_0_20px_rgba(243,55,103,0.5)] scale-75 group-hover:scale-100 transition-transform duration-500 delay-100">
+          <div className="w-14 h-14 rounded-full bg-[#f33767]/90 md:backdrop-blur-md flex items-center justify-center pl-1 text-white border border-white/20 shadow-[0_0_20px_rgba(243,55,103,0.5)] scale-75 group-hover:scale-100 transition-transform duration-500 delay-100">
             <Play size={24} className="fill-white" />
           </div>
         </div>

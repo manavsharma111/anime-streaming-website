@@ -110,11 +110,12 @@ export default function Search() {
           : "Explore Anime"
 
   return (
-    <div className="min-h-screen bg-[#0e0b12] text-white pt-[100px] pb-20 px-4 md:px-8 relative overflow-hidden">
-      {/* Background Glows */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#f33767]/5 blur-[120px] rounded-full pointer-events-none -z-10" />
+    <div className="min-h-screen bg-[#050505] text-white pt-24 pb-20 relative overflow-hidden">
+      {/* Decorative Background */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#f33767]/5 blur-[60px] md:blur-[120px] rounded-full pointer-events-none -z-10" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/5 blur-[60px] md:blur-[120px] rounded-full pointer-events-none -z-10" />
 
-      <div className="max-w-[1500px] mx-auto flex flex-col xl:flex-row gap-8 items-start">
+      <div className="max-w-[1500px] mx-auto flex flex-col xl:flex-row gap-8 items-start px-4 md:px-8">
         {/* Main Content Area */}
         <main className="flex-1 w-full flex flex-col gap-8">
           {/* Header */}

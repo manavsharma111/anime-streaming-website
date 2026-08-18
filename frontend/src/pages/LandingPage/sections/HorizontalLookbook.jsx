@@ -56,7 +56,7 @@ export default function HorizontalLookbook({ animeList = [], loading }) {
                 animate={{ opacity: 0.25, scale: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className="absolute inset-0 w-full h-full object-cover blur-[100px] saturate-150"
+                className="absolute inset-0 w-full h-full object-cover blur-[50px] md:blur-[100px] saturate-150"
               />
             )}
           </AnimatePresence>
@@ -85,10 +85,10 @@ export default function HorizontalLookbook({ animeList = [], loading }) {
                 className={`w-[80vw] md:w-[60vw] shrink-0 h-[65vh] md:h-[75vh] flex flex-col justify-center items-center relative transition-all duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
                   isActive
                     ? "scale-100 opacity-100"
-                    : "scale-90 opacity-30 blur-[4px]"
+                    : "scale-90 opacity-30 md:blur-[4px]"
                 }`}
               >
-                <div className="w-full h-full overflow-hidden relative rounded-2xl md:rounded-[2rem] shadow-2xl border border-white/10 bg-white/5 backdrop-blur-xl">
+                <div className="w-full h-full overflow-hidden relative rounded-2xl md:rounded-[2rem] shadow-2xl border border-white/10 bg-[#111] md:bg-white/5 md:backdrop-blur-xl">
                   {imgUrl ? (
                     <img
                       src={imgUrl}
@@ -122,7 +122,7 @@ export default function HorizontalLookbook({ animeList = [], loading }) {
                       </h3>
                       {item.score && (
                         <div className="flex items-center gap-2">
-                          <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-white text-sm font-bold border border-white/20">
+                          <span className="px-3 py-1 rounded-full bg-white/10 md:backdrop-blur-md text-white text-sm font-bold border border-white/20">
                             ★ {item.score}
                           </span>
                           <span className="text-white/60 text-sm font-medium tracking-wide uppercase">
