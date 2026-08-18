@@ -46,7 +46,7 @@ export default function WatchAnywhere() {
           </div>
         </div>
 
-        <div className="flex-1 relative h-[450px] lg:h-[600px] w-full flex items-center justify-center mt-10 lg:mt-0">
+        <div className="flex-1 relative h-[550px] lg:h-[600px] w-full flex items-center justify-center mt-16 lg:mt-0">
           {/* Decorative glowing orb */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] lg:w-[400px] h-[300px] lg:h-[400px] bg-red-600/20 rounded-full blur-[60px] lg:blur-[100px]" />
 
@@ -82,7 +82,7 @@ export default function WatchAnywhere() {
           {/* Phone Mockup */}
           <motion.div
             style={isMobile ? {} : { y: y3 }}
-            className="absolute z-30 left-0 md:left-20 lg:left-1/4 bottom-0 lg:bottom-10"
+            className="absolute z-30 left-0 md:left-20 lg:left-1/4 bottom-4 lg:bottom-10"
           >
             <div className="w-[100px] md:w-[140px] lg:w-[160px] aspect-[9/19] bg-[#111] rounded-[1.5rem] lg:rounded-[2rem] border-[6px] lg:border-8 border-[#222] shadow-[0_40px_80px_rgba(0,0,0,0.9)] overflow-hidden">
               <img
