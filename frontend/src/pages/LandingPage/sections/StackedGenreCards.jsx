@@ -165,7 +165,6 @@ export default function StackedGenreCards() {
             {
               scale: 1 - (index - i) * 0.05,
               yPercent: -(index - i) * 2,
-              filter: `blur(${(index - i) * 4}px)`,
               opacity: 1 - (index - i) * 0.1,
               ease: "none",
             },
@@ -220,7 +219,7 @@ export default function StackedGenreCards() {
               </p>
 
               <div
-                className="mt-8 px-8 py-3 rounded-full border border-white/20 bg-white/5 backdrop-blur-md text-white font-bold tracking-widest text-sm uppercase cursor-pointer hover:bg-white hover:text-black transition-colors duration-300 pointer-events-auto"
+                className="mt-8 px-8 py-3 rounded-full border border-white/20 bg-[#111] md:bg-white/5 md:backdrop-blur-md text-white font-bold tracking-widest text-sm uppercase cursor-pointer hover:bg-white hover:text-black transition-colors duration-300 pointer-events-auto"
                 onClick={() =>
                   navigate(
                     `/search?genres=${encodeURIComponent(genre.searchGenre)}`,
