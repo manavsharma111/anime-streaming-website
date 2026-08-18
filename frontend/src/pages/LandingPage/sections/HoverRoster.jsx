@@ -179,9 +179,8 @@ export default function HoverRoster({ animeList = [], loading }) {
             src={cur.img}
             alt=""
             aria-hidden
-            className="w-full h-full object-cover scale-110"
+            className="w-full h-full object-cover scale-110 blur-[40px] md:blur-[90px] brightness-[0.2] md:brightness-[0.12] saturate-200"
             style={{
-              filter: "blur(90px) brightness(0.12) saturate(2)",
               willChange: "opacity",
             }}
           />

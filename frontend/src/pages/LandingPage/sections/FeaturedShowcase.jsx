@@ -89,7 +89,7 @@ export default function FeaturedShowcase({ animeList = [], loading }) {
           <img
             src={item.img}
             alt={item.title}
-            className="w-full h-full object-cover opacity-40 filter blur-sm"
+            className="w-full h-full object-cover opacity-40 md:filter md:blur-sm"
           />
           <div
             className={`absolute inset-0 bg-gradient-to-r ${item.color} via-[#050505]/80 to-[#050505] mix-blend-multiply`}

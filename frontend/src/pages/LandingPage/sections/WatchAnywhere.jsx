@@ -48,7 +48,7 @@ export default function WatchAnywhere() {
 
         <div className="flex-1 relative h-[550px] lg:h-[600px] w-full flex items-center justify-center mt-16 lg:mt-0">
           {/* Decorative glowing orb */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] lg:w-[400px] h-[300px] lg:h-[400px] bg-red-600/20 rounded-full blur-[60px] lg:blur-[100px]" />
+          <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] lg:w-[400px] h-[300px] lg:h-[400px] bg-red-600/20 rounded-full blur-[60px] lg:blur-[100px]" />
 
           {/* Laptop Mockup */}
           <motion.div
