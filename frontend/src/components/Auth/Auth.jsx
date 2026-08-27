@@ -23,20 +23,20 @@ export default function AuthDropdown() {
   if (isAuthenticated && user) {
     return (
       <div className="flex flex-col p-2">
-        <div className="flex items-center gap-3 mb-5 mt-2 px-2">
+        <div className="flex items-center gap-3 mb-5 mt-2 px-1">
           {user.avatar ? (
             <img
               src={user.avatar}
               alt="Profile"
-              className="w-10 h-10 rounded-full border border-neutral-700 shadow-md"
+              className="w-11 h-11 rounded-full object-cover"
             />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-neutral-700 to-neutral-900 flex items-center justify-center text-white font-bold border border-neutral-600 shadow-md">
+            <div className="w-11 h-11 rounded-full bg-[#2a2a2a] flex items-center justify-center text-white font-black text-lg">
               {user.name ? user.name.charAt(0).toUpperCase() : "U"}
             </div>
           )}
           <div className="flex flex-col overflow-hidden">
-            <h3 className="text-white font-bold text-[15px] truncate">
+            <h3 className="text-white font-bold text-[15px] truncate leading-tight mb-0.5">
               {user.name || "User"}
             </h3>
             <p className="text-[11px] text-neutral-400 truncate">
@@ -44,29 +44,29 @@ export default function AuthDropdown() {
             </p>
           </div>
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2.5">
           <Link
             to="/profile"
-            onClick={() => document.dispatchEvent(new Event("click"))} // Optional: close dropdown hack or just rely on react-router
-            className="w-full py-2.5 px-4 bg-[#f33767]/10 hover:bg-[#f33767]/20 border border-[#f33767]/20 text-[#f33767] rounded-xl font-medium transition-all active:scale-95 flex justify-center items-center gap-2"
+            onClick={() => document.dispatchEvent(new Event("click"))}
+            className="w-full py-3 px-4 bg-[#231216] hover:bg-[#2a151a] text-[#f33767] rounded-xl font-semibold transition-all active:scale-95 flex justify-center items-center gap-2.5"
           >
-            <User size={16} />
+            <User size={18} />
             My Profile
           </Link>
           {user.role === "admin" && (
             <Link
               to="/admin"
-              className="w-full py-2.5 px-4 bg-red-600/10 hover:bg-red-600/20 border border-red-500/20 text-red-500 rounded-xl font-medium transition-all active:scale-95 flex justify-center items-center gap-2"
+              className="w-full py-3 px-4 bg-[#231216] hover:bg-[#2a151a] text-red-500 rounded-xl font-semibold transition-all active:scale-95 flex justify-center items-center gap-2.5"
             >
-              <LayoutDashboard size={16} />
+              <LayoutDashboard size={18} />
               Admin Dashboard
             </Link>
           )}
           <button
             onClick={handleLogout}
-            className="w-full py-2.5 px-4 bg-neutral-900/50 hover:bg-neutral-800 border border-neutral-800/80 text-red-400 hover:text-red-300 rounded-xl font-medium transition-all active:scale-95 flex justify-center items-center gap-2"
+            className="w-full py-3 px-4 bg-[#1a1a1a] hover:bg-[#222222] text-[#f33767] rounded-xl font-semibold transition-all active:scale-95 flex justify-center items-center gap-2.5"
           >
-            <LogOut size={16} />
+            <LogOut size={18} />
             Sign Out
           </button>
         </div>
