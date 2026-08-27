@@ -1,16 +1,19 @@
-import React, { useEffect } from "react"
+import React, { useEffect, Suspense, lazy } from "react"
 import { Routes, Route, useLocation } from "react-router-dom"
 import { useDispatch } from "react-redux"
 import { checkAuth, addSocketNotification } from "./redux/slice/authSlice"
 import Navbar from "./components/Navbar/Navbar"
-import Home from "./pages/Home"
-import AnimeDetails from "./pages/AnimeDetail/AnimeDetails"
-import Watch from "./pages/Watch"
-import Search from "./pages/Search"
-import AdminDashboard from "./pages/AdminDashBoard/AdminDashboard"
-import Wishlist from "./pages/WishList/Wishlist"
-import Profile from "./pages/Profile"
-import LandingPage from "./pages/LandingPage"
+
+// Lazy Load Pages to prevent huge bundle size and navigation lag
+const Home = lazy(() => import("./pages/Home"))
+const AnimeDetails = lazy(() => import("./pages/AnimeDetail/AnimeDetails"))
+const Watch = lazy(() => import("./pages/Watch"))
+const Search = lazy(() => import("./pages/Search"))
+const AdminDashboard = lazy(() => import("./pages/AdminDashBoard/AdminDashboard"))
+const Wishlist = lazy(() => import("./pages/WishList/Wishlist"))
+const Profile = lazy(() => import("./pages/Profile"))
+const LandingPage = lazy(() => import("./pages/LandingPage"))
+
 import Lenis from "@studio-freight/lenis"
 import { Toaster, toast } from "react-hot-toast"
 import SmoothScroll from "./components/common/animation/SmoothScroll"
@@ -74,41 +77,50 @@ export default function App() {
         <SmoothScroll>
           {location.pathname !== "/" && <Navbar />}
 
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="/anime/:id" element={<AnimeDetails />} />
-            <Route path="/search" element={<Search />} />
-            <Route path="/watch/:episodeId" element={<Watch />} />
+          <Suspense 
+            fallback={
+              <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center">
+                <div className="w-12 h-12 border-4 border-[#f33767]/20 border-t-[#f33767] rounded-full animate-spin mb-4" />
+                <div className="text-[#f33767] font-black tracking-[0.2em] font-mono text-sm animate-pulse">LOADING...</div>
+              </div>
+            }
+          >
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/home" element={<Home />} />
+              <Route path="/anime/:id" element={<AnimeDetails />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/watch/:episodeId" element={<Watch />} />
 
-            {/* Protected User Routes */}
-            <Route
-              path="/wishlist"
-              element={
-                <ProtectedRoute>
-                  <Wishlist />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
+              {/* Protected User Routes */}
+              <Route
+                path="/wishlist"
+                element={
+                  <ProtectedRoute>
+                    <Wishlist />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Protected Admin Routes */}
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute requireAdmin={true}>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
+              {/* Protected Admin Routes */}
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute requireAdmin={true}>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </Suspense>
         </SmoothScroll>
       </div>
     </UploadProvider>

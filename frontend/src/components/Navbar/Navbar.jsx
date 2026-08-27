@@ -76,7 +76,13 @@ export default function Navbar() {
 
     prevTab.current = item.id
     setActiveTab(item.id)
-    if (item.path) navigate(item.path)
+    if (item.path) {
+      // Delay navigation slightly so the pill animation can run smoothly at 60fps
+      // before React freezes the main thread to render the new page.
+      setTimeout(() => {
+        navigate(item.path)
+      }, 150)
+    }
     setDropdownOpen(false)
   }
 
@@ -132,7 +138,7 @@ export default function Navbar() {
         initial={false}
         animate={{
           top: isMobile ? "auto" : isScrolled ? 24 : 0,
-          bottom: isMobile ? 0 : "auto",
+          bottom: isMobile ? 24 : "auto",
           padding: 0,
         }}
         transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
@@ -157,23 +163,23 @@ export default function Navbar() {
                   backdropFilter: "blur(24px)",
                 }
               : {
-                  borderRadius: "0px",
-                  backgroundColor: "rgba(17,14,22,0.6)",
-                  borderColor: "transparent",
-                  borderWidth: "0px",
-                  borderTopWidth: "1px",
-                  backdropFilter: "blur(24px)",
-                  boxShadow: "none",
+                  borderRadius: "9999px",
+                  backgroundColor: "rgba(10,10,10,0.95)",
+                  borderColor: "rgba(255,255,255,0.1)",
+                  borderWidth: "1px",
+                  backdropFilter: "none",
+                  boxShadow: "0 -5px 20px rgba(0,0,0,0.5)",
                 }
           }
           transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
           className="relative flex items-center justify-center pointer-events-auto"
           style={{
-            width: isMobile ? "100%" : isScrolled ? "fit-content" : "100%",
-            padding: isMobile ? "12px 8px" : isScrolled ? "6px" : "12px 32px",
+            width: isMobile ? "auto" : isScrolled ? "fit-content" : "100%",
+            padding: isMobile ? "8px 12px" : isScrolled ? "6px" : "12px 32px",
             maxWidth: !isMobile && !isScrolled ? "100%" : "none",
+            gap: isMobile ? "8px" : "0px",
             justifyContent: isMobile
-              ? "space-evenly"
+              ? "center"
               : isScrolled
                 ? "center"
                 : "space-between",
@@ -200,8 +206,7 @@ export default function Navbar() {
           )}
 
           {/* Actual Navbar Navigation Component */}
-          <motion.nav
-            layout
+          <nav
             onMouseLeave={isMobile ? undefined : desktopMouseLeave}
             className={`flex items-center gap-1 relative ${!isMobile && !isScrolled ? "flex-none justify-center" : ""}`}
           >
@@ -231,17 +236,16 @@ export default function Navbar() {
                 >
                   <motion.div
                     whileHover={!isMobile ? { scale: 1.05 } : {}}
-                    whileTap={!isMobile ? { scale: 0.95 } : {}}
-                    className={`relative flex items-center gap-2 transition-all duration-300 ease-out z-10
-                    ${isMobile ? "flex-col p-2 w-16" : "px-4 py-2.5 rounded-full overflow-hidden group cursor-pointer"}
-                    ${isLit && isMobile ? "-translate-y-2" : ""}
+                    whileTap={{ scale: 0.9 }}
+                    className={`relative flex items-center justify-center gap-2 z-10 cursor-pointer group rounded-full overflow-hidden transition-all duration-300 ease-out
+                    ${isMobile ? (isLit ? "px-4 py-2 h-11" : "px-0 w-11 h-11") : "px-4 py-2.5 h-[42px]"}
                   `}
                   >
                     {/* Background highlight for active tab */}
-                    {isLit && !isMobile && (
+                    {isLit && (
                       <motion.div
                         layoutId="nav-pill"
-                        className="absolute inset-0 bg-gradient-to-r from-[#f33767]/20 to-[#ff7eb3]/10 border border-[#f33767]/50 rounded-full shadow-[0_0_20px_rgba(243,55,103,0.3)]"
+                        className="absolute inset-0 bg-gradient-to-r from-[#f33767]/20 to-[#ff7eb3]/10 border border-[#f33767]/50 rounded-full md:shadow-[0_0_20px_rgba(243,55,103,0.3)]"
                         transition={{
                           type: "spring",
                           stiffness: 400,
@@ -249,15 +253,16 @@ export default function Navbar() {
                         }}
                       />
                     )}
-
+                    
                     <motion.div
-                      animate={isLit && !isMobile ? { scale: [1, 1.2, 1] } : {}}
+                      animate={isLit ? { scale: [1, 1.2, 1] } : {}}
                       transition={{ duration: 0.3 }}
+                      className="relative flex items-center justify-center"
                     >
                       <Icon
                         size={isMobile ? 22 : 18}
                         className={`relative z-10 transition-colors duration-300
-                        ${isLit ? "text-[#f33767] drop-shadow-[0_0_8px_rgba(243,55,103,0.8)]" : "text-neutral-400 group-hover:text-white"}
+                        ${isLit ? "text-[#f33767] md:drop-shadow-[0_0_8px_rgba(243,55,103,0.8)]" : "text-neutral-400 group-hover:text-white"}
                       `}
                       />
                       {item.id === "notifications" &&
@@ -266,18 +271,15 @@ export default function Navbar() {
                         )}
                     </motion.div>
 
-                    {/* Desktop Label / Input */}
-                    {!isMobile && (
-                      <motion.div
-                        initial={false}
-                        animate={{
-                          width: isLit ? "auto" : 0,
-                          opacity: isLit ? 1 : 0,
-                          marginLeft: isLit ? "8px" : "0px",
-                        }}
-                        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                        className="overflow-hidden whitespace-nowrap text-xs font-black uppercase tracking-widest font-mono text-white drop-shadow-md flex items-center"
-                      >
+                    {/* Label / Input (Visible on both Desktop and Mobile when Lit) */}
+                    <div
+                      className="overflow-hidden whitespace-nowrap text-xs font-black uppercase tracking-widest font-mono text-white drop-shadow-md flex items-center transition-all duration-300 ease-out"
+                      style={{
+                        maxWidth: isLit ? "150px" : "0px",
+                        opacity: isLit ? 1 : 0,
+                        marginLeft: isLit ? "6px" : "0px",
+                      }}
+                    >
                         {item.id === "search" && isLit ? (
                           <form
                             onSubmit={handleSearchSubmit}
@@ -299,19 +301,8 @@ export default function Navbar() {
                             </span>
                           )
                         )}
-                      </motion.div>
-                    )}
+                    </div>
 
-                    {/* Mobile Label */}
-                    {isMobile && (
-                      <span
-                        className={`text-[10px] font-bold mt-1 transition-all duration-300
-                      ${isLit ? "text-[#f33767] opacity-100" : "text-neutral-500 opacity-0 -translate-y-2"}
-                    `}
-                      >
-                        {item.label}
-                      </span>
-                    )}
                   </motion.div>
                 </button>
               )
@@ -319,13 +310,12 @@ export default function Navbar() {
 
             {/* Surprise Me Button (Always attached to nav) */}
             {!isMobile && (
-              <motion.button
-                layout
+              <button
                 className="ml-2 px-5 py-2.5 bg-gradient-to-r from-[#f33767] to-[#ff7eb3] hover:to-[#f33767] text-white text-xs font-black uppercase tracking-[0.15em] font-mono rounded-full shadow-[0_0_20px_rgba(243,55,103,0.4)] transition-all transform hover:scale-105 active:scale-95 border border-white/20 whitespace-nowrap"
                 onClick={() => navigate("/search?surprise=true")}
               >
                 Surprise Me!
-              </motion.button>
+              </button>
             )}
 
             {/* Auth Dropdown */}
@@ -374,9 +364,10 @@ export default function Navbar() {
               <NotificationDropdown
                 isOpen={notifDropdownOpen}
                 onClose={() => setNotifDropdownOpen(false)}
+                isMobile={isMobile}
               />
             </div>
-          </motion.nav>
+          </nav>
 
           {/* Right side spacer for Unscrolled Desktop Navbar to keep it centered */}
           {!isMobile && (

@@ -9,7 +9,7 @@ import {
 } from "../../../redux/slice/authSlice"
 import { useNavigate } from "react-router-dom"
 
-export default function NotificationDropdown({ isOpen, onClose }) {
+export default function NotificationDropdown({ isOpen, onClose, isMobile }) {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { notifications } = useSelector((state) => state.auth)
@@ -44,11 +44,13 @@ export default function NotificationDropdown({ isOpen, onClose }) {
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+          initial={{ opacity: 0, y: isMobile ? 15 : -10, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 10, scale: 0.95 }}
+          exit={{ opacity: 0, y: isMobile ? 15 : -10, scale: 0.95 }}
           transition={{ duration: 0.2 }}
-          className="absolute right-0 top-12 w-80 bg-[#110e16] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50"
+          className={`overflow-hidden z-50 bg-[#110e16] border border-white/10 rounded-2xl shadow-2xl
+            ${isMobile ? "fixed bottom-[88px] left-4 right-4 w-auto origin-bottom" : "absolute right-0 top-12 w-80 origin-top-right"}
+          `}
         >
           <div className="p-4 border-b border-white/5 flex items-center justify-between bg-black/40">
             <h3 className="text-white font-bold text-sm">Notifications</h3>

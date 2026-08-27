@@ -31,12 +31,12 @@ export default function Wishlist() {
   return (
     <div className="min-h-screen bg-[#0e0b12] text-white pt-24 pb-32 md:pb-10 px-4 md:px-8 relative">
       <div className="max-w-[1500px] mx-auto">
-        <div className="flex items-center gap-3 mb-8 border-b border-white/5 pb-4">
-          <Heart size={32} className="text-[#f33767]" fill="#f33767" />
+        <div className="flex flex-wrap items-center gap-3 mb-8 border-b border-white/5 pb-4">
+          <Heart size={32} className="text-[#f33767] shrink-0" fill="#f33767" />
           <h1 className="text-3xl font-black uppercase tracking-wider">
             My Watchlist
           </h1>
-          <span className="ml-2 text-neutral-400 bg-white/5 px-3 py-1 rounded-full text-sm font-bold">
+          <span className="ml-2 text-neutral-400 bg-white/5 px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap shrink-0">
             {wishlist?.length || 0} Items
           </span>
         </div>
