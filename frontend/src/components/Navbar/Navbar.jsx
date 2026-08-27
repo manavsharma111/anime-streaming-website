@@ -108,11 +108,11 @@ export default function Navbar() {
         {dropdownOpen && isMobile && (
           <motion.div
             key="mob-backdrop"
-            className="fixed inset-0 z-40 bg-black/70 backdrop-blur-md md:hidden"
+            className="fixed inset-0 z-40 bg-black/80 md:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
             onPointerDown={() => {
               setActiveTab(prevTab.current)
               setDropdownOpen(false)
@@ -333,11 +333,11 @@ export default function Navbar() {
                       ? { y: "100%" }
                       : { opacity: 0, y: 15, scale: 0.95 }
                   }
-                  transition={{ type: "spring", damping: 25, stiffness: 220 }}
+                  transition={{ type: "spring", damping: 25, stiffness: 250, mass: 0.5 }}
                   className={[
                     "pointer-events-auto z-[60]",
                     isMobile
-                      ? "fixed bottom-0 left-0 right-0 w-full rounded-t-[2.5rem] pb-8 pt-4 px-4 bg-neutral-950/95 backdrop-blur-2xl border border-neutral-800 shadow-[0_15px_40px_rgba(0,0,0,0.8)] overflow-hidden"
+                      ? "fixed bottom-0 left-0 right-0 w-full rounded-t-[2.5rem] pb-8 pt-4 px-4 bg-[#0a0a0a] border-t border-neutral-800 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] overflow-hidden"
                       : "absolute top-full right-0 pt-4 w-[380px]",
                   ].join(" ")}
                 >
