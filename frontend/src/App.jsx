@@ -21,6 +21,7 @@ import socketService from "./services/socketService"
 import { UploadProvider } from "./context/UploadContext"
 import GlobalUploadProgress from "./components/GlobalUploadProgress"
 import ProtectedRoute from "./components/ProtectedRoute"
+import CustomCursor from "./components/common/animation/CustomCursor"
 
 export default function App() {
   const dispatch = useDispatch()
@@ -73,6 +74,7 @@ export default function App() {
             },
           }}
         />
+        <CustomCursor />
         <GlobalUploadProgress />
         <SmoothScroll>
           {location.pathname !== "/" && <Navbar />}

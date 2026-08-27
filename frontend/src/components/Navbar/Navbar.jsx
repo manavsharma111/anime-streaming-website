@@ -124,10 +124,12 @@ export default function Navbar() {
       {/* Mobile Top Logo */}
       {isMobile && !location.pathname.startsWith("/admin") && (
         <div
-          className="absolute top-6 left-0 right-0 z-[60] flex justify-center pointer-events-auto cursor-pointer"
-          onClick={() => navigate("/")}
+          className="absolute top-6 left-0 right-0 z-[60] flex justify-center pointer-events-auto"
         >
-          <div className="text-xl font-black tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-[#f33767] to-[#ff7eb3] font-mono drop-shadow-[0_0_10px_rgba(243,55,103,0.5)]">
+          <div 
+            className="text-xl font-black tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-[#f33767] to-[#ff7eb3] font-mono drop-shadow-[0_0_10px_rgba(243,55,103,0.5)] cursor-pointer"
+            onClick={() => navigate("/")}
+          >
             ANIME<span className="text-white drop-shadow-md">STREAM</span>
           </div>
         </div>
@@ -196,10 +198,12 @@ export default function Navbar() {
                 paddingRight: isScrolled ? 0 : "2rem",
               }}
               transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-              className="flex justify-start items-center overflow-hidden cursor-pointer whitespace-nowrap pointer-events-auto"
-              onClick={() => navigate("/")}
+              className="flex justify-start items-center overflow-hidden whitespace-nowrap pointer-events-auto"
             >
-              <div className="text-xl font-black tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-[#f33767] to-[#ff7eb3] font-mono drop-shadow-[0_0_10px_rgba(243,55,103,0.5)]">
+              <div 
+                className="text-xl font-black tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-[#f33767] to-[#ff7eb3] font-mono drop-shadow-[0_0_10px_rgba(243,55,103,0.5)] cursor-pointer"
+                onClick={() => navigate("/")}
+              >
                 ANIME<span className="text-white drop-shadow-md">STREAM</span>
               </div>
             </motion.div>
