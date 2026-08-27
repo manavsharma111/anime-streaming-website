@@ -181,7 +181,7 @@ export default function StackedGenreCards() {
       mm.add("(max-width: 767px)", () => {
         // Horizontal scroll tied to vertical scroll for mobile
         gsap.set(cardsRef.current, { clearProps: "all" })
-        
+
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: containerRef.current,
@@ -209,17 +209,17 @@ export default function StackedGenreCards() {
   return (
     <section
       ref={containerRef}
-      className="relative w-full min-h-screen bg-[#050505] flex flex-col items-start md:items-center z-20 py-16 md:py-0 overflow-hidden"
+      className="relative w-full min-h-screen bg-[#050505] flex flex-col items-start md:items-center md:justify-center z-20 py-16 md:py-12 overflow-hidden"
     >
-      <div className="md:absolute top-10 w-full flex flex-col items-center z-30 mb-8 md:mb-0 px-4 md:px-0">
+      <div className="w-full flex flex-col items-center z-30 mb-8 md:mb-10 px-4 md:px-0">
         <h2 className="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 tracking-tighter mb-2 text-center leading-none">
           DISCOVER BY GENRE
         </h2>
       </div>
 
-      <div 
+      <div
         ref={sliderRef}
-        className="relative flex flex-row md:block w-max md:w-full max-w-none md:max-w-5xl md:h-[80vh] gap-6 md:gap-0 px-6 md:px-0 mt-8 md:mt-16 self-start md:self-auto"
+        className="relative flex flex-row md:block w-max md:w-full max-w-none md:max-w-5xl md:h-[75vh] gap-6 md:gap-0 px-6 md:px-0 mt-0 self-start md:self-auto"
       >
         {genres.map((genre, i) => (
           <div
@@ -237,16 +237,16 @@ export default function StackedGenreCards() {
 
             {/* Dynamic Gradient Overlay */}
             <div
-              className={`absolute inset-0 bg-gradient-to-br ${genre.color} opacity-40 mix-blend-overlay`}
+              className={`absolute inset-0 bg-gradient-to-br ${genre.color} opacity-40 md:mix-blend-overlay`}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/90 via-[#050505]/20 to-transparent pointer-events-none" />
 
             {/* Content */}
-            <div className="relative z-10 flex flex-col items-center text-center px-6">
-              <h3 className="text-6xl md:text-9xl font-black text-white tracking-tighter drop-shadow-2xl">
+            <div className="relative z-10 flex flex-col items-center text-center px-4 w-full">
+              <h3 className="text-[12vw] sm:text-6xl md:text-9xl font-black text-white tracking-tighter drop-shadow-2xl max-w-full break-words leading-[1.1]">
                 {genre.title}
               </h3>
-              <p className="text-white/70 text-lg md:text-2xl mt-6 font-medium max-w-lg leading-relaxed">
+              <p className="text-white/70 text-sm sm:text-base md:text-2xl mt-4 md:mt-6 font-medium max-w-full md:max-w-lg leading-relaxed px-2">
                 {genre.desc}
               </p>
 

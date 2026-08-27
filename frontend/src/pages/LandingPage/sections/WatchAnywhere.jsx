@@ -46,16 +46,16 @@ export default function WatchAnywhere() {
           </div>
         </div>
 
-        <div className="flex-1 relative h-[350px] md:h-[650px] lg:h-[600px] w-full flex items-center justify-center mt-12 md:mt-20 lg:mt-0">
+        <div className="flex-1 relative w-full aspect-square md:aspect-auto md:h-[650px] lg:h-[600px] mt-12 md:mt-20 lg:mt-0 max-w-[400px] mx-auto md:max-w-none">
           {/* Decorative glowing orb */}
           <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] lg:w-[400px] h-[300px] lg:h-[400px] bg-red-600/20 rounded-full blur-[60px] lg:blur-[100px]" />
 
           {/* Laptop Mockup */}
           <motion.div
             style={isMobile ? {} : { y: y1 }}
-            className="absolute z-10 left-1/2 -translate-x-1/2 lg:translate-x-0 lg:-left-10 top-0 md:top-4 lg:top-10"
+            className="absolute z-10 top-0 left-1/2 -translate-x-1/2 w-[85%] md:w-[400px] lg:w-[450px] md:lg:-left-10 md:top-4 lg:top-10 md:-translate-x-0"
           >
-            <div className="w-[240px] md:w-[400px] lg:w-[450px] aspect-video bg-[#111] rounded-xl md:rounded-2xl border-2 md:border-4 border-[#222] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden relative">
+            <div className="w-full aspect-video bg-[#111] rounded-xl md:rounded-2xl border-2 md:border-4 border-[#222] shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden relative">
               <img
                 src="https://media1.tenor.com/m/bm-59zifr-oAAAAd/reze-chainsaw-man-reze.gif"
                 alt="Laptop View"
@@ -68,9 +68,9 @@ export default function WatchAnywhere() {
           {/* Tablet Mockup */}
           <motion.div
             style={isMobile ? {} : { y: y2 }}
-            className="absolute z-20 -right-2 md:right-10 lg:-right-10 top-1/2 -translate-y-1/2"
+            className="absolute z-20 bottom-[5%] right-0 w-[40%] md:w-[240px] lg:w-[280px] md:right-10 lg:-right-10 md:top-1/2 md:-translate-y-1/2 md:bottom-auto"
           >
-            <div className="w-[110px] md:w-[240px] lg:w-[280px] aspect-[3/4] bg-[#111] rounded-xl lg:rounded-3xl border-4 lg:border-8 border-[#222] shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden">
+            <div className="w-full aspect-[3/4] bg-[#111] rounded-xl lg:rounded-3xl border-4 lg:border-8 border-[#222] shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden">
               <img
                 src="https://media1.tenor.com/images/a9c85354bc73c114b4cc75455abe4dc3/tenor.gif?itemid=19915426"
                 alt="Tablet View"
@@ -82,9 +82,9 @@ export default function WatchAnywhere() {
           {/* Phone Mockup */}
           <motion.div
             style={isMobile ? {} : { y: y3 }}
-            className="absolute z-30 left-0 md:left-20 lg:left-1/4 bottom-4 md:bottom-12 lg:bottom-10"
+            className="absolute z-30 bottom-0 left-[5%] w-[30%] md:w-[140px] lg:w-[160px] md:left-20 lg:left-1/4 md:bottom-12 lg:bottom-10"
           >
-            <div className="w-[80px] md:w-[140px] lg:w-[160px] aspect-[9/19] bg-[#111] rounded-2xl lg:rounded-[2rem] border-4 lg:border-8 border-[#222] shadow-[0_40px_80px_rgba(0,0,0,0.9)] overflow-hidden">
+            <div className="w-full aspect-[9/19] bg-[#111] rounded-2xl lg:rounded-[2rem] border-4 lg:border-8 border-[#222] shadow-[0_40px_80px_rgba(0,0,0,0.9)] overflow-hidden">
               <img
                 src="https://64.media.tumblr.com/7e2453da9674bcb5b18a2b60795dfa07/6ffe034dc5a009bc-9b/s540x810/8eac80d1085f4d86de5c884ab107e79c6f16fc8c.gif"
                 alt="Phone View"

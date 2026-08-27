@@ -131,8 +131,10 @@ export default function HoverRoster({ animeList = [], loading }) {
         pin: true,
         pinSpacing: true,
         onUpdate(self) {
+          // Multiply by roster.length + 0.5 to give the last item extra pinned time
+          // before the section unpins, ensuring the user actually sees it.
           const idx = Math.min(
-            Math.floor(self.progress * roster.length),
+            Math.floor(self.progress * (roster.length + 0.5)),
             roster.length - 1,
           )
           setActiveIdx((prev) => (prev !== idx ? idx : prev))
@@ -162,7 +164,7 @@ export default function HoverRoster({ animeList = [], loading }) {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full h-screen overflow-hidden bg-[#020202]"
+      className="relative w-full h-[100dvh] md:h-screen overflow-hidden bg-[#020202]"
       style={{ zIndex: 20 }}
     >
       {/* Blurred ambient background */}
@@ -179,7 +181,7 @@ export default function HoverRoster({ animeList = [], loading }) {
             src={cur.img}
             alt=""
             aria-hidden
-            className="w-full h-full object-cover scale-110 blur-[40px] md:blur-[90px] brightness-[0.2] md:brightness-[0.12] saturate-200"
+            className="w-full h-full object-cover scale-110 blur-xl md:blur-[90px] brightness-[0.2] md:brightness-[0.12] saturate-150 md:saturate-200"
             style={{
               willChange: "opacity",
             }}
@@ -329,7 +331,8 @@ export default function HoverRoster({ animeList = [], loading }) {
           </p>
 
           {/* Ghost index */}
-          <div className="relative h-12 md:h-20 overflow-hidden pointer-events-none select-none">
+          {/* <div className="relative h-12 md:h-20 overflow-hidden pointer-events-none select-none"> */}
+            <div className="relative h-24 md:h-32 pointer-events-none select-none">
             <AnimatePresence mode="wait">
               <motion.span
                 key={"idx-" + activeIdx}
