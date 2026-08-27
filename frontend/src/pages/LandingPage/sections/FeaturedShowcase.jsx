@@ -76,7 +76,7 @@ export default function FeaturedShowcase({ animeList = [], loading }) {
   const item = displayList[active]
 
   return (
-    <section className="relative w-full h-screen min-h-[800px] flex items-center overflow-hidden bg-[#050505] z-10">
+    <section className="relative w-full min-h-screen md:min-h-[800px] flex items-center justify-center overflow-hidden bg-[#050505] z-10 py-24 md:py-0">
       <AnimatePresence mode="wait">
         <motion.div
           key={active}
@@ -97,26 +97,26 @@ export default function FeaturedShowcase({ animeList = [], loading }) {
         </motion.div>
       </AnimatePresence>
 
-      <div className="container mx-auto px-6 md:px-12 relative z-20 flex flex-col lg:flex-row items-center gap-12">
-        <div className="flex-1">
+      <div className="container mx-auto px-6 md:px-12 relative z-20 flex flex-col lg:flex-row items-center gap-8 md:gap-12 pb-12 md:pb-0">
+        <div className="flex-1 w-full text-center lg:text-left pt-10 md:pt-0">
           <motion.div
             key={`content-${active}`}
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
           >
-            <div className="inline-block px-4 py-1 rounded-full border border-white/20 bg-white/5 backdrop-blur-md text-white text-sm font-bold tracking-widest uppercase mb-8">
+            <div className="inline-block px-4 py-1 rounded-full border border-white/20 bg-white/5 backdrop-blur-md text-white text-xs md:text-sm font-bold tracking-widest uppercase mb-6 md:mb-8">
               Featured Masterpiece
             </div>
 
-            <h2 className="text-5xl md:text-7xl font-black text-white mb-6 drop-shadow-2xl">
+            <h2 className="text-4xl md:text-7xl font-black text-white mb-4 md:mb-6 drop-shadow-2xl">
               {item.title}
             </h2>
-            <p className="text-lg text-neutral-300 max-w-xl leading-relaxed mb-10">
+            <p className="text-sm md:text-lg text-neutral-300 max-w-xl mx-auto lg:mx-0 leading-relaxed mb-8 md:mb-10">
               {item.description}
             </p>
 
-            <div className="flex flex-wrap gap-4 pt-4">
+            <div className="flex flex-wrap justify-center lg:justify-start gap-4 pt-2 md:pt-4">
               <Link to="/home">
                 <button className="px-8 py-4 bg-white text-black font-bold rounded-full flex items-center gap-3 hover:scale-105 transition-transform">
                   <Play size={20} className="fill-black" />
@@ -130,7 +130,7 @@ export default function FeaturedShowcase({ animeList = [], loading }) {
           </motion.div>
         </div>
 
-        <div className="flex-1 flex justify-center lg:justify-end relative h-[500px] w-full">
+        <div className="flex-1 flex justify-center lg:justify-end relative h-[360px] md:h-[500px] w-full mt-4 md:mt-0">
           <AnimatePresence mode="wait">
             <motion.div
               key={`image-${active}`}
@@ -138,7 +138,7 @@ export default function FeaturedShowcase({ animeList = [], loading }) {
               animate={{ opacity: 1, y: 0, rotateY: 0 }}
               exit={{ opacity: 0, y: -50, rotateY: -20 }}
               transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
-              className="absolute w-[300px] md:w-[400px] h-[450px] md:h-[600px] rounded-3xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.8)] border border-white/10"
+              className="absolute w-[240px] md:w-[400px] h-[340px] md:h-[600px] rounded-2xl md:rounded-3xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.8)] border border-white/10"
               style={{ perspective: 1000 }}
             >
               <img
@@ -152,7 +152,7 @@ export default function FeaturedShowcase({ animeList = [], loading }) {
       </div>
 
       {/* Indicators */}
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-3 z-30">
+      <div className="absolute bottom-6 md:bottom-12 left-1/2 -translate-x-1/2 flex gap-3 z-30">
         {displayList.map((_, i) => (
           <button
             key={i}

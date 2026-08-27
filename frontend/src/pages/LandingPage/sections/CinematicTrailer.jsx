@@ -27,11 +27,18 @@ export default function CinematicTrailer() {
           style={{ scale, opacity }}
           className="relative w-full md:w-[85vw] h-[60vh] md:h-[85vh] rounded-[2rem] overflow-hidden shadow-2xl border border-white/5 bg-black"
         >
-          {/* Authentic High-Quality Anime Aesthetic */}
+          {/* Authentic High-Quality Anime Aesthetic - Fallback for mobile and iframe for desktop */}
+          <div className="absolute inset-0 w-full h-full block md:hidden">
+            <img 
+              src="https://media1.tenor.com/m/bm-59zifr-oAAAAd/reze-chainsaw-man-reze.gif" 
+              alt="Anime Action"
+              className="w-full h-full object-cover brightness-[0.6]"
+            />
+          </div>
           <iframe
             src="https://www.youtube.com/embed/PWoS5WrXgnc?autoplay=1&mute=1&loop=1&playlist=PWoS5WrXgnc&controls=0&showinfo=0&rel=0&modestbranding=1&disablekb=1&iv_load_policy=3&playsinline=1"
             title="Trailer Background"
-            className="w-full h-full object-cover brightness-[0.6] pointer-events-none scale-[1.3]"
+            className="hidden md:block w-full h-full object-cover brightness-[0.6] pointer-events-none scale-[1.3]"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen

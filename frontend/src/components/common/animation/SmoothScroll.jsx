@@ -17,9 +17,8 @@ const SmoothScroll = ({ children }) => {
       lerp: 0.05, // Lower value = more buttery/smooth, higher = more responsive (default is 0.1)
       wheelMultiplier: 1,
       smoothWheel: true,
-      syncTouch: true,
-      touchMultiplier: 1.5, // Thoda kam kiya taaki touch par ekdam se na bhaage
-      smoothTouch: true,
+      syncTouch: false,
+      smoothTouch: false, // Disabled for mobile because native touch scroll is hardware-accelerated and much smoother
     })
 
     // Make lenis globally available to allow modals to pause it

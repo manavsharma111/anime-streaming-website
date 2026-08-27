@@ -134,6 +134,7 @@ const genres = [
 ]
 export default function StackedGenreCards() {
   const containerRef = useRef(null)
+  const sliderRef = useRef(null)
   const cardsRef = useRef([])
   const navigate = useNavigate()
 
@@ -178,8 +179,26 @@ export default function StackedGenreCards() {
       });
 
       mm.add("(max-width: 767px)", () => {
-        // Reset styles for mobile
-        gsap.set(cardsRef.current, { clearProps: "all" });
+        // Horizontal scroll tied to vertical scroll for mobile
+        gsap.set(cardsRef.current, { clearProps: "all" })
+        
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "top top",
+            end: `+=${genres.length * 100}%`, // Scroll duration
+            scrub: 1,
+            pin: true,
+          },
+        })
+
+        // Calculate the total distance to move
+        // We move the slider container to the left by (100% - viewport width)
+        const paddingRight = 24 // Accounts for px-6
+        tl.to(sliderRef.current, {
+          x: () => -(sliderRef.current.scrollWidth - window.innerWidth + paddingRight),
+          ease: "none",
+        })
       });
 
     }, containerRef)
@@ -190,20 +209,23 @@ export default function StackedGenreCards() {
   return (
     <section
       ref={containerRef}
-      className="relative w-full min-h-screen bg-[#050505] flex flex-col items-center z-20 px-4 md:px-0 py-24 md:py-0"
+      className="relative w-full min-h-screen bg-[#050505] flex flex-col items-start md:items-center z-20 py-16 md:py-0 overflow-hidden"
     >
-      <div className="md:absolute top-10 w-full flex flex-col items-center z-30 mb-10 md:mb-0">
+      <div className="md:absolute top-10 w-full flex flex-col items-center z-30 mb-8 md:mb-0 px-4 md:px-0">
         <h2 className="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 tracking-tighter mb-2 text-center leading-none">
           DISCOVER BY GENRE
         </h2>
       </div>
 
-      <div className="relative w-full max-w-5xl md:h-[80vh] flex flex-col md:block gap-12 md:mt-16 pb-20 md:pb-0">
+      <div 
+        ref={sliderRef}
+        className="relative flex flex-row md:block w-max md:w-full max-w-none md:max-w-5xl md:h-[80vh] gap-6 md:gap-0 px-6 md:px-0 mt-8 md:mt-16 self-start md:self-auto"
+      >
         {genres.map((genre, i) => (
           <div
             key={i}
             ref={(el) => (cardsRef.current[i] = el)}
-            className="sticky md:absolute top-24 md:top-0 left-0 w-full h-[60vh] md:h-full rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.5)] flex items-center justify-center border border-white/10 origin-top"
+            className="shrink-0 w-[80vw] md:w-full relative md:absolute md:top-0 left-0 h-[65vh] md:h-full rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl flex items-center justify-center border border-white/10 origin-top"
             style={{ zIndex: i }}
           >
             {/* Background Image */}
