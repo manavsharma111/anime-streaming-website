@@ -181,6 +181,10 @@ const processAnimeVideo = async (
         if (streamCounts.aCount > 0) {
           streamCounts.audioStreams.forEach(a => audioMaps.push(`-map 0:${a.index}`))
         }
+
+        audioPaths.forEach((audioPath, index) => {
+          audioMaps.push(`-map ${index + 1}:a:0`)
+        })
         
         let baseHlsOptions = [
           "-c:v libx264", "-profile:v main", "-pix_fmt yuv420p", "-preset ultrafast", "-threads 2",
@@ -190,6 +194,7 @@ const processAnimeVideo = async (
         ]
 
         const hls1080Cmd = ffmpeg().input(inputPath)
+        audioPaths.forEach(audioPath => hls1080Cmd.input(audioPath))
         hls1080Cmd.output(path.join(streamDir, "0/manifest.m3u8")).outputOptions([
           "-map 0:v:0", ...audioMaps,
           "-s:v:0 1920x1080", "-b:v:0 3000k", ...baseHlsOptions,
@@ -200,6 +205,7 @@ const processAnimeVideo = async (
 
         // 2. HLS 720p Task
         const hls720Cmd = ffmpeg().input(inputPath)
+        audioPaths.forEach(audioPath => hls720Cmd.input(audioPath))
         hls720Cmd.output(path.join(streamDir, "1/manifest.m3u8")).outputOptions([
           "-map 0:v:0", ...audioMaps,
           "-s:v:0 1280x720", "-b:v:0 1500k", ...baseHlsOptions,
@@ -210,6 +216,7 @@ const processAnimeVideo = async (
         
         // 3. HLS 480p Task
         const hls480Cmd = ffmpeg().input(inputPath)
+        audioPaths.forEach(audioPath => hls480Cmd.input(audioPath))
         hls480Cmd.output(path.join(streamDir, "2/manifest.m3u8")).outputOptions([
           "-map 0:v:0", ...audioMaps,
           "-s:v:0 854x480", "-b:v:0 800k", ...baseHlsOptions,

@@ -1,73 +1,73 @@
-import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useState } from "react"
+import { motion } from "framer-motion"
 
 const CustomCursor = () => {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [hoveredElement, setHoveredElement] = useState(null);
-  const [, setScrollForceUpdate] = useState(0);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [hoveredElement, setHoveredElement] = useState(null)
+  const [, setScrollForceUpdate] = useState(0)
 
   useEffect(() => {
     const updateMousePosition = (e) => {
       setMousePosition({
         x: e.clientX,
         y: e.clientY,
-      });
-    };
+      })
+    }
 
     const handleMouseOver = (e) => {
       const target = e.target.closest(
         'a, button, [role="button"], input, textarea, select, .cursor-pointer'
-      );
+      )
       if (target) {
-        setHoveredElement(target);
+        setHoveredElement(target)
       }
-    };
+    }
 
     const handleMouseOut = (e) => {
       const target = e.target.closest(
         'a, button, [role="button"], input, textarea, select, .cursor-pointer'
-      );
+      )
       if (target) {
-        setHoveredElement(null);
+        setHoveredElement(null)
       }
-    };
+    }
     
     const handleScroll = () => {
       if (hoveredElement) {
         setScrollForceUpdate(prev => prev + 1);
       }
-    };
+    }
 
-    window.addEventListener("mousemove", updateMousePosition);
-    window.addEventListener("mouseover", handleMouseOver);
-    window.addEventListener("mouseout", handleMouseOut);
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("mousemove", updateMousePosition)
+    window.addEventListener("mouseover", handleMouseOver)
+    window.addEventListener("mouseout", handleMouseOut)
+    window.addEventListener("scroll", handleScroll, { passive: true })
 
     return () => {
-      window.removeEventListener("mousemove", updateMousePosition);
-      window.removeEventListener("mouseover", handleMouseOver);
-      window.removeEventListener("mouseout", handleMouseOut);
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [hoveredElement]);
+      window.removeEventListener("mousemove", updateMousePosition)
+      window.removeEventListener("mouseover", handleMouseOver)
+      window.removeEventListener("mouseout", handleMouseOut)
+      window.removeEventListener("scroll", handleScroll)
+    }
+  }, [hoveredElement])
 
   const getHoverConfig = () => {
-    if (!hoveredElement) return null;
-    const rect = hoveredElement.getBoundingClientRect();
-    const computedStyle = window.getComputedStyle(hoveredElement);
-    const radius = computedStyle.borderRadius;
+    if (!hoveredElement) return null
+    const rect = hoveredElement.getBoundingClientRect()
+    const computedStyle = window.getComputedStyle(hoveredElement)
+    const radius = computedStyle.borderRadius
     // Extra padding around the element
-    const padding = 8;
+    const padding = 8
     return {
       x: rect.left - padding / 2,
       y: rect.top - padding / 2,
       width: rect.width + padding,
       height: rect.height + padding,
       borderRadius: radius === "0px" ? "8px" : radius, 
-    };
-  };
+    }
+  }
 
-  const hoverConfig = getHoverConfig();
+  const hoverConfig = getHoverConfig()
 
   const variants = {
     default: {
