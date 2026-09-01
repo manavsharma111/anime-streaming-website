@@ -79,10 +79,6 @@ html {
   font-weight: 600 !important;
 }
 
-video::-webkit-media-text-track-display {
-  transform: translateY(-40px) !important;
-}
-
 button {
   cursor: pointer;
 }

@@ -48,3 +48,14 @@ video::-webkit-media-controls {
 .player-container.hide-cursor, .player-container.hide-cursor * {
   cursor: none !important;
 }
+
+/* Subtitle Positioning */
+.player-container.subtitle-pos-bottom video::-webkit-media-text-track-display {
+  transform: translateY(-40px) !important;
+}
+
+.player-container.subtitle-pos-top video::-webkit-media-text-track-display {
+  transform: none !important;
+  bottom: auto !important;
+  top: 10% !important;
+}

@@ -63,6 +63,8 @@ export default function VideoPlayer({
     changeVolume,
   } = playerState
 
+  const [subtitlePosition, setSubtitlePosition] = React.useState("bottom")
+
   // HLS Hook
   const {
     qualities,
@@ -244,10 +246,12 @@ export default function VideoPlayer({
     onQualityChange: changeQuality,
     onAudioChange: changeAudioTrack,
     onSubtitleChange: changeSubtitleTrack,
-    onSpeedChange: (s) => {
-      if (videoRef.current) videoRef.current.playbackRate = s
-      setPlaybackSpeed(s)
+    onSpeedChange: (speed) => {
+      setPlaybackSpeed(speed)
+      if (videoRef.current) videoRef.current.playbackRate = speed
     },
+    subtitlePosition,
+    onSubtitlePositionChange: setSubtitlePosition,
   }
 
   return (
@@ -258,7 +262,8 @@ export default function VideoPlayer({
       className={cn(
         "relative w-full bg-transparent group select-none player-container font-sans text-white shadow-2xl",
         isFullscreen ? "h-screen w-screen" : "aspect-video",
-        !showControls && "hide-cursor"
+        !showControls && "hide-cursor",
+        subtitlePosition === "top" ? "subtitle-pos-top" : "subtitle-pos-bottom"
       )}
     >
       {/* NATIVE VIDEO ELEMENT */}

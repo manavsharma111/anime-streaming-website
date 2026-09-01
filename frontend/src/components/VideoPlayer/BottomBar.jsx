@@ -28,7 +28,7 @@ export default function BottomBar({
   return (
     <div
       className={cn(
-        "absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent pt-12 pb-4 px-6 flex flex-col gap-3 z-30 transition-opacity duration-300 pointer-events-auto",
+        "absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent pt-12 pb-4 px-6 flex flex-col gap-3 transition-opacity duration-300 pointer-events-auto",
         showControls ? "opacity-100" : "opacity-0 pointer-events-none",
       )}
     >
