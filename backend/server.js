@@ -120,20 +120,53 @@ app.get("/api/fix-m3u8", (req, res) => {
   
       content = content.replace(/\\/g, '/');
       const lines = content.split('\n');
+      let newLines = [];
       let hasDefaultAudio = false;
+      let skipNextLine = false;
+
       for (let i = 0; i < lines.length; i++) {
-        if (lines[i].includes('#EXT-X-MEDIA:TYPE=AUDIO')) {
-          if (!hasDefaultAudio && lines[i].includes('DEFAULT=YES')) {
+        if (skipNextLine) {
+          skipNextLine = false;
+          continue;
+        }
+
+        let line = lines[i];
+
+        // Fix default audio flag
+        if (line.includes('#EXT-X-MEDIA:TYPE=AUDIO')) {
+          if (!hasDefaultAudio && line.includes('DEFAULT=YES')) {
             hasDefaultAudio = true;
-          } else if (hasDefaultAudio && lines[i].includes('DEFAULT=YES')) {
-            lines[i] = lines[i].replace('DEFAULT=YES', 'DEFAULT=NO');
-          } else if (!hasDefaultAudio && lines[i].includes('DEFAULT=NO')) {
-             lines[i] = lines[i].replace('DEFAULT=NO', 'DEFAULT=YES');
+          } else if (hasDefaultAudio && line.includes('DEFAULT=YES')) {
+            line = line.replace('DEFAULT=YES', 'DEFAULT=NO');
+          } else if (!hasDefaultAudio && line.includes('DEFAULT=NO')) {
+             line = line.replace('DEFAULT=NO', 'DEFAULT=YES');
              hasDefaultAudio = true;
           }
+          newLines.push(line);
+          continue;
         }
+
+        // Fix EXT-X-STREAM-INF
+        if (line.startsWith('#EXT-X-STREAM-INF:')) {
+          const nextLine = lines[i + 1] || "";
+          
+          // If this STREAM-INF is actually just an audio track, remove it entirely
+          if (nextLine.toLowerCase().includes('audio') && !nextLine.toLowerCase().includes('1080') && !nextLine.toLowerCase().includes('720') && !nextLine.toLowerCase().includes('480')) {
+            skipNextLine = true;
+            continue;
+          }
+
+          // Otherwise, it's a real video stream. Remove embedded audio codec.
+          // e.g. CODECS="avc1.6e0028,mp4a.40.2" -> CODECS="avc1.6e0028"
+          line = line.replace(/,mp4a\.40\.2/g, '').replace(/mp4a\.40\.2,/g, '').replace(/mp4a\.40\.2/g, '');
+          newLines.push(line);
+          continue;
+        }
+
+        newLines.push(line);
       }
-      content = lines.join('\n');
+      
+      content = newLines.join('\n');
   
       if (content !== originalContent) {
         fs.writeFileSync(masterPath, content, 'utf8');

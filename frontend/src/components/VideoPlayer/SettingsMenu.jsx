@@ -211,7 +211,7 @@ export default function SettingsMenu({
             transition={{ duration: 0.15, ease: "easeOut" }}
             className={cn(
               "absolute right-0 w-[260px] sm:w-[300px] bg-[#2a2d34]/95 backdrop-blur-xl rounded-xl shadow-2xl z-50 flex flex-col border border-white/10 overflow-hidden text-white pointer-events-auto font-sans cursor-grab active:cursor-grabbing",
-              "bottom-full mb-3 origin-bottom-right max-h-[240px] sm:max-h-[320px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              "bottom-full mb-3 origin-bottom-right max-h-[150px] sm:max-h-[250px] md:max-h-[320px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             )}
             data-lenis-prevent="true"
             onMouseDown={handleMouseDown}
