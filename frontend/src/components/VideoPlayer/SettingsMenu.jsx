@@ -171,8 +171,7 @@ export default function SettingsMenu({
               "absolute right-0 w-[260px] sm:w-[300px] bg-[#2a2d34]/95 backdrop-blur-xl rounded-xl shadow-2xl z-50 flex flex-col border border-white/10 overflow-hidden text-white pointer-events-auto font-sans",
               "bottom-full mb-3 origin-bottom-right max-h-[60vh] sm:max-h-[80vh] overflow-y-auto custom-scrollbar"
             )}
-            onWheel={(e) => e.stopPropagation()}
-            onTouchMove={(e) => e.stopPropagation()}
+            data-lenis-prevent="true"
           >
             {activeMenu === "main" && (
               <motion.div 
