@@ -100,10 +100,12 @@ export default function SettingsMenu({
           return (
             <button
               key={item[idKey]}
-              onClick={() => {
-                if (!isDragging) {
+              onClick={(e) => {
+                if (!hasMoved) {
                   if(onSelect) onSelect(item[idKey])
                   setActiveMenu("main")
+                } else {
+                  e.preventDefault()
                 }
               }}
               className="text-left px-5 py-3 text-[14px] transition-colors flex items-center gap-3 hover:bg-white/10"
@@ -127,7 +129,7 @@ export default function SettingsMenu({
 
   const renderMainMenuItem = (label, value, onClick) => (
     <button 
-      onClick={() => { if (!isDragging) onClick() }}
+      onClick={(e) => { if (!hasMoved) onClick(); else e.preventDefault(); }}
       className="w-full text-left px-5 py-3 flex items-center justify-between hover:bg-white/10 transition-colors group"
     >
       <div className="flex flex-col">
@@ -141,7 +143,7 @@ export default function SettingsMenu({
   const renderSubMenuHeader = (title) => (
     <div className="flex items-center px-2 py-2 border-b border-white/10">
       <button 
-        onClick={() => { if (!isDragging) setActiveMenu("main") }}
+        onClick={(e) => { if (!hasMoved) setActiveMenu("main"); else e.preventDefault(); }}
         className="p-2 hover:bg-white/10 rounded-full transition-colors text-neutral-300 hover:text-white"
       >
         <ChevronLeft size={20} />
@@ -151,6 +153,7 @@ export default function SettingsMenu({
   )
 
   const [isDragging, setIsDragging] = useState(false)
+  const [hasMoved, setHasMoved] = useState(false)
   const [startY, setStartY] = useState(0)
   const [scrollTop, setScrollTop] = useState(0)
   const scrollRef = useRef(null)
@@ -158,17 +161,19 @@ export default function SettingsMenu({
   const handleMouseDown = (e) => {
     if (!scrollRef.current) return
     setIsDragging(true)
+    setHasMoved(false)
     setStartY(e.pageY - scrollRef.current.offsetTop)
     setScrollTop(scrollRef.current.scrollTop)
   }
 
   const handleMouseLeave = () => {
     setIsDragging(false)
+    setTimeout(() => setHasMoved(false), 50)
   }
 
   const handleMouseUp = () => {
-    // Adding a small timeout to prevent click events from firing immediately after drag
-    setTimeout(() => setIsDragging(false), 50)
+    setIsDragging(false)
+    setTimeout(() => setHasMoved(false), 50)
   }
 
   const handleMouseMove = (e) => {
@@ -176,6 +181,11 @@ export default function SettingsMenu({
     e.preventDefault()
     const y = e.pageY - scrollRef.current.offsetTop
     const walk = (y - startY) * 1.5
+    
+    // Only consider it a drag if moved more than 5px
+    if (Math.abs(y - startY) > 5) {
+      setHasMoved(true)
+    }
     scrollRef.current.scrollTop = scrollTop - walk
   }
 
@@ -201,7 +211,7 @@ export default function SettingsMenu({
             transition={{ duration: 0.15, ease: "easeOut" }}
             className={cn(
               "absolute right-0 w-[260px] sm:w-[300px] bg-[#2a2d34]/95 backdrop-blur-xl rounded-xl shadow-2xl z-50 flex flex-col border border-white/10 overflow-hidden text-white pointer-events-auto font-sans cursor-grab active:cursor-grabbing",
-              "bottom-full mb-3 origin-bottom-right max-h-[60vh] sm:max-h-[80vh] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              "bottom-full mb-3 origin-bottom-right max-h-[240px] sm:max-h-[320px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             )}
             data-lenis-prevent="true"
             onMouseDown={handleMouseDown}
@@ -263,10 +273,12 @@ export default function SettingsMenu({
                     return (
                       <button
                         key={size}
-                        onClick={() => {
-                          if (!isDragging) {
+                        onClick={(e) => {
+                          if (!hasMoved) {
                             if (onSubtitleSizeChange) onSubtitleSizeChange(size);
                             setActiveMenu("main");
+                          } else {
+                            e.preventDefault();
                           }
                         }}
                         className={cn(
@@ -330,7 +342,7 @@ export default function SettingsMenu({
                       target="_blank"
                       rel="noreferrer"
                       onClick={(e) => {
-                        if (isDragging) e.preventDefault();
+                        if (hasMoved) e.preventDefault();
                       }}
                       className="text-left px-5 py-3 text-[14px] font-medium text-neutral-300 hover:text-white hover:bg-white/10 transition-colors flex items-center justify-between group"
                     >
