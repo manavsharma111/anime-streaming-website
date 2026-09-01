@@ -55,22 +55,8 @@ const uploadFileToR2 = async (localFilePath, s3Key) => {
     let content = fileBuffer.toString("utf8")
     content = content.replace(/\\/g, "/")
 
-    // Fix FFmpeg creating video variants for audio tracks
-    if (localFilePath.endsWith("master.m3u8")) {
-      // Strip erroneous video streams that point to audio directories
-      // Actual HLS variant dirs are named 0, 1, 2 (not 1080p, 720p, 480p)
-      content = content.replace(
-        /#EXT-X-STREAM-INF:.*?[\r\n]+(?![012]\/manifest\.m3u8)[^\r\n]+\/manifest\.m3u8[\r\n]*/g,
-        "",
-      )
-
-      // Fix audio track names (FFmpeg hardcodes them as audio_X)
-      // Extract the language code from the URI (e.g. URI="hin/manifest.m3u8") and use it as the NAME
-      content = content.replace(
-        /NAME="audio_\d+"(.*?)URI="([a-zA-Z0-9_-]+)\/manifest\.m3u8"/g,
-        'NAME="$2"$1URI="$2/manifest.m3u8"',
-      )
-    }
+    // We no longer need to run regex fixes on master.m3u8 
+    // because ffmpegService.js now generates a clean, perfect master playlist.
 
     body = Buffer.from(content, "utf8")
   } else {

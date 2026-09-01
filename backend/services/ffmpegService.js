@@ -271,16 +271,32 @@ const processAnimeVideo = async (
         }
 
         for (let i = 0; i < audioPaths.length; i++) {
-          const audioCmd = ffmpeg().input(audioPaths[i]);
+          const audioPath = audioPaths[i];
+          const audioCmd = ffmpeg().input(audioPath);
           audioCmd.output(path.join(streamDir, `audio_${audioIndex}/manifest.m3u8`)).outputOptions([
             `-map 0:a:0`,
             "-c:a", "aac", "-b:a", "128k", "-ar", "48000", "-ac", "2",
             "-f", "hls", "-hls_time", "6", "-hls_playlist_type", "vod",
             "-hls_segment_filename", path.join(streamDir, `audio_${audioIndex}/segment%03d.ts`)
           ]);
-          await runFfmpegCommand(audioCmd, `Extra Audio ${i + 1}`, 0.05, overallProgress);
+          
+          let langName = `Extra Audio ${i + 1}`;
+          if (audioPath) {
+            const baseName = path.basename(audioPath, path.extname(audioPath)).toLowerCase();
+            if (baseName.includes("hin")) langName = "Hindi";
+            else if (baseName.includes("eng")) langName = "English";
+            else if (baseName.includes("jap") || baseName.includes("jpn")) langName = "Japanese";
+            else if (baseName.includes("_")) langName = baseName.split("_").pop();
+            else if (baseName.includes("-")) langName = baseName.split("-").pop();
+            else langName = baseName; // use full filename if no separator
+            
+            // capitalize first letter for cleanliness
+            langName = langName.charAt(0).toUpperCase() + langName.slice(1);
+          }
+
+          await runFfmpegCommand(audioCmd, `Audio: ${langName}`, 0.05, overallProgress);
           overallProgress.base += 5;
-          audioPlaylists.push({ id: audioIndex, name: `Extra Audio ${i + 1}` });
+          audioPlaylists.push({ id: audioIndex, name: langName });
           audioIndex++;
         }
 
