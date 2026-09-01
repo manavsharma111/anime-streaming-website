@@ -49,6 +49,11 @@ video::-webkit-media-controls {
   cursor: none !important;
 }
 
+/* Subtitle Size */
+.player-container video::cue {
+  font-size: var(--subtitle-size, 100%);
+}
+
 /* Subtitle Positioning */
 .player-container.subtitle-pos-bottom video::-webkit-media-text-track-display {
   transform: translateY(-40px) !important;

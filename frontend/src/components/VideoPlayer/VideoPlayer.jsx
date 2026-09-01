@@ -64,6 +64,7 @@ export default function VideoPlayer({
   } = playerState
 
   const [subtitlePosition, setSubtitlePosition] = React.useState("bottom")
+  const [subtitleSize, setSubtitleSize] = React.useState(100)
 
   // HLS Hook
   const {
@@ -252,6 +253,8 @@ export default function VideoPlayer({
     },
     subtitlePosition,
     onSubtitlePositionChange: setSubtitlePosition,
+    subtitleSize,
+    onSubtitleSizeChange: setSubtitleSize,
   }
 
   return (
@@ -259,6 +262,7 @@ export default function VideoPlayer({
       ref={containerRef}
       onMouseMove={keepAlive}
       onMouseLeave={hideNow}
+      style={{ "--subtitle-size": `${subtitleSize}%` }}
       className={cn(
         "relative w-full bg-transparent group select-none player-container font-sans text-white shadow-2xl",
         isFullscreen ? "h-screen w-screen" : "aspect-video",

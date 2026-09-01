@@ -19,11 +19,13 @@ export default function SettingsMenu({
   currentSubtitle,
   playbackSpeed,
   subtitlePosition = "bottom",
+  subtitleSize = 100,
   onQualityChange,
   onAudioChange,
   onSubtitleChange,
   onSpeedChange,
   onSubtitlePositionChange,
+  onSubtitleSizeChange,
   downloadQualities = {},
   videoUrl,
   isFullscreen,
@@ -166,8 +168,8 @@ export default function SettingsMenu({
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
             className={cn(
-              "absolute right-0 w-[260px] sm:w-[300px] bg-[#1a1a1a]/95 backdrop-blur-xl rounded-xl shadow-2xl z-50 flex flex-col border border-white/10 overflow-hidden text-white pointer-events-auto",
-              "bottom-full mb-3 origin-bottom-right max-h-[160px] sm:max-h-[280px] md:max-h-[400px] overflow-y-auto custom-scrollbar"
+              "absolute right-0 w-[260px] sm:w-[300px] bg-[#2a2d34]/95 backdrop-blur-xl rounded-xl shadow-2xl z-50 flex flex-col border border-white/10 overflow-hidden text-white pointer-events-auto font-sans",
+              "bottom-full mb-3 origin-bottom-right max-h-[160px] sm:max-h-[350px] md:max-h-[450px] overflow-y-auto custom-scrollbar"
             )}
             onWheel={(e) => e.stopPropagation()}
             onTouchMove={(e) => e.stopPropagation()}
@@ -183,6 +185,7 @@ export default function SettingsMenu({
               >
                 {renderMainMenuItem("Audio settings", getCurrentAudioLabel(), () => setActiveMenu("audio"))}
                 {renderMainMenuItem("Subtitle settings", getCurrentSubtitleLabel(), () => setActiveMenu("subtitles"))}
+                {renderMainMenuItem("Subtitle size", subtitleSize ? `${subtitleSize}%` : "100%", () => setActiveMenu("size"))}
                 {renderMainMenuItem("Subtitle position", getSubtitlePositionLabel(), () => setActiveMenu("position"))}
                 {renderMainMenuItem("Quality", getCurrentQualityLabel(), () => setActiveMenu("quality"))}
                 {renderMainMenuItem("Playback speed", getSpeedLabel(), () => setActiveMenu("speed"))}
@@ -213,6 +216,34 @@ export default function SettingsMenu({
               <motion.div key="subtitles" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 20, opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col">
                 {renderSubMenuHeader("Subtitle settings")}
                 {renderList(displaySubtitleTracks, currentSubtitle, onSubtitleChange, "name", "id", "Off")}
+              </motion.div>
+            )}
+
+            {activeMenu === "size" && (
+              <motion.div key="size" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 20, opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col">
+                {renderSubMenuHeader("Subtitle Size")}
+                <div className="flex flex-col py-1 overflow-y-auto custom-scrollbar pointer-events-auto">
+                  {[50, 75, 90, 100, 110, 125, 150, 175].map((size) => {
+                    const isActive = subtitleSize === size || (!subtitleSize && size === 100);
+                    return (
+                      <button
+                        key={size}
+                        onClick={() => {
+                          if (onSubtitleSizeChange) onSubtitleSizeChange(size);
+                          setActiveMenu("main");
+                        }}
+                        className={cn(
+                          "text-left px-5 py-4 text-[15px] transition-colors flex items-center hover:bg-white/5 border-l-[3px]",
+                          isActive ? "border-[#29b6f6] bg-white/5" : "border-transparent text-neutral-300"
+                        )}
+                      >
+                        <span className={isActive ? "text-white font-semibold" : "text-neutral-300 font-semibold"}>
+                          {size}%
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
               </motion.div>
             )}
 
