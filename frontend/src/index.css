@@ -69,10 +69,18 @@ html {
   background-color: transparent !important;
   color: white !important;
   text-shadow:
-    2px 2px 5px rgba(0, 0, 0, 1),
-    -2px -2px 5px rgba(0, 0, 0, 1) !important;
+    2px 2px 2px rgba(0, 0, 0, 1),
+    -2px -2px 2px rgba(0, 0, 0, 1),
+    -2px 2px 2px rgba(0, 0, 0, 1),
+    2px -2px 2px rgba(0, 0, 0, 1),
+    0px 4px 8px rgba(0, 0, 0, 0.8) !important;
   font-family: "Inter", sans-serif !important;
-  font-size: 1.25rem !important;
+  font-size: 1.75rem !important;
+  font-weight: 600 !important;
+}
+
+video::-webkit-media-text-track-display {
+  transform: translateY(-40px) !important;
 }
 
 button {

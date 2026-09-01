@@ -18,7 +18,7 @@ export default function SkipIntroButton({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={onClick}
-          className="absolute bottom-20 right-6 md:bottom-24 md:right-8 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white border border-white/20 text-xs md:text-sm font-medium py-2 px-4 rounded transition-colors flex items-center gap-2 z-40 select-none"
+          className="absolute bottom-20 right-6 md:bottom-24 md:right-8 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white border border-white/20 text-xs md:text-sm font-medium py-2 px-4 rounded transition-colors flex items-center gap-2 z-20 select-none"
         >
           <FastForward size={16} className="text-white" />
           {label}
