@@ -18,16 +18,9 @@ export default function SkipIntroButton({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={onClick}
-          className={`absolute bottom-12 right-4 md:bottom-24 md:right-8 backdrop-blur-xl text-white text-xs md:text-sm font-bold py-2 px-3 md:py-3 md:px-6 rounded-lg border shadow-2xl flex items-center gap-1.5 md:gap-2 z-40 select-none ${
-            isIntro
-              ? "bg-slate-900/80 border-blue-500/50 hover:bg-slate-800"
-              : "bg-slate-900/80 border-purple-500/50 hover:bg-slate-800"
-          }`}
+          className="absolute bottom-20 right-6 md:bottom-24 md:right-8 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white border border-white/20 text-xs md:text-sm font-medium py-2 px-4 rounded transition-colors flex items-center gap-2 z-40 select-none"
         >
-          <FastForward
-            size={18}
-            className={isIntro ? "text-blue-400" : "text-purple-400"}
-          />
+          <FastForward size={16} className="text-white" />
           {label}
         </motion.button>
       )}

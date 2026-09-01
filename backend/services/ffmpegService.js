@@ -79,9 +79,13 @@ const processAnimeVideo = async (
 
       // Extract subtitles if any text-based subs exist
       let extractedSubs = []
-      if (streamCounts.subStreams.length > 0) {
-        const subsDir = path.join(outputDir, "subtitles")
+      
+      const subsDir = path.join(outputDir, "subtitles")
+      if (streamCounts.subStreams.length > 0 || (subtitlePaths && subtitlePaths.length > 0)) {
         if (!fs.existsSync(subsDir)) fs.mkdirSync(subsDir, { recursive: true })
+      }
+
+      if (streamCounts.subStreams.length > 0) {
 
         await new Promise((resSub, rejSub) => {
           const subCommand = ffmpeg(inputPath)
@@ -105,6 +109,20 @@ const processAnimeVideo = async (
               console.log(
                 `[FFmpeg] Subtitles successfully extracted! Starting video encoding...`,
               )
+              // Clean up extracted VTT files to remove ASS formatting tags
+              streamCounts.subStreams.forEach((sub, i) => {
+                const vttPath = path.join(subsDir, `sub_${i}.vtt`)
+                if (fs.existsSync(vttPath)) {
+                  let content = fs.readFileSync(vttPath, "utf8")
+                  // Remove ASS tags like {\an8}
+                  content = content.replace(/\{[^}]+\}/g, "")
+                  // Remove HTML-like tags (some players don't support them well)
+                  content = content.replace(/<\/?(?:font|b|i|u|c)[^>]*>/g, "")
+                  // Fix multiple blank lines
+                  content = content.replace(/\n{3,}/g, "\n\n")
+                  fs.writeFileSync(vttPath, content, "utf8")
+                }
+              })
               resSub()
             })
             .on("error", (err) => {
@@ -115,6 +133,33 @@ const processAnimeVideo = async (
               resSub() // Skip on error so main video doesn't fail
             })
             .run()
+        })
+      }
+
+      // Process manually uploaded external subtitles
+      if (subtitlePaths && subtitlePaths.length > 0) {
+        subtitlePaths.forEach((subPath, i) => {
+          if (fs.existsSync(subPath)) {
+            const newVttPath = path.join(subsDir, `ext_sub_${i}.vtt`)
+            fs.copyFileSync(subPath, newVttPath)
+            const folderId = path.basename(outputDir)
+            
+            // Try to extract language from filename, fallback to generic name
+            let lang = `External ${i + 1}`
+            const baseName = path.basename(subPath, path.extname(subPath))
+            if (baseName.includes("_")) lang = baseName.split("_").pop()
+            else if (baseName.includes("-")) lang = baseName.split("-").pop()
+            
+            // Also clean external subs just in case
+            let content = fs.readFileSync(newVttPath, "utf8")
+            content = content.replace(/\{[^}]+\}/g, "").replace(/<\/?(?:font|b|i|u|c)[^>]*>/g, "").replace(/\n{3,}/g, "\n\n")
+            fs.writeFileSync(newVttPath, content, "utf8")
+
+            extractedSubs.push({
+              lang: lang,
+              url: `/uploads/processed/${folderId}/subtitles/ext_sub_${i}.vtt`,
+            })
+          }
         })
       }
 

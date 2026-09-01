@@ -258,6 +258,7 @@ export default function VideoPlayer({
       className={cn(
         "relative w-full bg-transparent group select-none player-container font-sans text-white shadow-2xl",
         isFullscreen ? "h-screen w-screen" : "aspect-video",
+        !showControls && "hide-cursor"
       )}
     >
       {/* NATIVE VIDEO ELEMENT */}

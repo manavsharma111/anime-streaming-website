@@ -38,3 +38,13 @@
 video::-webkit-media-controls {
   display: none !important;
 }
+
+/* Force native cursor inside video player */
+.player-container, .player-container * {
+  cursor: default !important;
+}
+
+/* Hide native cursor when controls are inactive */
+.player-container.hide-cursor, .player-container.hide-cursor * {
+  cursor: none !important;
+}

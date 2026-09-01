@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 const CustomCursor = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [hoveredElement, setHoveredElement] = useState(null)
+  const [isOverPlayer, setIsOverPlayer] = useState(false)
   const [, setScrollForceUpdate] = useState(0)
 
   useEffect(() => {
@@ -12,6 +13,13 @@ const CustomCursor = () => {
         x: e.clientX,
         y: e.clientY,
       })
+      
+      // Hide custom cursor when hovering over the video player
+      if (e.target.closest('.player-container')) {
+        setIsOverPlayer(true)
+      } else {
+        setIsOverPlayer(false)
+      }
     }
 
     const handleMouseOver = (e) => {
@@ -78,6 +86,7 @@ const CustomCursor = () => {
       borderRadius: "50%",
       backgroundColor: "rgba(243, 55, 103, 0)",
       border: "1px solid rgba(243, 55, 103, 1)",
+      opacity: isOverPlayer ? 0 : 1,
     },
     hover: hoverConfig ? {
       x: hoverConfig.x,
@@ -87,6 +96,7 @@ const CustomCursor = () => {
       borderRadius: hoverConfig.borderRadius,
       backgroundColor: "rgba(243, 55, 103, 0.15)",
       border: "1px solid rgba(243, 55, 103, 0.5)",
+      opacity: isOverPlayer ? 0 : 1,
     } : {},
   };
 
@@ -95,7 +105,7 @@ const CustomCursor = () => {
       x: mousePosition.x - 4,
       y: mousePosition.y - 4,
       scale: 1,
-      opacity: 1,
+      opacity: isOverPlayer ? 0 : 1,
     },
     hover: {
       x: mousePosition.x - 4,
