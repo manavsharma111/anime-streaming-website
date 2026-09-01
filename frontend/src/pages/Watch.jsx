@@ -200,42 +200,26 @@ export default function Watch() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0e0b12] pt-[80px] pb-12 w-full px-4 overflow-x-hidden relative font-sans">
-      {/* Dynamic Background Image */}
-      {anime?.cover || anime?.thumbnail ? (
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20 blur-[100px] pointer-events-none -z-10"
-          style={{ backgroundImage: `url(${getImageUrl(anime.cover || anime.thumbnail)})` }}
-        />
-      ) : (
-        <>
-          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[500px] bg-[#f33767]/5 blur-[120px] rounded-full pointer-events-none -z-10" />
-          <div className="absolute top-[40%] right-[-10%] w-[30%] h-[400px] bg-purple-500/5 blur-[100px] rounded-full pointer-events-none -z-10" />
-        </>
-      )}
+    <div className="min-h-screen bg-[#0e0b12] pt-[100px] pb-12 w-full px-4 overflow-x-hidden relative">
+      {/* Abstract Background Glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[500px] bg-[#f33767]/5 blur-[120px] rounded-full pointer-events-none -z-10" />
+      <div className="absolute top-[40%] right-[-10%] w-[30%] h-[400px] bg-purple-500/5 blur-[100px] rounded-full pointer-events-none -z-10" />
 
-      <div className="w-full max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-[260px_1fr] xl:grid-cols-[260px_1fr_320px] gap-6 items-start relative z-10">
-        
-        {/* LEFT COLUMN: Anime Info Box */}
-        <div className="order-2 lg:order-1 xl:order-1">
-          <AnimeInfoBox anime={anime} />
+      <div className="w-full max-w-[1700px] mx-auto grid grid-cols-1 xl:grid-cols-[300px_1fr_320px] gap-6 items-start">
+        {/* LEFT COLUMN: Episodes List */}
+        <div className="order-2 xl:order-none xl:col-start-1 xl:row-start-1 xl:row-span-2">
+          <EpisodeListSidebar
+            searchEpisode={searchEpisode}
+            setSearchEpisode={setSearchEpisode}
+            episodesList={episodesList}
+            episode={episode}
+            handleSelectEpisode={handleSelectEpisode}
+          />
         </div>
 
-        {/* MIDDLE COLUMN: Video Player & Toolbar */}
-        <div className="order-1 lg:order-2 xl:order-2 flex flex-col gap-4">
-          <main className="flex flex-col shadow-2xl bg-[#13151a] rounded-xl border border-white/5 relative z-10 overflow-hidden">
-            {/* Breadcrumb Header */}
-            <div className="px-5 py-4 flex items-center gap-2 text-[13px] font-medium text-neutral-400">
-              <span className="text-white flex items-center gap-1 cursor-pointer hover:text-[#f33767] transition-colors" onClick={() => navigate("/")}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.99 9a.75.75 0 1 1-1.04 1.081L20 13.439V21a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-7.561l-.48.483a.75.75 0 0 1-1.04-1.08l8.99-9Z"/></svg>
-                Home
-              </span>
-              <span>/</span>
-              <span className="text-white cursor-pointer hover:text-[#f33767] transition-colors">{anime?.title}</span>
-              <span>/</span>
-              <span>Episode {episode.episodeNumber}</span>
-            </div>
-
+        {/* MIDDLE COLUMN TOP: Video Player & Toolbar */}
+        <div className="order-1 xl:order-none xl:col-start-2 xl:row-start-1">
+          <main className="flex flex-col shadow-2xl bg-[#1c1c1c] rounded-2xl border border-white/5 relative z-10">
             {/* Focus Mode Overlay */}
             {isFocused && (
               <div
@@ -245,7 +229,7 @@ export default function Watch() {
             )}
 
             <div
-              className={`w-full aspect-video bg-black relative ${isFocused ? "z-50 shadow-[0_0_100px_rgba(243,55,103,0.15)] ring-1 ring-[#f33767]/30 rounded-xl" : ""}`}
+              className={`w-full aspect-video bg-black relative ${isFocused ? "z-50 shadow-[0_0_100px_rgba(243,55,103,0.15)] ring-1 ring-[#f33767]/30 rounded-2xl" : ""}`}
             >
               <VideoPlayer
                 streamUrl={streamUrl}
@@ -284,17 +268,15 @@ export default function Watch() {
           </main>
         </div>
 
-        {/* RIGHT COLUMN: Episodes List */}
-        <div className="order-3 lg:col-span-2 xl:col-span-1 xl:order-3">
-          <EpisodeListSidebar
-            searchEpisode={searchEpisode}
-            setSearchEpisode={setSearchEpisode}
-            episodesList={episodesList}
-            episode={episode}
-            handleSelectEpisode={handleSelectEpisode}
-          />
+        {/* MIDDLE COLUMN BOTTOM: Anime Info Box */}
+        <div className="order-3 xl:order-none xl:col-start-2 xl:row-start-2">
+          <AnimeInfoBox anime={anime} />
         </div>
 
+        {/* RIGHT COLUMN: Trending / Recommendations */}
+        <div className="order-4 xl:order-none xl:col-start-3 xl:row-start-1 xl:row-span-2">
+          <TrendingSidebar />
+        </div>
       </div>
     </div>
   )

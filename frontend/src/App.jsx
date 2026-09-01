@@ -1,5 +1,5 @@
 import React, { useEffect, Suspense, lazy } from "react"
-import { Routes, Route, useLocation } from "react-router-dom"
+import { Routes, Route, useLocation, Navigate } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 import { checkAuth, addSocketNotification } from "./redux/slice/authSlice"
 import { getWishlist } from "./redux/slice/wishlistSlice"
@@ -129,6 +129,9 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
+
+              {/* Fallback Route */}
+              <Route path="*" element={<Navigate to="/home" replace />} />
             </Routes>
           </Suspense>
         </SmoothScroll>
