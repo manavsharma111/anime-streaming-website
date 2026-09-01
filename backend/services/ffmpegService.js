@@ -34,7 +34,7 @@ const processAnimeVideo = async (
 
       // Create isolated resolution folders for HLS variants
       // FFmpeg 4.0.2 does not support 'name:' in var_stream_map, so %v resolves to 0, 1, 2, 3, etc.
-      const resolutions = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+      const resolutions = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "audio_0", "audio_1", "audio_2", "audio_3", "audio_4", "audio_5", "audio_6", "audio_7"]
       resolutions.forEach((res) => {
         if (!fs.existsSync(path.join(streamDir, res)))
           fs.mkdirSync(path.join(streamDir, res), { recursive: true })
@@ -176,84 +176,126 @@ const processAnimeVideo = async (
       let overallProgress = { base: 0, startTime: Date.now() }
 
       try {
-        // 1. HLS 1080p Task
-        let audioMaps = []
+        // Audio Tasks
+        let audioPlaylists = []
+        let audioIndex = 0;
+        
         if (streamCounts.aCount > 0) {
-          streamCounts.audioStreams.forEach(a => audioMaps.push(`-map 0:${a.index}`))
+          for (let i = 0; i < streamCounts.audioStreams.length; i++) {
+            const a = streamCounts.audioStreams[i];
+            const audioCmd = ffmpeg().input(inputPath);
+            audioCmd.output(path.join(streamDir, `audio_${audioIndex}/manifest.m3u8`)).outputOptions([
+              `-map 0:${a.index}`,
+              "-c:a", "aac", "-b:a", "128k", "-ar", "48000", "-ac", "2",
+              "-f", "hls", "-hls_time", "6", "-hls_playlist_type", "vod",
+              "-hls_segment_filename", path.join(streamDir, `audio_${audioIndex}/segment%03d.ts`)
+            ]);
+            await runFfmpegCommand(audioCmd, `Audio Track ${audioIndex + 1}`, 0.05, overallProgress);
+            overallProgress.base += 5;
+            audioPlaylists.push({ id: audioIndex, name: a.lang || `Audio ${audioIndex + 1}` });
+            audioIndex++;
+          }
+        }
+        
+        for (let i = 0; i < audioPaths.length; i++) {
+          const audioCmd = ffmpeg().input(audioPaths[i]);
+          audioCmd.output(path.join(streamDir, `audio_${audioIndex}/manifest.m3u8`)).outputOptions([
+            `-map 0:a:0`,
+            "-c:a", "aac", "-b:a", "128k", "-ar", "48000", "-ac", "2",
+            "-f", "hls", "-hls_time", "6", "-hls_playlist_type", "vod",
+            "-hls_segment_filename", path.join(streamDir, `audio_${audioIndex}/segment%03d.ts`)
+          ]);
+          await runFfmpegCommand(audioCmd, `Extra Audio ${i + 1}`, 0.05, overallProgress);
+          overallProgress.base += 5;
+          audioPlaylists.push({ id: audioIndex, name: `Extra Audio ${i + 1}` });
+          audioIndex++;
         }
 
-        audioPaths.forEach((audioPath, index) => {
-          audioMaps.push(`-map ${index + 1}:a:0`)
-        })
-        
         let baseHlsOptions = [
           "-c:v libx264", "-profile:v main", "-pix_fmt yuv420p", "-preset ultrafast", "-threads 2",
           "-g 48", "-keyint_min 48", "-sc_threshold 0",
-          "-c:a", "aac", "-ar", "48000", "-ac", "2", "-b:a", "128k",
           "-f", "hls", "-hls_time", "6", "-hls_playlist_type", "vod"
         ]
 
+        // Adjust remaining weight for video tasks
+        let remainingWeight = 100 - overallProgress.base - 5 - 5; // 5 for thumbnails, 5 for mp4s
+        let w1080 = (remainingWeight * 0.45) / 100;
+        let w720 = (remainingWeight * 0.35) / 100;
+        let w480 = (remainingWeight * 0.20) / 100;
+
+        // 1. HLS 1080p Task
         const hls1080Cmd = ffmpeg().input(inputPath)
-        audioPaths.forEach(audioPath => hls1080Cmd.input(audioPath))
         hls1080Cmd.output(path.join(streamDir, "0/manifest.m3u8")).outputOptions([
-          "-map 0:v:0", ...audioMaps,
+          "-map 0:v:0", "-an",
           "-s:v:0 1920x1080", "-b:v:0 3000k", ...baseHlsOptions,
           "-hls_segment_filename", path.join(streamDir, "0/segment%03d.ts")
         ])
-        await runFfmpegCommand(hls1080Cmd, "HLS 1080p", 0.35, overallProgress)
-        overallProgress.base += 35
+        await runFfmpegCommand(hls1080Cmd, "HLS 1080p", w1080, overallProgress)
+        overallProgress.base += w1080 * 100
 
         // 2. HLS 720p Task
         const hls720Cmd = ffmpeg().input(inputPath)
-        audioPaths.forEach(audioPath => hls720Cmd.input(audioPath))
         hls720Cmd.output(path.join(streamDir, "1/manifest.m3u8")).outputOptions([
-          "-map 0:v:0", ...audioMaps,
+          "-map 0:v:0", "-an",
           "-s:v:0 1280x720", "-b:v:0 1500k", ...baseHlsOptions,
           "-hls_segment_filename", path.join(streamDir, "1/segment%03d.ts")
         ])
-        await runFfmpegCommand(hls720Cmd, "HLS 720p", 0.30, overallProgress)
-        overallProgress.base += 30
+        await runFfmpegCommand(hls720Cmd, "HLS 720p", w720, overallProgress)
+        overallProgress.base += w720 * 100
         
         // 3. HLS 480p Task
         const hls480Cmd = ffmpeg().input(inputPath)
-        audioPaths.forEach(audioPath => hls480Cmd.input(audioPath))
         hls480Cmd.output(path.join(streamDir, "2/manifest.m3u8")).outputOptions([
-          "-map 0:v:0", ...audioMaps,
+          "-map 0:v:0", "-an",
           "-s:v:0 854x480", "-b:v:0 800k", ...baseHlsOptions,
           "-hls_segment_filename", path.join(streamDir, "2/segment%03d.ts")
         ])
-        await runFfmpegCommand(hls480Cmd, "HLS 480p", 0.25, overallProgress)
-        overallProgress.base += 25
+        await runFfmpegCommand(hls480Cmd, "HLS 480p", w480, overallProgress)
+        overallProgress.base += w480 * 100
 
         // Manually write master.m3u8
         let masterPlaylist = "#EXTM3U\n"
-        masterPlaylist += "#EXT-X-STREAM-INF:BANDWIDTH=3000000,RESOLUTION=1920x1080\n0/manifest.m3u8\n"
-        masterPlaylist += "#EXT-X-STREAM-INF:BANDWIDTH=1500000,RESOLUTION=1280x720\n1/manifest.m3u8\n"
-        masterPlaylist += "#EXT-X-STREAM-INF:BANDWIDTH=800000,RESOLUTION=854x480\n2/manifest.m3u8\n"
+        if (audioPlaylists.length > 0) {
+          audioPlaylists.forEach((ap, idx) => {
+            masterPlaylist += `#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",NAME="${ap.name}",DEFAULT=${idx === 0 ? 'YES' : 'NO'},AUTOSELECT=YES,URI="audio_${ap.id}/manifest.m3u8"\n`
+          })
+        }
+        let audioStr = audioPlaylists.length > 0 ? ',AUDIO="audio"' : '';
+        masterPlaylist += `#EXT-X-STREAM-INF:BANDWIDTH=3000000,RESOLUTION=1920x1080${audioStr}\n0/manifest.m3u8\n`
+        masterPlaylist += `#EXT-X-STREAM-INF:BANDWIDTH=1500000,RESOLUTION=1280x720${audioStr}\n1/manifest.m3u8\n`
+        masterPlaylist += `#EXT-X-STREAM-INF:BANDWIDTH=800000,RESOLUTION=854x480${audioStr}\n2/manifest.m3u8\n`
         fs.writeFileSync(path.join(streamDir, "master.m3u8"), masterPlaylist)
 
 
+        // MP4 Tasks
+        const setupMp4Cmd = (cmd, manifestPath) => {
+          cmd.input(path.join(streamDir, manifestPath))
+          if (audioPlaylists.length > 0) {
+            cmd.input(path.join(streamDir, "audio_0/manifest.m3u8"))
+            cmd.outputOptions(["-c", "copy", "-bsf:a", "aac_adtstoasc", "-map 0:v:0", "-map 1:a:0"])
+          } else {
+            cmd.outputOptions(["-c", "copy"])
+          }
+        }
+
         // 4. 1080p MP4 Task (Lightning Fast Copy from HLS)
-        const mp41080Cmd = ffmpeg().input(path.join(streamDir, "0/manifest.m3u8"))
-        mp41080Cmd
-          .output(path.join(downloadDir, "1080p.mp4"))
-          .outputOptions(["-c", "copy", "-bsf:a", "aac_adtstoasc"])
+        const mp41080Cmd = ffmpeg()
+        setupMp4Cmd(mp41080Cmd, "0/manifest.m3u8")
+        mp41080Cmd.output(path.join(downloadDir, "1080p.mp4"))
         await runFfmpegCommand(mp41080Cmd, "MP4 1080p", 0.02, overallProgress)
         overallProgress.base += 2
         
         // 5. 720p MP4 Task (Lightning Fast Copy from HLS)
-        const mp4720Cmd = ffmpeg().input(path.join(streamDir, "1/manifest.m3u8"))
-        mp4720Cmd
-          .output(path.join(downloadDir, "720p.mp4"))
-          .outputOptions(["-c", "copy", "-bsf:a", "aac_adtstoasc"])
+        const mp4720Cmd = ffmpeg()
+        setupMp4Cmd(mp4720Cmd, "1/manifest.m3u8")
+        mp4720Cmd.output(path.join(downloadDir, "720p.mp4"))
         await runFfmpegCommand(mp4720Cmd, "MP4 720p", 0.02, overallProgress)
         overallProgress.base += 2
         
         // 6. 480p MP4 Task (Lightning Fast Copy from HLS)
-        const mp4480Cmd = ffmpeg().input(path.join(streamDir, "2/manifest.m3u8"))
-        mp4480Cmd
-          .output(path.join(downloadDir, "480p.mp4"))
-          .outputOptions(["-c", "copy", "-bsf:a", "aac_adtstoasc"])
+        const mp4480Cmd = ffmpeg()
+        setupMp4Cmd(mp4480Cmd, "2/manifest.m3u8")
+        mp4480Cmd.output(path.join(downloadDir, "480p.mp4"))
         await runFfmpegCommand(mp4480Cmd, "MP4 480p", 0.01, overallProgress)
         overallProgress.base += 1
 
