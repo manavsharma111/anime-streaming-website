@@ -1,6 +1,6 @@
 import React, { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { fetchAnimes } from "../redux/slice/animeSlice"
+import { fetchAnimes, fetchMalTrending } from "../redux/slice/animeSlice"
 import HeroCarousel from "../components/Home/HeroCarousel"
 import QuickFilter from "../components/Home/QuickFilter"
 import TopAnime from "../components/Home/TopAnime"
@@ -13,11 +13,12 @@ import { useNavigate } from "react-router-dom"
 export default function Home() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { animeList, isLoading } = useSelector((state) => state.anime)
+  const { animeList, malTrendingList, isLoading } = useSelector((state) => state.anime)
   const { isAuthenticated } = useSelector((state) => state.auth)
 
   useEffect(() => {
     dispatch(fetchAnimes({ limit: 20 }))
+    dispatch(fetchMalTrending())
   }, [dispatch])
 
   useEffect(() => {
@@ -58,6 +59,16 @@ export default function Home() {
             isLoading={isLoading}
             viewAllLink="/search?sort=trending"
           />
+
+          {/* Currently Airing (MAL Proxy) */}
+          {malTrendingList && malTrendingList.length > 0 && (
+            <AnimeSection
+              title="🔥 Currently Airing (MAL)"
+              icon={Sparkles}
+              animes={malTrendingList}
+              isLoading={isLoading}
+            />
+          )}
 
           {/* Latest Episode */}
           <AnimeSection

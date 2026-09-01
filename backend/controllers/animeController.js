@@ -85,17 +85,57 @@ const getAnimes = async (req, res, next) => {
   }
 }
 
+const mongoose = require("mongoose")
+
+// Helper to map Jikan Anime to our DB Anime format
+const mapJikanToAnime = (malAnime) => {
+  return {
+    _id: malAnime.mal_id.toString(),
+    title: malAnime.title_english || malAnime.title,
+    description: malAnime.synopsis || "No description available.",
+    year: malAnime.year || new Date(malAnime.aired?.from).getFullYear() || new Date().getFullYear(),
+    rating: malAnime.score || 0,
+    thumbnail: malAnime.images?.webp?.large_image_url || malAnime.images?.jpg?.large_image_url,
+    cover: malAnime.trailer?.images?.maximum_image_url || malAnime.images?.webp?.large_image_url,
+    trailerUrl: malAnime.trailer?.youtube_id ? `https://www.youtube.com/watch?v=${malAnime.trailer.youtube_id}` : "",
+    genres: malAnime.genres ? malAnime.genres.map(g => g.name) : ["Unknown"],
+    status: malAnime.status === "Currently Airing" ? "ongoing" : "completed",
+    episodes: [], // No local episodes for MAL proxy
+    totalEpisodes: malAnime.episodes || 0,
+    views: 0,
+    isMalProxy: true
+  }
+}
+
 // Get single anime details with episodes and recommendations
 const getAnimeDetails = async (req, res, next) => {
   try {
-    // Populate episodes to send all data in one response
-    const anime = await Anime.findById(req.params.id).populate("episodes")
+    let anime = null;
+
+    if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+      anime = await Anime.findById(req.params.id).populate("episodes")
+    }
+
+    if (!anime) {
+      // Try fetching from MAL (Jikan API)
+      try {
+        const fetch = (await import("node-fetch")).default || require("node-fetch")
+        const jikanRes = await fetch(`https://api.jikan.moe/v4/anime/${req.params.id}`)
+        const jikanData = await jikanRes.json()
+        
+        if (jikanData && jikanData.data) {
+          anime = mapJikanToAnime(jikanData.data)
+        }
+      } catch (err) {
+        console.error("Failed to proxy MAL data:", err)
+      }
+    }
 
     if (!anime) {
       return res.status(404).json({ message: "Anime not found" })
     }
 
-    // Find recommended animes based on similar genres
+    // Find recommended animes based on similar genres (from our DB)
     const recommendedAnimes = await Anime.find({
       genres: { $in: anime.genres },
       _id: { $ne: anime._id },
@@ -109,7 +149,27 @@ const getAnimeDetails = async (req, res, next) => {
       recommended: recommendedAnimes,
     })
   } catch (error) {
-    // Pass error to global error handler
+    next(error)
+  }
+}
+
+const getMalTrending = async (req, res, next) => {
+  try {
+    const fetch = (await import("node-fetch")).default || require("node-fetch")
+    const jikanRes = await fetch("https://api.jikan.moe/v4/top/anime?filter=airing&limit=15")
+    const jikanData = await jikanRes.json()
+    
+    if (!jikanData || !jikanData.data) {
+      return res.status(500).json({ message: "Failed to fetch MAL trending" })
+    }
+
+    const trendingAnimes = jikanData.data.map(mapJikanToAnime)
+
+    res.status(200).json({
+      success: true,
+      data: trendingAnimes,
+    })
+  } catch (error) {
     next(error)
   }
 }
@@ -180,4 +240,5 @@ module.exports = {
   getAnimeDetails,
   incrementViews,
   getAnimeGenres,
+  getMalTrending,
 }

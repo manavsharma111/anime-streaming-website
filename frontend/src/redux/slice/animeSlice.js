@@ -29,10 +29,24 @@ export const fetchAnimeDetails = createAsyncThunk(
   },
 )
 
+// Thunk for fetching MAL Trending Animes
+export const fetchMalTrending = createAsyncThunk(
+  "anime/fetchMalTrending",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await animeService.getMalTrendingAnimes()
+      return response.data
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to fetch MAL trending")
+    }
+  },
+)
+
 const animeSlice = createSlice({
   name: "anime",
   initialState: {
     animeList: [],
+    malTrendingList: [],
     animeDetails: null,
     pagination: null,
     isLoading: false,
@@ -73,6 +87,20 @@ const animeSlice = createSlice({
       state.animeDetails = action.payload?.data || action.payload
     })
     builder.addCase(fetchAnimeDetails.rejected, (state, action) => {
+      state.isLoading = false
+      state.error = action.payload
+    })
+
+    // Fetch MAL Trending
+    builder.addCase(fetchMalTrending.pending, (state) => {
+      state.isLoading = true
+      state.error = null
+    })
+    builder.addCase(fetchMalTrending.fulfilled, (state, action) => {
+      state.isLoading = false
+      state.malTrendingList = action.payload?.data || action.payload || []
+    })
+    builder.addCase(fetchMalTrending.rejected, (state, action) => {
       state.isLoading = false
       state.error = action.payload
     })

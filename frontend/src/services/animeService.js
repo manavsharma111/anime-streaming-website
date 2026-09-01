@@ -19,6 +19,15 @@ const animeService = {
       return error
     }
   },
+  getMalTrendingAnimes: async () => {
+    try {
+      const response = await axiosInstance.get("/anime/mal-trending")
+      return response.data
+    } catch (error) {
+      console.error("MAL Trending fetch error:", error)
+      return error
+    }
+  },
 }
 
 export default animeService
