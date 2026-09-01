@@ -167,7 +167,7 @@ export default function SettingsMenu({
             transition={{ duration: 0.15, ease: "easeOut" }}
             className={cn(
               "absolute right-0 w-[260px] sm:w-[300px] bg-[#1a1a1a]/95 backdrop-blur-xl rounded-xl shadow-2xl z-50 flex flex-col border border-white/10 overflow-hidden text-white pointer-events-auto",
-              "bottom-full mb-3 origin-bottom-right max-h-[280px] sm:max-h-[400px] overflow-y-auto custom-scrollbar"
+              "bottom-full mb-3 origin-bottom-right max-h-[160px] sm:max-h-[280px] md:max-h-[400px] overflow-y-auto custom-scrollbar"
             )}
             onWheel={(e) => e.stopPropagation()}
             onTouchMove={(e) => e.stopPropagation()}
