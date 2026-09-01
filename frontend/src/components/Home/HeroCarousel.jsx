@@ -34,12 +34,17 @@ export default function HeroCarousel({ animes }) {
 
           {/* Gradients */}
           <div
-            className={`absolute inset-0 transition-opacity duration-500 ${isActive ? "bg-gradient-to-t from-[#0e0b12] via-[#0e0b12]/60 to-transparent" : "bg-black/60 hover:bg-black/40"}`}
+            className={`absolute inset-0 transition-opacity duration-700 ${isActive ? "bg-gradient-to-t from-[#0e0b12] via-[#0e0b12]/40 to-transparent" : "bg-black/70 hover:bg-black/50"}`}
+          />
+
+          {/* Premium Subte Glow on Active */}
+          <div
+            className={`absolute bottom-0 left-0 w-full h-2/3 bg-gradient-to-t from-[#f33767]/30 to-transparent opacity-0 mix-blend-screen pointer-events-none transition-opacity duration-1000 ${isActive ? "opacity-100" : "opacity-0"}`}
           />
 
           {/* Dark gradient for text readability (only when active) */}
           <div
-            className={`absolute inset-0 bg-gradient-to-r from-[#0e0b12]/90 via-[#0e0b12]/60 to-transparent w-full md:w-3/4 transition-opacity duration-500 ${isActive ? "opacity-100" : "opacity-0"}`}
+            className={`absolute inset-0 bg-gradient-to-r from-[#0e0b12] via-[#0e0b12]/70 to-transparent w-full md:w-3/4 transition-opacity duration-700 ${isActive ? "opacity-100" : "opacity-0"}`}
           />
         </>
       )}
