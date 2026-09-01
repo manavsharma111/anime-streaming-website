@@ -121,7 +121,7 @@ export default function SettingsMenu({
     </div>
   )
 
-  const MainMenuItem = ({ label, value, onClick }) => (
+  const renderMainMenuItem = (label, value, onClick) => (
     <button 
       onClick={onClick}
       className="w-full text-left px-5 py-3 flex items-center justify-between hover:bg-white/10 transition-colors group"
@@ -134,7 +134,7 @@ export default function SettingsMenu({
     </button>
   )
 
-  const SubMenuHeader = ({ title }) => (
+  const renderSubMenuHeader = (title) => (
     <div className="flex items-center px-2 py-2 border-b border-white/10">
       <button 
         onClick={() => setActiveMenu("main")}
@@ -161,15 +161,13 @@ export default function SettingsMenu({
       <AnimatePresence mode="wait">
         {showSettings && (
           <motion.div
-            initial={{ opacity: 0, y: isFullscreen ? 10 : -10, scale: 0.95 }}
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: isFullscreen ? 10 : -10, scale: 0.95 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
             className={cn(
-              "absolute right-0 sm:-right-4 md:right-0 w-[260px] sm:w-[300px] bg-[#1a1a1a]/95 backdrop-blur-xl rounded-xl shadow-2xl z-50 flex flex-col border border-white/10 overflow-hidden text-white pointer-events-auto",
-              isFullscreen
-                ? "bottom-full mb-3 origin-bottom-right"
-                : "top-full mt-3 origin-top-right",
+              "absolute right-0 w-[260px] sm:w-[300px] bg-[#1a1a1a]/95 backdrop-blur-xl rounded-xl shadow-2xl z-50 flex flex-col border border-white/10 overflow-hidden text-white pointer-events-auto",
+              "bottom-full mb-3 origin-bottom-right"
             )}
             onWheel={(e) => e.stopPropagation()}
             onTouchMove={(e) => e.stopPropagation()}
@@ -183,18 +181,18 @@ export default function SettingsMenu({
                 transition={{ duration: 0.2 }}
                 className="py-2 flex flex-col"
               >
-                <MainMenuItem label="Audio settings" value={getCurrentAudioLabel()} onClick={() => setActiveMenu("audio")} />
-                <MainMenuItem label="Subtitle settings" value={getCurrentSubtitleLabel()} onClick={() => setActiveMenu("subtitles")} />
-                <MainMenuItem label="Subtitle position" value={getSubtitlePositionLabel()} onClick={() => setActiveMenu("position")} />
-                <MainMenuItem label="Quality" value={getCurrentQualityLabel()} onClick={() => setActiveMenu("quality")} />
-                <MainMenuItem label="Playback speed" value={getSpeedLabel()} onClick={() => setActiveMenu("speed")} />
-                <MainMenuItem label="Download Options" value="" onClick={() => setActiveMenu("download")} />
+                {renderMainMenuItem("Audio settings", getCurrentAudioLabel(), () => setActiveMenu("audio"))}
+                {renderMainMenuItem("Subtitle settings", getCurrentSubtitleLabel(), () => setActiveMenu("subtitles"))}
+                {renderMainMenuItem("Subtitle position", getSubtitlePositionLabel(), () => setActiveMenu("position"))}
+                {renderMainMenuItem("Quality", getCurrentQualityLabel(), () => setActiveMenu("quality"))}
+                {renderMainMenuItem("Playback speed", getSpeedLabel(), () => setActiveMenu("speed"))}
+                {renderMainMenuItem("Download Options", "", () => setActiveMenu("download"))}
               </motion.div>
             )}
 
             {activeMenu === "quality" && (
               <motion.div key="quality" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 20, opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col">
-                <SubMenuHeader title="Quality" />
+                {renderSubMenuHeader("Quality")}
                 {renderList(
                   qualities.length > 0 ? qualities : [ { id: -1, name: "Auto (1080p)" }, { id: 2, name: "1080p" }, { id: 1, name: "720p" } ],
                   currentQuality,
@@ -206,21 +204,21 @@ export default function SettingsMenu({
 
             {activeMenu === "audio" && (
               <motion.div key="audio" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 20, opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col">
-                <SubMenuHeader title="Audio settings" />
+                {renderSubMenuHeader("Audio settings")}
                 {renderList(displayAudioTracks, currentAudio, onAudioChange, "name", "id", "Default Track")}
               </motion.div>
             )}
 
             {activeMenu === "subtitles" && (
               <motion.div key="subtitles" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 20, opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col">
-                <SubMenuHeader title="Subtitle settings" />
+                {renderSubMenuHeader("Subtitle settings")}
                 {renderList(displaySubtitleTracks, currentSubtitle, onSubtitleChange, "name", "id", "Off")}
               </motion.div>
             )}
 
             {activeMenu === "position" && (
               <motion.div key="position" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 20, opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col">
-                <SubMenuHeader title="Subtitle position" />
+                {renderSubMenuHeader("Subtitle position")}
                 {renderList(
                   [{ id: "bottom", name: "Bottom" }, { id: "top", name: "Top" }],
                   subtitlePosition,
@@ -232,7 +230,7 @@ export default function SettingsMenu({
 
             {activeMenu === "speed" && (
               <motion.div key="speed" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 20, opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col">
-                <SubMenuHeader title="Playback speed" />
+                {renderSubMenuHeader("Playback speed")}
                 <div className="px-5 py-6 flex flex-col gap-4">
                   <div className="flex justify-between items-center text-neutral-400 text-[12px] font-medium">
                     <span>0.25x</span>
@@ -254,7 +252,7 @@ export default function SettingsMenu({
 
             {activeMenu === "download" && (
               <motion.div key="download" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 20, opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col">
-                <SubMenuHeader title="Download Options" />
+                {renderSubMenuHeader("Download Options")}
                 <div className="flex flex-col py-2 max-h-[250px] overflow-y-auto custom-scrollbar">
                   {Object.entries(displayDownloadQualities).map(([quality, url]) => (
                     <a

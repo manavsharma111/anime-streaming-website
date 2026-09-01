@@ -147,51 +147,7 @@ export default function PlayerToolbar({
         </div>
       </div>
 
-      {/* Server Selector Area */}
-      <div className="w-full bg-[#111] p-4 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="text-xs text-neutral-400 leading-relaxed max-w-md">
-          You're watching{" "}
-          <span className="text-[#6c5ce7] font-bold">
-            Episode {episode.episodeNumber}
-          </span>
-          . <br />
-          If current servers doesn't work, please try other servers beside.
-        </div>
 
-        <div className="flex items-center gap-3">
-          <div className="bg-[#1c1c1c] text-neutral-300 text-xs font-bold px-3 py-1.5 rounded flex items-center gap-1">
-            <Settings size={14} /> SUB
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setActiveServer(1)}
-              className={`px-4 py-1.5 rounded text-xs font-bold transition-all flex items-center gap-2 ${
-                activeServer === 1
-                  ? "bg-[#6c5ce7] text-white"
-                  : "bg-[#1c1c1c] text-neutral-400 hover:bg-white/10 hover:text-white"
-              }`}
-            >
-              <span
-                className={`w-2 h-2 rounded-full ${activeServer === 1 ? "bg-white" : "bg-neutral-600"}`}
-              ></span>
-              Vidplay
-            </button>
-            <button
-              onClick={() => setActiveServer(2)}
-              className={`px-4 py-1.5 rounded text-xs font-bold transition-all flex items-center gap-2 ${
-                activeServer === 2
-                  ? "bg-[#6c5ce7] text-white"
-                  : "bg-[#1c1c1c] text-neutral-400 hover:bg-white/10 hover:text-white"
-              }`}
-            >
-              <span
-                className={`w-2 h-2 rounded-full ${activeServer === 2 ? "bg-white" : "bg-neutral-600"}`}
-              ></span>
-              MyCloud
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }

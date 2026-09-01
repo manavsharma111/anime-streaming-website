@@ -40,7 +40,7 @@ export default function BottomBar({
       />
 
       <div className="flex items-center justify-between mt-1">
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-2 sm:gap-6">
           <PlayPauseButton isPlaying={isPlaying} onClick={togglePlay} />
 
           <VolumeControl
@@ -53,7 +53,7 @@ export default function BottomBar({
           <TimeDisplay currentTime={currentTime} duration={duration} />
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1 sm:gap-4">
           <SettingsMenu {...settingsProps} isFullscreen={isFullscreen} />
           <PictureInPictureButton videoRef={videoRef} />
           <FullscreenButton
