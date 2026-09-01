@@ -93,7 +93,7 @@ export default function SettingsMenu({
   const getSubtitlePositionLabel = () => subtitlePosition === "top" ? "Top" : "Bottom"
 
   const renderList = (items, currentId, onSelect, labelKey = "name", idKey = "id", emptyMessage = "Default") => (
-    <div className="flex flex-col py-1 max-h-[250px] overflow-y-auto custom-scrollbar pointer-events-auto">
+    <div className="flex flex-col py-1 pointer-events-auto">
       {items.length > 0 ? (
         items.map((item) => {
           const isActive = currentId === item[idKey]
@@ -101,8 +101,10 @@ export default function SettingsMenu({
             <button
               key={item[idKey]}
               onClick={() => {
-                if(onSelect) onSelect(item[idKey])
-                setActiveMenu("main")
+                if (!isDragging) {
+                  if(onSelect) onSelect(item[idKey])
+                  setActiveMenu("main")
+                }
               }}
               className="text-left px-5 py-3 text-[14px] transition-colors flex items-center gap-3 hover:bg-white/10"
             >
@@ -125,7 +127,7 @@ export default function SettingsMenu({
 
   const renderMainMenuItem = (label, value, onClick) => (
     <button 
-      onClick={onClick}
+      onClick={() => { if (!isDragging) onClick() }}
       className="w-full text-left px-5 py-3 flex items-center justify-between hover:bg-white/10 transition-colors group"
     >
       <div className="flex flex-col">
@@ -139,7 +141,7 @@ export default function SettingsMenu({
   const renderSubMenuHeader = (title) => (
     <div className="flex items-center px-2 py-2 border-b border-white/10">
       <button 
-        onClick={() => setActiveMenu("main")}
+        onClick={() => { if (!isDragging) setActiveMenu("main") }}
         className="p-2 hover:bg-white/10 rounded-full transition-colors text-neutral-300 hover:text-white"
       >
         <ChevronLeft size={20} />
@@ -147,6 +149,35 @@ export default function SettingsMenu({
       <span className="ml-2 text-[15px] font-semibold text-white">{title}</span>
     </div>
   )
+
+  const [isDragging, setIsDragging] = useState(false)
+  const [startY, setStartY] = useState(0)
+  const [scrollTop, setScrollTop] = useState(0)
+  const scrollRef = useRef(null)
+
+  const handleMouseDown = (e) => {
+    if (!scrollRef.current) return
+    setIsDragging(true)
+    setStartY(e.pageY - scrollRef.current.offsetTop)
+    setScrollTop(scrollRef.current.scrollTop)
+  }
+
+  const handleMouseLeave = () => {
+    setIsDragging(false)
+  }
+
+  const handleMouseUp = () => {
+    // Adding a small timeout to prevent click events from firing immediately after drag
+    setTimeout(() => setIsDragging(false), 50)
+  }
+
+  const handleMouseMove = (e) => {
+    if (!isDragging || !scrollRef.current) return
+    e.preventDefault()
+    const y = e.pageY - scrollRef.current.offsetTop
+    const walk = (y - startY) * 1.5
+    scrollRef.current.scrollTop = scrollTop - walk
+  }
 
   return (
     <div className="relative" ref={menuRef}>
@@ -163,15 +194,20 @@ export default function SettingsMenu({
       <AnimatePresence mode="wait">
         {showSettings && (
           <motion.div
+            ref={scrollRef}
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
             className={cn(
-              "absolute right-0 w-[260px] sm:w-[300px] bg-[#2a2d34]/95 backdrop-blur-xl rounded-xl shadow-2xl z-50 flex flex-col border border-white/10 overflow-hidden text-white pointer-events-auto font-sans",
-              "bottom-full mb-3 origin-bottom-right max-h-[60vh] sm:max-h-[80vh] overflow-y-auto custom-scrollbar"
+              "absolute right-0 w-[260px] sm:w-[300px] bg-[#2a2d34]/95 backdrop-blur-xl rounded-xl shadow-2xl z-50 flex flex-col border border-white/10 overflow-hidden text-white pointer-events-auto font-sans cursor-grab active:cursor-grabbing",
+              "bottom-full mb-3 origin-bottom-right max-h-[60vh] sm:max-h-[80vh] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             )}
             data-lenis-prevent="true"
+            onMouseDown={handleMouseDown}
+            onMouseLeave={handleMouseLeave}
+            onMouseUp={handleMouseUp}
+            onMouseMove={handleMouseMove}
           >
             {activeMenu === "main" && (
               <motion.div 
@@ -221,15 +257,17 @@ export default function SettingsMenu({
             {activeMenu === "size" && (
               <motion.div key="size" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 20, opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col">
                 {renderSubMenuHeader("Subtitle Size")}
-                <div className="flex flex-col py-1 overflow-y-auto custom-scrollbar pointer-events-auto">
+                <div className="flex flex-col py-1 pointer-events-auto">
                   {[50, 75, 90, 100, 110, 125, 150, 175].map((size) => {
                     const isActive = subtitleSize === size || (!subtitleSize && size === 100);
                     return (
                       <button
                         key={size}
                         onClick={() => {
-                          if (onSubtitleSizeChange) onSubtitleSizeChange(size);
-                          setActiveMenu("main");
+                          if (!isDragging) {
+                            if (onSubtitleSizeChange) onSubtitleSizeChange(size);
+                            setActiveMenu("main");
+                          }
                         }}
                         className={cn(
                           "text-left px-5 py-4 text-[15px] transition-colors flex items-center hover:bg-white/5 border-l-[3px]",
@@ -283,7 +321,7 @@ export default function SettingsMenu({
             {activeMenu === "download" && (
               <motion.div key="download" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 20, opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col">
                 {renderSubMenuHeader("Download Options")}
-                <div className="flex flex-col py-2 max-h-[250px] overflow-y-auto custom-scrollbar">
+                <div className="flex flex-col py-2">
                   {Object.entries(displayDownloadQualities).map(([quality, url]) => (
                     <a
                       key={quality}
@@ -291,6 +329,9 @@ export default function SettingsMenu({
                       download={`Episode_${quality}.mp4`}
                       target="_blank"
                       rel="noreferrer"
+                      onClick={(e) => {
+                        if (isDragging) e.preventDefault();
+                      }}
                       className="text-left px-5 py-3 text-[14px] font-medium text-neutral-300 hover:text-white hover:bg-white/10 transition-colors flex items-center justify-between group"
                     >
                       <span className="group-hover:translate-x-1 transition-transform">{quality}</span>

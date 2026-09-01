@@ -22,7 +22,7 @@ export default function RelatedSeasons({ seasons, anime }) {
           <span className="w-1.5 h-6 bg-[#f33767] rounded-full shadow-[0_0_10px_rgba(243,55,103,0.5)]"></span>
           Seasons
         </h3>
-        <div className="flex items-center gap-4 overflow-x-auto hide-scrollbar pb-4 [scrollbar-width:none]">
+        <div data-lenis-prevent="true" className="flex items-center gap-4 overflow-x-auto hide-scrollbar pb-4 [scrollbar-width:none]">
           {seasons.map((s, i) => (
             <div
               key={i}

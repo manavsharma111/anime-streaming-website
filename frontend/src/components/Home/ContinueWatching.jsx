@@ -47,6 +47,7 @@ export default function ContinueWatching() {
 
       <div
         ref={scrollContainer}
+        data-lenis-prevent="true"
         className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >

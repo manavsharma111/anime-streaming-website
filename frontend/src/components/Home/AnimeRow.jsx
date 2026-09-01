@@ -84,6 +84,7 @@ export default function AnimeRow({ title, animes, loading }) {
       {/* Row Container */}
       <div
         ref={rowRef}
+        data-lenis-prevent="true"
         className="flex gap-4 overflow-x-scroll scrollbar-hide scroll-smooth pb-10 -mb-10 pt-4 -mt-4 px-2 -mx-2"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
