@@ -143,6 +143,7 @@ export default function VideoPlayer({
   // Gestures Hook
   useGestures(containerRef, videoRef, {
     togglePlay: () => togglePlay(videoRef.current),
+    onDoubleTapCenter: toggleFullscreen,
     onDoubleTapLeft: () => {
       if (videoRef.current) videoRef.current.currentTime -= 10
     },
@@ -288,6 +289,7 @@ export default function VideoPlayer({
           onPlaying={handlePlaying}
           onEnded={handleVideoEnded}
           onClick={() => togglePlay(videoRef.current)}
+          onDoubleClick={toggleFullscreen}
           className="w-full h-full object-cover"
           playsInline
           autoPlay={autoPlay}

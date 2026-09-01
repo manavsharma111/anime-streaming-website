@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react"
 
 export const useGestures = (containerRef, videoRef, handlers) => {
-  const { togglePlay, onDoubleTapLeft, onDoubleTapRight } = handlers
+  const { togglePlay, onDoubleTapLeft, onDoubleTapRight, onDoubleTapCenter } = handlers
   const lastTapRef = useRef(0)
 
   useEffect(() => {
@@ -20,11 +20,12 @@ export const useGestures = (containerRef, videoRef, handlers) => {
         const width = rect.width
 
         if (x < width / 3) {
-          onDoubleTapLeft()
+          if (onDoubleTapLeft) onDoubleTapLeft()
         } else if (x > (width * 2) / 3) {
-          onDoubleTapRight()
+          if (onDoubleTapRight) onDoubleTapRight()
         } else {
-          togglePlay()
+          if (onDoubleTapCenter) onDoubleTapCenter()
+          else if (togglePlay) togglePlay()
         }
         lastTapRef.current = 0 // Reset
       } else {
