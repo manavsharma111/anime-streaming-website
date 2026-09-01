@@ -1,7 +1,8 @@
 import React, { useEffect, Suspense, lazy } from "react"
 import { Routes, Route, useLocation } from "react-router-dom"
-import { useDispatch } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { checkAuth, addSocketNotification } from "./redux/slice/authSlice"
+import { getWishlist } from "./redux/slice/wishlistSlice"
 import Navbar from "./components/Navbar/Navbar"
 
 // Lazy Load Pages to prevent huge bundle size and navigation lag
@@ -26,6 +27,13 @@ import CustomCursor from "./components/common/animation/CustomCursor"
 export default function App() {
   const dispatch = useDispatch()
   const location = useLocation()
+  const { isAuthenticated } = useSelector((state) => state.auth)
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(getWishlist())
+    }
+  }, [isAuthenticated, dispatch])
 
   useEffect(() => {
     dispatch(checkAuth())
