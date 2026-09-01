@@ -243,6 +243,31 @@ const deleteEpisode = async (req, res, next) => {
       fs.unlinkSync(path.join(__dirname, "..", episode.videoUrl))
     }
 
+    // Delete from Cloudflare R2
+    try {
+      const { s3Client, ListObjectsV2Command, DeleteObjectCommand } = require("../config/s3")
+      if (s3Client && process.env.CLOUDFLARE_R2_BUCKET) {
+        const prefix = `uploads/processed/${episode._id.toString()}/`
+        const listCmd = new ListObjectsV2Command({
+          Bucket: process.env.CLOUDFLARE_R2_BUCKET,
+          Prefix: prefix,
+        })
+        const listedObjects = await s3Client.send(listCmd)
+        if (listedObjects.Contents && listedObjects.Contents.length > 0) {
+          console.log(`[R2Delete] Found ${listedObjects.Contents.length} files to delete for episode ${episode._id}`)
+          for (const obj of listedObjects.Contents) {
+            await s3Client.send(new DeleteObjectCommand({
+              Bucket: process.env.CLOUDFLARE_R2_BUCKET,
+              Key: obj.Key
+            }))
+          }
+          console.log(`[R2Delete] Successfully deleted files for episode ${episode._id} from R2.`)
+        }
+      }
+    } catch (r2Err) {
+      console.error("[R2Delete] Failed to delete from R2:", r2Err)
+    }
+
     await Episode.findByIdAndDelete(req.params.id)
 
     // Clear related redis keys
