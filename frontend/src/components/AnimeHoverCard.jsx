@@ -47,7 +47,7 @@ export default function AnimeHoverCard({ anime, position = "right" }) {
 
   return (
     <div
-      className={`hidden lg:flex flex-col absolute z-50 w-[300px] bg-[#1c1c1c] rounded-xl border border-white/10 p-4 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 delay-300 ${positionClasses}`}
+      className={`hidden lg:flex flex-col absolute z-[100] w-[300px] bg-[#1c1c1c] rounded-xl border border-white/10 p-4 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 delay-300 ${positionClasses}`}
     >
       <img
         src={getImageUrl(anime.posterPath || anime.cover || anime.thumbnail)}
