@@ -60,7 +60,7 @@ export default function EpisodeListSidebar({
       </div>
 
       {/* Episodes Container */}
-      <div className={`overflow-y-auto pr-1 [scrollbar-width:thin] [scrollbar-color:#333_transparent] ${
+      <div className={`overflow-y-auto [scrollbar-width:thin] [scrollbar-color:#333_transparent] ${
         viewMode === "grid" 
           ? "grid grid-cols-6 gap-2 content-start" 
           : "flex flex-col gap-2"
