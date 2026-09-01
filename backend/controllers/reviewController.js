@@ -56,7 +56,7 @@ exports.addReview = async (req, res, next) => {
       allReviews.reduce((acc, curr) => acc + curr.rating, 0) / allReviews.length
 
     await Anime.findByIdAndUpdate(animeId, {
-      rating: avgRating.toFixed(1),
+      platformRating: avgRating.toFixed(1),
     })
 
     // Emit Socket Event
@@ -104,7 +104,7 @@ exports.deleteReview = async (req, res, next) => {
         : 0
 
     await Anime.findByIdAndUpdate(animeId, {
-      rating: avgRating.toFixed(1),
+      platformRating: avgRating.toFixed(1),
     })
 
     if (global.io) {

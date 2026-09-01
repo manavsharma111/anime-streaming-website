@@ -110,7 +110,10 @@ export default function AnimeInfoBox({ anime }) {
             )}
             <div>
               <span className="text-neutral-500 mr-2">Scores:</span>
-              <span className="text-neutral-200">{anime?.rating || "N/A"}</span>
+              <div className="inline-flex items-center gap-4">
+                <span className="text-neutral-200 flex items-center gap-1"><span className="text-yellow-400">★</span> {anime?.platformRating || "N/A"} <span className="text-neutral-500 text-[10px]">(Users)</span></span>
+                <span className="text-neutral-200 flex items-center gap-1"><span className="text-blue-400">★</span> {anime?.rating || "N/A"} <span className="text-neutral-500 text-[10px]">(MAL)</span></span>
+              </div>
             </div>
             <div>
               <span className="text-neutral-500 mr-2">Aired:</span>
