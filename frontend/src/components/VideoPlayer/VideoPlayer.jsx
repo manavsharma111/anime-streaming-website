@@ -289,7 +289,10 @@ export default function VideoPlayer({
           onPlaying={handlePlaying}
           onEnded={handleVideoEnded}
           onClick={() => togglePlay(videoRef.current)}
-          onDoubleClick={toggleFullscreen}
+          onDoubleClick={(e) => {
+            if (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) return
+            toggleFullscreen()
+          }}
           className="w-full h-full object-cover"
           playsInline
           autoPlay={autoPlay}
