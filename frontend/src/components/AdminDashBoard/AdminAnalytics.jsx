@@ -60,17 +60,15 @@ export default function AdminAnalytics({ animes }) {
   const stats = useMemo(() => {
     let totalEpisodes = 0
     let tvCount = 0
-    let movieCount = 0
-    let ovaCount = 0
+    let totalViews = 0
     let genreCounts = {}
 
     animes.forEach((anime) => {
-      const epCount = anime.episodes?.length || 0
+      const epCount = anime.totalEpisodes || anime.episodes?.length || 0
       totalEpisodes += epCount
-
-      if (anime.type === "Movie") movieCount++
-      else if (anime.type === "OVA") ovaCount++
-      else tvCount++
+      
+      totalViews += anime.views || 0
+      tvCount++
 
       if (anime.genres && Array.isArray(anime.genres)) {
         anime.genres.forEach((g) => {
@@ -90,7 +88,7 @@ export default function AdminAnalytics({ animes }) {
     return {
       totalEpisodes,
       tvCount,
-      movieCount,
+      totalViews,
       topViewedAnimes,
       genreCount: Object.keys(genreCounts).length,
     }
@@ -143,9 +141,9 @@ export default function AdminAnalytics({ animes }) {
           delay={0.1}
         />
         <MetricCard
-          title="Total Movies"
-          value={stats.movieCount}
-          icon={Clapperboard}
+          title="Total Views"
+          value={stats.totalViews}
+          icon={Eye}
           colorClass="bg-orange-500/10 text-orange-500"
           delay={0.2}
         />

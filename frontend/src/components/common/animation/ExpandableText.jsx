@@ -12,6 +12,8 @@ export default function ExpandableText({
 }) {
   const [isExpanded, setIsExpanded] = useState(false)
 
+  const cleanText = text ? text.replace(/\[Written by MAL Rewrite\]/g, "").trim() : ""
+
   return (
     <motion.div layout className={containerClassName}>
       <motion.p
@@ -19,9 +21,9 @@ export default function ExpandableText({
         onClick={() => !isExpanded && setIsExpanded(true)}
         className={`${textClassName} ${isExpanded ? "" : `${lineClampClass} cursor-pointer`}`}
       >
-        {text || fallbackText}
+        {cleanText || fallbackText}
       </motion.p>
-      {text && text.length > maxLength && (
+      {cleanText && cleanText.length > maxLength && (
         <motion.button
           layout
           onClick={() => setIsExpanded(!isExpanded)}

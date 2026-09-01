@@ -48,24 +48,29 @@ export default function AnimeDetails() {
   }
 
   const [dynamicTrailerId, setDynamicTrailerId] = useState(null)
+  const [malBanner, setMalBanner] = useState(null)
 
-  // If no trailer was provided, try to fetch it automatically using the title!
+  // Fetch dynamic trailer and high-quality MAL image if available
   useEffect(() => {
-    if (animeDetails && !getYoutubeId(animeDetails.trailerUrl)) {
+    if (animeDetails) {
       fetch(
         `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(animeDetails.title)}&limit=1`,
       )
         .then((res) => res.json())
         .then((data) => {
-          if (
-            data.data &&
-            data.data.length > 0 &&
-            data.data[0].trailer?.youtube_id
-          ) {
-            setDynamicTrailerId(data.data[0].trailer.youtube_id)
+          if (data.data && data.data.length > 0) {
+            const malAnime = data.data[0]
+            if (!getYoutubeId(animeDetails.trailerUrl) && malAnime.trailer?.youtube_id) {
+              setDynamicTrailerId(malAnime.trailer.youtube_id)
+            }
+            if (malAnime.trailer?.images?.maximum_image_url) {
+              setMalBanner(malAnime.trailer.images.maximum_image_url)
+            } else if (malAnime.images?.webp?.large_image_url) {
+              setMalBanner(malAnime.images.webp.large_image_url)
+            }
           }
         })
-        .catch((err) => console.error("Failed to fetch dynamic trailer", err))
+        .catch((err) => console.error("Failed to fetch MAL data", err))
     }
   }, [animeDetails])
 
@@ -105,12 +110,21 @@ export default function AnimeDetails() {
 
       {/* Background Video & Image Fallback */}
       <div className="absolute top-0 left-0 w-full h-[90vh] overflow-hidden pointer-events-none z-0 bg-[#0e0b12]">
-        <img
-          src={getImageUrl(anime.cover || anime.thumbnail)}
-          className="absolute inset-0 w-full h-full object-cover opacity-20 blur-2xl transform scale-110"
-          alt="background fallback"
-        />
-        {trailerId ? (
+        {malBanner ? (
+          <img
+            src={malBanner}
+            className="absolute inset-0 w-full h-full object-cover opacity-30 transform scale-105"
+            alt="MAL Background"
+          />
+        ) : (
+          <img
+            src={getImageUrl(anime.cover || anime.thumbnail)}
+            className="absolute inset-0 w-full h-full object-cover opacity-20 blur-2xl transform scale-110"
+            alt="background fallback"
+          />
+        )}
+        
+        {trailerId && !malBanner && (
           <iframe
             src={`https://www.youtube.com/embed/${trailerId}?autoplay=1&mute=1&loop=1&playlist=${trailerId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&disablekb=1&fs=0`}
             allow="autoplay; encrypted-media"
@@ -118,19 +132,9 @@ export default function AnimeDetails() {
             style={{ border: "none", pointerEvents: "none" }}
             tabIndex="-1"
           ></iframe>
-        ) : (
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            controls={false}
-            className="w-full h-full object-cover opacity-30 absolute top-0 left-0 z-0 pointer-events-none"
-            style={{ pointerEvents: "none" }}
-            src="https://assets.mixkit.co/videos/preview/mixkit-animation-of-futuristic-devices-99786-large.mp4"
-          ></video>
         )}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0e0b12]/30 via-[#0e0b12]/60 to-[#0e0b12] z-10"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0e0b12]/30 via-[#0e0b12]/70 to-[#0e0b12] z-10"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0e0b12] via-transparent to-transparent z-10"></div>
       </div>
 
       <div className="max-w-[1700px] mx-auto px-4 relative z-10 grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6 items-start">
