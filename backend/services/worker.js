@@ -188,8 +188,10 @@ const worker = new Worker(
   },
   {
     connection,
-    lockDuration: 10800000, // 3 hours lock (prevents job from being re-queued while still processing)
-    lockRenewTime: 60000,   // Renew lock every 60 seconds
+    concurrency: 1,
+    lockDuration: 60000, // 60 seconds (worker renews automatically). If server crashes, job is marked stalled in 60s.
+    lockRenewTime: 15000, // Renew lock every 15 seconds
+    maxStalledCount: 1, // Only retry a crashed job 1 time to prevent infinite crash loops
   },
 )
 
