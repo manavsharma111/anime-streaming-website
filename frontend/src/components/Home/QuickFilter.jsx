@@ -91,8 +91,21 @@ export default function QuickFilter() {
   }
 
   const handleClear = () => {
+    const params = new URLSearchParams(window.location.search)
+    const hasActiveFilters = filters.genres || filters.year || filters.status || filters.sort
+    const hasUrlFilters = params.has("genres") || params.has("year") || params.has("status") || params.has("sort")
+
+    if (!hasActiveFilters && !hasUrlFilters) {
+      return // Nothing to clear!
+    }
+
     setFilters({ genres: "", year: "", status: "", sort: "" })
-    navigate("/search") // or preserve other query params if needed, but usually clear means clear all.
+    
+    // Preserve the search query when clearing filters
+    const newParams = new URLSearchParams()
+    if (params.has("q")) newParams.set("q", params.get("q"))
+    
+    navigate(`/search${newParams.toString() ? '?' + newParams.toString() : ''}`)
   }
 
   return (

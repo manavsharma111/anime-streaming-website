@@ -73,9 +73,19 @@ const getAnimes = async (req, res, next) => {
     if (search && pageNumber === 1) {
       try {
         const axios = require("axios")
-        const jikanRes = await axios.get(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(search)}&limit=5`)
-        if (jikanRes.data && jikanRes.data.data) {
-          const malAnimes = jikanRes.data.data.map(mapJikanToAnime)
+        const queryStr = `
+          query($search: String) {
+            Page(page: 1, perPage: 5) {
+              media(type: ANIME, search: $search) {
+                id idMal title { english romaji } description seasonYear averageScore 
+                coverImage { extraLarge large } bannerImage trailer { id site } genres episodes status
+              }
+            }
+          }
+        `
+        const alRes = await axios.post("https://graphql.anilist.co", { query: queryStr, variables: { search } })
+        if (alRes.data && alRes.data.data && alRes.data.data.Page) {
+          const malAnimes = alRes.data.data.Page.media.map(mapAnilistToAnime)
           const localTitles = animes.map(a => a.title.toLowerCase())
           
           const newMalAnimes = malAnimes.filter(ma => !localTitles.some(t => t.includes(ma.title.toLowerCase()) || ma.title.toLowerCase().includes(t)))
@@ -114,21 +124,21 @@ const getAnimes = async (req, res, next) => {
 
 const mongoose = require("mongoose")
 
-// Helper to map Jikan Anime to our DB Anime format
-function mapJikanToAnime(malAnime) {
+// Helper to map Anilist Anime to our DB Anime format
+function mapAnilistToAnime(alAnime) {
   return {
-    _id: malAnime.mal_id.toString(),
-    title: malAnime.title_english || malAnime.title,
-    description: malAnime.synopsis || "No description available.",
-    year: malAnime.year || new Date(malAnime.aired?.from).getFullYear() || new Date().getFullYear(),
-    rating: malAnime.score || 0,
-    thumbnail: malAnime.images?.webp?.large_image_url || malAnime.images?.jpg?.large_image_url,
-    cover: malAnime.trailer?.images?.maximum_image_url || malAnime.images?.webp?.large_image_url,
-    trailerUrl: malAnime.trailer?.youtube_id ? `https://www.youtube.com/watch?v=${malAnime.trailer.youtube_id}` : "",
-    genres: malAnime.genres ? malAnime.genres.map(g => g.name) : ["Unknown"],
-    status: malAnime.status === "Currently Airing" ? "ongoing" : "completed",
-    episodes: [], // No local episodes for MAL proxy
-    totalEpisodes: malAnime.episodes || 0,
+    _id: (alAnime.idMal || alAnime.id).toString(),
+    title: alAnime.title?.english || alAnime.title?.romaji || "Unknown Title",
+    description: (alAnime.description || "No description available.").replace(/<br>/g, "\n"),
+    year: alAnime.seasonYear || new Date().getFullYear(),
+    rating: (alAnime.averageScore || 0) / 10,
+    thumbnail: alAnime.coverImage?.extraLarge || alAnime.coverImage?.large,
+    cover: alAnime.bannerImage || alAnime.coverImage?.extraLarge,
+    trailerUrl: alAnime.trailer?.site === "youtube" ? `https://www.youtube.com/watch?v=${alAnime.trailer.id}` : "",
+    genres: alAnime.genres || ["Unknown"],
+    status: alAnime.status === "RELEASING" ? "ongoing" : "completed",
+    episodes: [], // No local episodes for proxy
+    totalEpisodes: alAnime.episodes || 0,
     views: 0,
     isMalProxy: true
   }
@@ -144,13 +154,23 @@ const getAnimeDetails = async (req, res, next) => {
     }
 
     if (!anime) {
-      // Try fetching from MAL (Jikan API)
+      // Try fetching from Anilist
       try {
-        const axios = require("axios")
-        const jikanRes = await axios.get(`https://api.jikan.moe/v4/anime/${req.params.id}`)
-        
-        if (jikanRes.data && jikanRes.data.data) {
-          anime = mapJikanToAnime(jikanRes.data.data)
+        const parsedId = parseInt(req.params.id)
+        if (!isNaN(parsedId)) {
+          const axios = require("axios")
+          const queryStr = `
+            query($id: Int) {
+              Media(idMal: $id, type: ANIME) {
+                  id idMal title { english romaji } description seasonYear averageScore 
+                  coverImage { extraLarge large } bannerImage trailer { id site } genres episodes status
+              }
+            }
+          `
+          const alRes = await axios.post("https://graphql.anilist.co", { query: queryStr, variables: { id: parsedId } })
+          if (alRes.data && alRes.data.data && alRes.data.data.Media) {
+            anime = mapAnilistToAnime(alRes.data.data.Media)
+          }
         }
       } catch (err) {
         console.error("Failed to proxy MAL data:", err.message)
@@ -182,14 +202,18 @@ const getAnimeDetails = async (req, res, next) => {
 const getMalTrending = async (req, res, next) => {
   try {
     const axios = require("axios")
-    const jikanRes = await axios.get("https://api.jikan.moe/v4/top/anime?filter=airing&limit=15")
-    const jikanData = jikanRes.data
-    
-    if (!jikanData || !jikanData.data) {
-      return res.status(500).json({ message: "Failed to fetch MAL trending" })
-    }
-
-    const trendingAnimes = jikanData.data.map(mapJikanToAnime)
+    const queryStr = `
+      query {
+        Page(page: 1, perPage: 15) {
+          media(type: ANIME, status: RELEASING, sort: TRENDING_DESC) {
+            id idMal title { english romaji } description seasonYear averageScore 
+            coverImage { extraLarge large } bannerImage trailer { id site } genres episodes status
+          }
+        }
+      }
+    `
+    const alRes = await axios.post("https://graphql.anilist.co", { query: queryStr })
+    const trendingAnimes = alRes.data.data.Page.media.map(mapAnilistToAnime)
 
     res.status(200).json({
       success: true,

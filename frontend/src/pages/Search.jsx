@@ -181,7 +181,7 @@ export default function Search() {
             </form>
           </div>
           {/* Grid */}
-          {isLoading ? (
+          {isLoading && (!animeList || animeList.length === 0) ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
               {[...Array(10)].map((_, i) => (
                 <div key={i} className="flex flex-col gap-2">
@@ -192,7 +192,7 @@ export default function Search() {
             </div>
           ) : animeList?.length > 0 ? (
             <>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+              <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 transition-opacity duration-300 ${isLoading ? "opacity-40 pointer-events-none grayscale-[30%]" : "opacity-100"}`}>
                 {animeList.map((anime) => (
                   <AnimeCard key={anime._id} anime={anime} />
                 ))}
