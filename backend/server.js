@@ -20,6 +20,14 @@ try {
   console.warn("[Server] Worker could not be started:", err.message)
 }
 
+// Initialize cron jobs (Auto-Sync Anime)
+try {
+  const { initCronJobs } = require("./services/cronService")
+  initCronJobs()
+} catch (err) {
+  console.warn("[Server] Cron jobs could not be started:", err.message)
+}
+
 const app = express()
 
 // Initialize WebSocket server
@@ -71,6 +79,17 @@ app.use(
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
+
+// rate Limiter
+const rateLimit = require("express-rate-limit")
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // limit each IP to 1000 requests per windowMs
+  message: "Too many requests from this IP, please try again after 15 minutes",
+  standardHeaders: true,
+  legacyHeaders: false,
+})
+app.use('/api', limiter)
 
 // Serve uploads 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")))
