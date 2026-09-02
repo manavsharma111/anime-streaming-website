@@ -2,33 +2,42 @@ const cron = require('node-cron');
 const axios = require('axios');
 const Anime = require('../models/Anime');
 
-// Helper to map Jikan Anime to our DB Anime format
-const mapJikanToAnime = (malAnime) => {
+// Helper to map Anilist Anime to our DB Anime format
+const mapAnilistToAnime = (alAnime) => {
   return {
-    title:
-      malAnime.title_english || malAnime.title || malAnime.title_japanese,
-    description: malAnime.synopsis || 'No description available.',
-    year: malAnime.year || malAnime.aired?.prop?.from?.year || new Date().getFullYear(),
-    rating: malAnime.score || 0,
-    thumbnail: malAnime.images?.webp?.large_image_url || malAnime.images?.jpg?.large_image_url || '',
-    cover: malAnime.trailer?.images?.maximum_image_url || malAnime.images?.webp?.large_image_url || '',
-    trailerUrl: malAnime.trailer?.url || '',
-    genres: malAnime.genres ? malAnime.genres.map((g) => g.name) : ['Unknown'],
-    status: malAnime.status === 'Currently Airing' ? 'ongoing' : 'completed',
-    totalEpisodes: malAnime.episodes || null,
+    title: alAnime.title?.english || alAnime.title?.romaji || "Unknown Title",
+    description: (alAnime.description || 'No description available.').replace(/<br>/g, "\n"),
+    year: alAnime.seasonYear || new Date().getFullYear(),
+    rating: (alAnime.averageScore || 0) / 10,
+    thumbnail: alAnime.coverImage?.extraLarge || alAnime.coverImage?.large || '',
+    cover: alAnime.bannerImage || alAnime.coverImage?.extraLarge || '',
+    trailerUrl: alAnime.trailer?.site === "youtube" ? `https://www.youtube.com/watch?v=${alAnime.trailer.id}` : '',
+    genres: alAnime.genres || ['Unknown'],
+    status: alAnime.status === 'RELEASING' ? 'ongoing' : 'completed',
+    totalEpisodes: alAnime.episodes || null,
   };
 };
 
 const syncLatestAnime = async () => {
   console.log('[Cron] Starting sync for latest airing anime...');
   try {
-    const response = await axios.get('https://api.jikan.moe/v4/seasons/now?limit=20');
-    const animes = response.data.data;
+    const query = `
+      query {
+        Page(page: 1, perPage: 20) {
+          media(type: ANIME, status: RELEASING, sort: SCORE_DESC) {
+            idMal title { english romaji } description seasonYear averageScore 
+            coverImage { extraLarge large } bannerImage trailer { id site } genres episodes status
+          }
+        }
+      }
+    `;
+    const response = await axios.post('https://graphql.anilist.co', { query });
+    const animes = response.data.data.Page.media;
 
     let addedCount = 0;
 
-    for (const malAnime of animes) {
-      const mappedAnime = mapJikanToAnime(malAnime);
+    for (const alAnime of animes) {
+      const mappedAnime = mapAnilistToAnime(alAnime);
       
       // Check if anime already exists by title
       const existingAnime = await Anime.findOne({ title: mappedAnime.title });

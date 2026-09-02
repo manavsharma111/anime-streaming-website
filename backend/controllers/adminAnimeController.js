@@ -428,14 +428,19 @@ const bulkFetchEpisodes = async (req, res, next) => {
     // Attempt to get MAL ID for AniSkip integration
     let malId = null
     try {
-      const jikanRes = await axios.get(
-        `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1`,
-      )
-      if (jikanRes.data.data && jikanRes.data.data.length > 0) {
-        malId = jikanRes.data.data[0].mal_id
+      const alQuery = `
+        query($search: String) {
+          Media(search: $search, type: ANIME) {
+            idMal
+          }
+        }
+      `
+      const alRes = await axios.post("https://graphql.anilist.co", { query: alQuery, variables: { search: title } })
+      if (alRes.data && alRes.data.data && alRes.data.data.Media) {
+        malId = alRes.data.data.Media.idMal
       }
-    } catch (jikanErr) {
-      console.warn("Could not fetch MAL ID from Jikan:", jikanErr.message)
+    } catch (alErr) {
+      console.warn("Could not fetch MAL ID from Anilist:", alErr.message)
     }
 
     let addedCount = 0
