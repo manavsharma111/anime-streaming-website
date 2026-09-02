@@ -205,7 +205,7 @@ const getMalTrending = async (req, res, next) => {
     const queryStr = `
       query {
         Page(page: 1, perPage: 15) {
-          media(type: ANIME, status: RELEASING, sort: TRENDING_DESC) {
+          media(type: ANIME, status: RELEASING, sort: SCORE_DESC) {
             id idMal title { english romaji } description seasonYear averageScore 
             coverImage { extraLarge large } bannerImage trailer { id site } genres episodes status
           }

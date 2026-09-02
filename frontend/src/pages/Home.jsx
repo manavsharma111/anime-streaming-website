@@ -63,7 +63,7 @@ export default function Home() {
           {/* Currently Airing (MAL Proxy) */}
           {malTrendingList && malTrendingList.length > 0 && (
             <AnimeSection
-              title="🔥 Currently Airing (MAL)"
+              title="🏆 Top Airing Anime"
               icon={Sparkles}
               animes={malTrendingList}
               isLoading={isLoading}
