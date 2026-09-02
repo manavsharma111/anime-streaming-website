@@ -195,7 +195,7 @@ export default function AdminQueue() {
       animate={{ opacity: 1, y: 0 }}
       className="bg-neutral-900/40 backdrop-blur-xl rounded-3xl p-8 border border-white/5 shadow-2xl flex flex-col gap-8 min-h-[80vh]"
     >
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
         <div>
           <h3 className="text-2xl font-black text-white flex items-center gap-3">
             <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-500">
