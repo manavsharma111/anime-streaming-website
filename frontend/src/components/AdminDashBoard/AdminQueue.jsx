@@ -69,18 +69,13 @@ export default function AdminQueue() {
   }
 
   const handleNukeQueue = async () => {
-    const confirm = window.confirm("WARNING: This will forcefully clear ALL waiting and active jobs, and kill any running FFmpeg processes. Are you sure you want to clear the queue?")
-    if (!confirm) return
-
     try {
       const res = await axiosInstance.post(`/anime-admin/queue/nuke`)
       if (res.data.success) {
-        alert("Queue cleared successfully!")
         fetchQueue()
       }
     } catch (err) {
       console.error("Failed to clear queue", err)
-      alert("Failed to clear queue")
     }
   }
 
