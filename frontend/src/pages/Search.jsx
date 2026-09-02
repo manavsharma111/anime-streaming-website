@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { fetchAnimes } from "../redux/slice/animeSlice"
 import AnimeCard from "../components/Home/AnimeCard"
 import QuickFilter from "../components/Home/QuickFilter"
-import { Search as SearchIcon, Compass } from "lucide-react"
+import { Search as SearchIcon, Compass, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
 
 export default function Search() {
   const location = useLocation()
@@ -109,6 +109,32 @@ export default function Search() {
           ? `Search Results for "${queryParam}"`
           : "Explore Anime"
 
+  const currentPage = parseInt(pageParam) || 1
+  // Use actual data if available, but ensure at least 5 pages are shown for the UI design
+  const actualTotalPages = pagination?.total ? Math.ceil(pagination.total / (pagination.limit || 30)) : 1
+  const totalPages = Math.max(5, actualTotalPages)
+  
+  const getPageNumbers = () => {
+    const pages = []
+    const maxVisible = 5
+    
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i)
+    } else {
+      let start = Math.max(1, currentPage - 2)
+      let end = Math.min(totalPages, start + maxVisible - 1)
+      
+      if (end - start < maxVisible - 1) {
+        start = Math.max(1, end - maxVisible + 1)
+      }
+      
+      for (let i = start; i <= end; i++) pages.push(i)
+    }
+    return pages
+  }
+
+  const pageNumbers = getPageNumbers()
+
   return (
     <div className="min-h-screen bg-[#050505] text-white pt-24 pb-20 relative overflow-hidden">
       {/* Decorative Background */}
@@ -160,7 +186,21 @@ export default function Search() {
               </div>
 
               {/* Pagination UI */}
-              <div className="flex justify-center items-center gap-2 mt-8">
+              <div className="flex justify-center items-center gap-2 sm:gap-3 mt-12 mb-4 flex-wrap">
+                {/* First Page */}
+                <button
+                  disabled={!pageParam || pageParam === "1"}
+                  onClick={() => {
+                    const newParams = new URLSearchParams(location.search)
+                    newParams.set("page", 1)
+                    navigate(`/search?${newParams.toString()}`)
+                  }}
+                  className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center bg-[#1e1c22] hover:bg-[#2a2730] rounded-full text-neutral-400 hover:text-white disabled:opacity-30 disabled:hover:bg-[#1e1c22] disabled:hover:text-neutral-400 transition-all shadow-sm"
+                >
+                  <ChevronsLeft size={18} />
+                </button>
+
+                {/* Previous Page */}
                 <button
                   disabled={!pageParam || pageParam === "1"}
                   onClick={() => {
@@ -169,34 +209,56 @@ export default function Search() {
                     newParams.set("page", currentPage - 1)
                     navigate(`/search?${newParams.toString()}`)
                   }}
-                  className="px-4 py-2 bg-[#1a1721] border border-white/10 rounded-lg text-sm font-bold disabled:opacity-50 hover:bg-[#201d2a] transition-colors"
+                  className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center bg-[#1e1c22] hover:bg-[#2a2730] rounded-full text-neutral-400 hover:text-white disabled:opacity-30 disabled:hover:bg-[#1e1c22] disabled:hover:text-neutral-400 transition-all shadow-sm"
                 >
-                  Prev
+                  <ChevronLeft size={18} />
                 </button>
 
-                <span className="text-sm text-neutral-400 font-bold px-4">
-                  Page {pageParam || "1"}{" "}
-                  {pagination?.total
-                    ? `of ${Math.ceil(pagination.total / (pagination.limit || 30))}`
-                    : ""}
-                </span>
+                {/* Page Numbers */}
+                {pageNumbers.map((num) => (
+                  <button
+                    key={num}
+                    onClick={() => {
+                      if (num === currentPage) return
+                      const newParams = new URLSearchParams(location.search)
+                      newParams.set("page", num)
+                      navigate(`/search?${newParams.toString()}`)
+                    }}
+                    className={`w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-full font-bold text-sm sm:text-base transition-all duration-300 shadow-sm ${
+                      currentPage === num
+                        ? "bg-[#ffe082] text-[#110e16] scale-105 cursor-default shadow-[0_0_15px_rgba(255,224,130,0.3)]"
+                        : "bg-[#1e1c22] text-neutral-400 hover:text-white hover:bg-[#2a2730]"
+                    }`}
+                  >
+                    {num}
+                  </button>
+                ))}
 
+                {/* Next Page */}
                 <button
-                  disabled={
-                    animeList.length < 30 ||
-                    (pagination &&
-                      pagination.page >=
-                        Math.ceil(pagination.total / pagination.limit))
-                  }
+                  disabled={currentPage >= totalPages}
                   onClick={() => {
                     const newParams = new URLSearchParams(location.search)
                     const currentPage = parseInt(pageParam) || 1
                     newParams.set("page", currentPage + 1)
                     navigate(`/search?${newParams.toString()}`)
                   }}
-                  className="px-4 py-2 bg-[#1a1721] border border-white/10 rounded-lg text-sm font-bold disabled:opacity-50 hover:bg-[#201d2a] transition-colors"
+                  className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center bg-[#1e1c22] hover:bg-[#2a2730] rounded-full text-neutral-400 hover:text-white disabled:opacity-30 disabled:hover:bg-[#1e1c22] disabled:hover:text-neutral-400 transition-all shadow-sm"
                 >
-                  Next
+                  <ChevronRight size={18} />
+                </button>
+                
+                {/* Last Page */}
+                <button
+                  disabled={currentPage >= totalPages}
+                  onClick={() => {
+                    const newParams = new URLSearchParams(location.search)
+                    newParams.set("page", totalPages)
+                    navigate(`/search?${newParams.toString()}`)
+                  }}
+                  className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center bg-[#1e1c22] hover:bg-[#2a2730] rounded-full text-neutral-400 hover:text-white disabled:opacity-30 disabled:hover:bg-[#1e1c22] disabled:hover:text-neutral-400 transition-all shadow-sm"
+                >
+                  <ChevronsRight size={18} />
                 </button>
               </div>
             </>
