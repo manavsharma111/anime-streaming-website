@@ -8,7 +8,7 @@ const {
   getMalTrending,
   getSmartRecommendations,
 } = require("../controllers/animeController")
-const { verifyToken } = require("../middleware/authMiddleware")
+const { authMiddleware } = require("../middleware/authMiddleware")
 
 // get all animes
 router.get("/", getAnimes)
@@ -20,7 +20,7 @@ router.get("/genres", getAnimeGenres)
 router.get("/mal-trending", getMalTrending)
 
 // get smart recommendations (MUST be before /:id)
-router.get("/smart-recommendations", verifyToken, getSmartRecommendations)
+router.get("/smart-recommendations", authMiddleware, getSmartRecommendations)
 
 // get anime details
 router.get("/:id", getAnimeDetails)
