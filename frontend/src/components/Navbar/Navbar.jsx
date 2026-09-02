@@ -126,7 +126,7 @@ export default function Navbar() {
         <div
           className="absolute top-6 left-0 right-0 z-[60] flex justify-center pointer-events-auto"
         >
-          <div 
+          <div
             className="text-xl font-black tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-[#f33767] to-[#ff7eb3] font-mono drop-shadow-[0_0_10px_rgba(243,55,103,0.5)] cursor-pointer"
             onClick={() => navigate("/")}
           >
@@ -151,27 +151,27 @@ export default function Navbar() {
           animate={
             !isMobile
               ? {
-                  borderRadius: isScrolled ? "9999px" : "0px",
-                  backgroundColor: isScrolled
-                    ? "rgba(17,14,22,0.7)"
-                    : "rgba(17,14,22,0.0)",
-                  borderColor: isScrolled
-                    ? "rgba(255,255,255,0.05)"
-                    : "transparent",
-                  borderWidth: isScrolled ? "1px" : "0px",
-                  boxShadow: isScrolled
-                    ? "0 10px 40px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.05)"
-                    : "none",
-                  backdropFilter: "blur(24px)",
-                }
+                borderRadius: isScrolled ? "9999px" : "0px",
+                backgroundColor: isScrolled
+                  ? "rgba(17,14,22,0.7)"
+                  : "rgba(17,14,22,0.0)",
+                borderColor: isScrolled
+                  ? "rgba(255,255,255,0.05)"
+                  : "transparent",
+                borderWidth: isScrolled ? "1px" : "0px",
+                boxShadow: isScrolled
+                  ? "0 10px 40px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.05)"
+                  : "none",
+                backdropFilter: "blur(24px)",
+              }
               : {
-                  borderRadius: "9999px",
-                  backgroundColor: "rgba(10,10,10,0.95)",
-                  borderColor: "rgba(255,255,255,0.1)",
-                  borderWidth: "1px",
-                  backdropFilter: "none",
-                  boxShadow: "0 -5px 20px rgba(0,0,0,0.5)",
-                }
+                borderRadius: "9999px",
+                backgroundColor: "rgba(10,10,10,0.95)",
+                borderColor: "rgba(255,255,255,0.1)",
+                borderWidth: "1px",
+                backdropFilter: "none",
+                boxShadow: "0 -5px 20px rgba(0,0,0,0.5)",
+              }
           }
           transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
           className="relative flex items-center justify-center pointer-events-auto"
@@ -200,7 +200,7 @@ export default function Navbar() {
               transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
               className="flex justify-start items-center overflow-hidden whitespace-nowrap pointer-events-auto"
             >
-              <div 
+              <div
                 className="text-xl font-black tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-[#f33767] to-[#ff7eb3] font-mono drop-shadow-[0_0_10px_rgba(243,55,103,0.5)] cursor-pointer"
                 onClick={() => navigate("/")}
               >
@@ -257,7 +257,7 @@ export default function Navbar() {
                         }}
                       />
                     )}
-                    
+
                     <motion.div
                       animate={isLit ? { scale: [1, 1.2, 1] } : {}}
                       transition={{ duration: 0.3 }}
@@ -284,27 +284,27 @@ export default function Navbar() {
                         marginLeft: isLit ? "6px" : "0px",
                       }}
                     >
-                        {item.id === "search" && isLit ? (
-                          <form
-                            onSubmit={handleSearchSubmit}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <input
-                              type="text"
-                              autoFocus
-                              placeholder="Search anime..."
-                              value={searchQuery}
-                              onChange={(e) => setSearchQuery(e.target.value)}
-                              className="bg-transparent border-none outline-none text-white placeholder:text-white/50 w-32 font-bold tracking-wider"
-                            />
-                          </form>
-                        ) : (
-                          item.id !== "search" && (
-                            <span className="relative z-10 group-hover:text-white transition-colors">
-                              {item.label}
-                            </span>
-                          )
-                        )}
+                      {item.id === "search" && isLit ? (
+                        <form
+                          onSubmit={handleSearchSubmit}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <input
+                            type="text"
+                            autoFocus
+                            placeholder="Search anime..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="bg-transparent border-none outline-none text-white placeholder:text-white/50 w-32 font-bold tracking-wider"
+                          />
+                        </form>
+                      ) : (
+                        item.id !== "search" && (
+                          <span className="relative z-10 group-hover:text-white transition-colors">
+                            {item.label}
+                          </span>
+                        )
+                      )}
                     </div>
 
                   </motion.div>

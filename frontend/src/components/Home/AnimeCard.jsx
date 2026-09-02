@@ -1,13 +1,27 @@
-import React from "react"
+import {useState} from "react"
 import { Link } from "react-router-dom"
 import { Play, Captions, Mic } from "lucide-react"
 import { getImageUrl } from "../../utils/image"
 import { motion } from "framer-motion"
 import AnimeHoverCard from "../AnimeHoverCard"
 
+
 const AnimeCard = ({ anime }) => {
+  const [hoverPos, setHoverPos] = useState("right")
+
+  const handleMouseEnter = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    // If the card is too close to the right edge, flip hover card to the left
+    if (rect.right + 340 > window.innerWidth) {
+      setHoverPos("left")
+    } else {
+      setHoverPos("right")
+    }
+  }
+
   return (
     <motion.div
+      onMouseEnter={handleMouseEnter}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
@@ -19,7 +33,7 @@ const AnimeCard = ({ anime }) => {
         className="relative group cursor-pointer aspect-[3/4] rounded-xl overflow-hidden bg-[#110e16] border border-white/5 block shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
       >
         <img
-          src={getImageUrl(anime.cover || anime.thumbnail)}
+          src={getImageUrl(anime.thumbnail || anime.cover)}
           alt={anime.title}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out opacity-90 group-hover:opacity-100"
         />
@@ -64,7 +78,7 @@ const AnimeCard = ({ anime }) => {
         </h3>
       </Link>
 
-      <AnimeHoverCard anime={anime} position="right" />
+      <AnimeHoverCard anime={anime} position={hoverPos} />
     </motion.div>
   )
 }

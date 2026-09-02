@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import ExpandableText from "../common/animation/ExpandableText"
 import { getImageUrl } from "../../utils/image"
 import { useDispatch, useSelector } from "react-redux"
@@ -22,21 +22,38 @@ export default function AnimeInfoBox({ anime }) {
   )
   const isInWishlist = !!wishlistItem
 
-  const handleWishlistToggle = () => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+
+  // Dropdown options
+  const listStatuses = ["Watching", "Completed", "Planning", "Paused", "Dropped"]
+  const currentStatus = wishlistItem?.status || "Add to List"
+
+  const handleStatusChange = (status) => {
+    setIsDropdownOpen(false)
     if (!isAuthenticated) {
-      toast.error("Please login to add to watchlist")
+      toast.error("Please login to manage your list")
+      return
+    }
+    
+    if (status === "Remove") {
+      if (isInWishlist) {
+        dispatch(deleteWishlist(wishlistItem._id))
+          .unwrap()
+          .then(() => toast.success("Removed from list"))
+          .catch((err) => toast.error(err.message || "Failed to remove"))
+      }
       return
     }
 
     if (isInWishlist) {
-      dispatch(deleteWishlist(wishlistItem._id))
+      dispatch(updateWishlistStatus({ id: wishlistItem._id, status }))
         .unwrap()
-        .then(() => toast.success("Removed from watchlist"))
-        .catch((err) => toast.error(err.message || "Failed to remove"))
+        .then(() => toast.success(`Moved to ${status}`))
+        .catch((err) => toast.error(err.message || "Failed to update"))
     } else {
-      dispatch(addToWishlist({ anime: anime._id }))
+      dispatch(addToWishlist({ anime: anime._id, status }))
         .unwrap()
-        .then(() => toast.success("Added to watchlist"))
+        .then(() => toast.success(`Added to ${status}`))
         .catch((err) => toast.error(err.message || "Failed to add"))
     }
   }
@@ -58,14 +75,23 @@ export default function AnimeInfoBox({ anime }) {
   return (
     <div className="w-full flex flex-col gap-6">
       <div className="flex flex-col md:flex-row gap-6">
-        {/* Left Side: Poster */}
+        {/* Left Side: Thumbnail/Cover */}
         <div className="w-full md:w-[200px] flex-shrink-0">
           <div className="w-full aspect-[3/4] rounded-xl overflow-hidden shadow-2xl border border-white/10 relative group">
             <img
-              src={getImageUrl(anime?.cover || anime?.thumbnail)}
+              src={getImageUrl(anime?.thumbnail || anime?.cover)}
               alt={anime?.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             />
+            {/* Play Button Overlay */}
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <button
+                onClick={handleWatchClick}
+                className="w-14 h-14 bg-[#f33767] rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(243,55,103,0.5)] transform scale-90 group-hover:scale-100 transition-transform duration-300"
+              >
+                <Play size={24} className="text-white fill-white ml-1" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -75,6 +101,12 @@ export default function AnimeInfoBox({ anime }) {
             <h1 className="text-3xl font-black text-[#a67cff] leading-tight">
               {anime?.title}
             </h1>
+            
+            {anime?.otherNames && anime.otherNames.length > 0 && (
+              <p className="text-xs text-neutral-500 italic mt-0.5 mb-2 line-clamp-1">
+                {anime.otherNames.join(", ")}
+              </p>
+            )}
 
             <div className="flex items-center gap-2 text-[11px] font-bold mt-1">
               <span className="border border-white/20 text-neutral-300 px-1.5 py-0.5 rounded-sm">
@@ -99,86 +131,135 @@ export default function AnimeInfoBox({ anime }) {
 
           <ExpandableText text={anime?.description} />
 
-          <div className="flex flex-col gap-1.5 text-sm mt-4">
-            {anime?.otherNames && anime.otherNames.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-sm mt-4">
+            {/* Left Column */}
+            <div className="flex flex-col gap-2">
+              {anime?.type && (
+                <div>
+                  <span className="text-neutral-500 mr-2">Type:</span>
+                  <span className="text-neutral-200">{anime.type}</span>
+                </div>
+              )}
+              {anime?.country && (
+                <div>
+                  <span className="text-neutral-500 mr-2">Country:</span>
+                  <span className="text-neutral-200">{anime.country}</span>
+                </div>
+              )}
               <div>
-                <span className="text-neutral-500 mr-2">Other names:</span>
-                <span className="text-neutral-200">
-                  {anime.otherNames.join(", ")}
+                <span className="text-neutral-500 mr-2">Premiered:</span>
+                <span className="text-neutral-200">{anime?.year || "N/A"}</span>
+              </div>
+              <div>
+                <span className="text-neutral-500 mr-2">Status:</span>
+                <span className="text-[#a67cff] capitalize">
+                  {anime?.status || "Completed"}
                 </span>
               </div>
-            )}
-            <div>
-              <span className="text-neutral-500 mr-2">Scores:</span>
-              <div className="inline-flex items-center gap-4">
-                <span className="text-neutral-200 flex items-center gap-1"><span className="text-yellow-400">★</span> {anime?.platformRating || "N/A"} <span className="text-neutral-500 text-[10px]">(Users)</span></span>
-                <span className="text-neutral-200 flex items-center gap-1"><span className="text-blue-400">★</span> {anime?.rating || "N/A"} <span className="text-neutral-500 text-[10px]">(MAL)</span></span>
+              {anime?.source && (
+                <div>
+                  <span className="text-neutral-500 mr-2">Source:</span>
+                  <span className="text-neutral-200">{anime.source}</span>
+                </div>
+              )}
+              <div className="col-span-1 md:col-span-2 mt-1">
+                <span className="text-neutral-500 mr-2">Genres:</span>
+                <span className="text-[#a67cff]">
+                  {anime?.genres ? (
+                    [
+                      ...new Set(
+                        anime?.genres
+                          .flatMap((g) => g.split(","))
+                          .map((g) => g.trim()),
+                      ),
+                    ].join(", ")
+                  ) : (
+                    "Unknown"
+                  )}
+                </span>
               </div>
             </div>
-            <div>
-              <span className="text-neutral-500 mr-2">Aired:</span>
-              <span className="text-neutral-200">{anime?.year || "N/A"}</span>
-            </div>
-            <div>
-              <span className="text-neutral-500 mr-2">Duration:</span>
-              <span className="text-neutral-200">
-                {anime?.duration || "24 min"}
-              </span>
-            </div>
-            <div>
-              <span className="text-neutral-500 mr-2">Status:</span>
-              <span className="text-neutral-200 capitalize">
-                {anime?.status || "Completed"}
-              </span>
-            </div>
-            <div>
-              <span className="text-neutral-500 mr-2">Genre:</span>
-              <span>
-                {anime?.genres ? (
-                  [
-                    ...new Set(
-                      anime?.genres
-                        .flatMap((g) => g.split(",").map((s) => s.trim()))
-                        .filter(Boolean),
-                    ),
-                  ].map((g, i, arr) => (
-                    <span key={i}>
-                      <span className="text-[#a67cff] hover:underline cursor-pointer transition-colors">
-                        {g}
-                      </span>
-                      {i < arr.length - 1 && (
-                        <span className="text-neutral-200">, </span>
-                      )}
-                    </span>
-                  ))
-                ) : (
-                  <span className="text-neutral-200">N/A</span>
-                )}
-              </span>
+
+            {/* Right Column */}
+            <div className="flex flex-col gap-2">
+              <div>
+                <span className="text-neutral-500 mr-2">Scores:</span>
+                <span className="text-neutral-200">
+                  {anime?.rating != null ? `${anime.rating} (MAL)` : ""}
+                  {anime?.rating != null && anime?.platformRating != null ? " • " : ""}
+                  {anime?.platformRating != null ? `${anime.platformRating} (Users)` : ""}
+                  {anime?.rating == null && anime?.platformRating == null && "N/A"}
+                </span>
+              </div>
+              <div>
+                <span className="text-neutral-500 mr-2">Duration:</span>
+                <span className="text-neutral-200">
+                  {anime?.duration || "24 min"}
+                </span>
+              </div>
+              <div>
+                <span className="text-neutral-500 mr-2">Episodes:</span>
+                <span className="text-neutral-200">
+                  {anime?.episodes?.length || anime?.totalEpisodes || "??"}
+                </span>
+              </div>
+              {anime?.studios && (
+                <div>
+                  <span className="text-neutral-500 mr-2">Studios:</span>
+                  <span className="text-[#a67cff]">{anime.studios}</span>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="flex items-center gap-4 mt-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 mt-6">
             <button
               onClick={handleWatchClick}
-              className="flex-grow max-w-[200px] flex items-center justify-center gap-2 bg-[#a0a0a0] hover:bg-[#b0b0b0] text-black font-bold py-2.5 rounded-full transition-colors"
+              className="flex-grow sm:flex-grow-0 sm:w-[200px] flex items-center justify-center gap-2 bg-[#a0a0a0] hover:bg-[#b0b0b0] text-black font-bold py-2.5 rounded-full transition-colors"
             >
               <Play size={18} className="fill-current" /> Watch
             </button>
-            <button
-              onClick={handleWishlistToggle}
-              className={`flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-full transition-colors ${
-                isInWishlist
-                  ? "bg-[#f33767]/20 text-[#f33767] border border-[#f33767]/50"
-                  : "bg-white/10 text-white hover:bg-white/20"
-              }`}
-            >
-              {isInWishlist ? (
-                <Heart size={20} fill="#f33767" />
-              ) : (
-                <Plus size={24} />
+            
+            {/* List Status Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className={`w-full sm:w-48 flex items-center justify-center gap-2 py-2.5 rounded-full font-bold transition-colors ${
+                  isInWishlist
+                    ? "bg-[#f33767] text-white"
+                    : "bg-white/10 text-white hover:bg-white/20"
+                }`}
+              >
+                {isInWishlist ? <Heart size={16} fill="white" /> : <Plus size={18} />}
+                {currentStatus}
+              </button>
+              
+              {isDropdownOpen && (
+                <div className="absolute top-full mt-2 left-0 w-full sm:w-48 bg-[#1a1721] border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50">
+                  {listStatuses.map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => handleStatusChange(status)}
+                      className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                        currentStatus === status 
+                          ? "bg-white/10 text-[#f33767] font-bold" 
+                          : "text-neutral-300 hover:bg-white/5 hover:text-white"
+                      }`}
+                    >
+                      {status}
+                    </button>
+                  ))}
+                  {isInWishlist && (
+                    <button
+                      onClick={() => handleStatusChange("Remove")}
+                      className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-500/10 font-bold transition-colors border-t border-white/5"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
               )}
-            </button>
+            </div>
           </div>
         </div>
       </div>

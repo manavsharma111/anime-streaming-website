@@ -12,6 +12,11 @@ const Wishlist = new mongoose.Schema(
       ref: "Anime",
       required: true,
     },
+    status: {
+      type: String,
+      enum: ["Watching", "Completed", "Planning", "Paused", "Dropped"],
+      default: "Planning",
+    },
     addedAt: {
       type: Date,
       default: Date.now,

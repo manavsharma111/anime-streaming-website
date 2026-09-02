@@ -29,10 +29,11 @@ export default function Home() {
     }
   }, [dispatch, isAuthenticated])
 
-  // Split anime into trending and latest (mock separation)
-  const trendingAnime = animeList?.slice(0, 10) || []
-  const latestAnime = animeList?.slice(10, 20) || []
-  const recommendedAnime = animeList?.slice(5, 15) || []
+  // Use live data, falling back to local DB if API fails
+  const liveData = malTrendingList?.length > 0 ? malTrendingList : animeList
+  const trendingAnime = liveData?.slice(0, 8) || []
+  const latestAnime = liveData?.slice(8, 15) || []
+  const recommendedAnime = liveData?.slice(3, 11) || []
 
   return (
     <div className="min-h-screen bg-[#050505] text-white pt-24 pb-20 overflow-x-hidden relative">
@@ -45,7 +46,7 @@ export default function Home() {
         <main className="flex-1 min-w-0 flex flex-col gap-10">
           {/* Hero Section */}
           <section className="mb-4">
-            <HeroCarousel animes={animeList} />
+            <HeroCarousel animes={malTrendingList?.length > 0 ? malTrendingList : animeList} />
           </section>
 
           {/* Continue Watching (Only shows if logged in with history) */}
@@ -95,7 +96,7 @@ export default function Home() {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                {animeList?.slice(0, 5).map((anime) => (
+                {(malTrendingList?.length > 0 ? malTrendingList : animeList)?.slice(0, 5).map((anime) => (
                   <AnimeListCard key={anime._id} anime={anime} />
                 ))}
               </div>
@@ -115,7 +116,7 @@ export default function Home() {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                {animeList?.slice(5, 10).map((anime) => (
+                {(malTrendingList?.length > 0 ? malTrendingList : animeList)?.slice(5, 10).map((anime) => (
                   <AnimeListCard key={anime._id} anime={anime} />
                 ))}
               </div>
@@ -135,7 +136,7 @@ export default function Home() {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                {animeList?.slice(10, 15).map((anime) => (
+                {(malTrendingList?.length > 0 ? malTrendingList : animeList)?.slice(10, 15).map((anime) => (
                   <AnimeListCard key={anime._id} anime={anime} />
                 ))}
               </div>

@@ -39,6 +39,20 @@ export const deleteWishlist = createAsyncThunk(
   },
 )
 
+export const updateWishlistStatus = createAsyncThunk(
+  "wishlist/updateWishlistStatus",
+  async ({ id, status }, { rejectWithValue }) => {
+    try {
+      const response = await wishlistService.updateWishlistStatus(id, status)
+      return response.data
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data || "Failed to update wishlist status",
+      )
+    }
+  },
+)
+
 const wishlistSlice = createSlice({
   name: "wishlist",
   initialState: {
@@ -82,6 +96,17 @@ const wishlistSlice = createSlice({
         )
         if (!exists) {
           state.wishlist.push(newItem)
+        }
+      }
+    })
+
+    // Update Wishlist Status Cases
+    builder.addCase(updateWishlistStatus.fulfilled, (state, action) => {
+      if (action.payload?.data) {
+        const updatedItem = action.payload.data
+        const index = state.wishlist.findIndex(item => item._id === updatedItem._id)
+        if (index !== -1) {
+          state.wishlist[index].status = updatedItem.status
         }
       }
     })

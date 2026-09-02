@@ -10,6 +10,9 @@ const wishlistService = {
   deleteWishlist: (id) => {
     return axiosInstance.delete(`/wishlist/remove-from-wishlist/${id}`)
   },
+  updateWishlistStatus: (id, status) => {
+    return axiosInstance.put(`/wishlist/update-status/${id}`, { status })
+  }
 }
 
 export default wishlistService

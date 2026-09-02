@@ -11,13 +11,23 @@ export default function TrendingSidebar() {
   useEffect(() => {
     const fetchTrending = async () => {
       try {
-        // Fetch trending/popular animes (using top-rated or recent for now)
-        const res = await axiosInstance.get("/anime?sort=-rating&limit=8")
-        if (res.data.success) {
+        // Fetch live trending animes from Anilist proxy
+        const res = await axiosInstance.get("/anime/mal-trending")
+        if (res.data.success && res.data.data.length > 0) {
           setTrending(res.data.data.slice(0, 8))
+        } else {
+          throw new Error("Empty trending data")
         }
       } catch (error) {
-        console.error("Failed to fetch trending", error)
+        console.error("Failed to fetch live trending, falling back to local DB", error)
+        try {
+          const fallbackRes = await axiosInstance.get("/anime?sort=-rating&limit=8")
+          if (fallbackRes.data.success) {
+            setTrending(fallbackRes.data.data.slice(0, 8))
+          }
+        } catch (fallbackError) {
+          console.error("Fallback also failed", fallbackError)
+        }
       }
     }
     fetchTrending()

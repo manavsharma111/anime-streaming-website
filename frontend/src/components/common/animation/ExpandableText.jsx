@@ -12,7 +12,13 @@ export default function ExpandableText({
 }) {
   const [isExpanded, setIsExpanded] = useState(false)
 
-  const cleanText = text ? text.replace(/\[Written by MAL Rewrite\]/g, "").trim() : ""
+  const cleanText = text 
+    ? text
+        .replace(/<[^>]*>?/gm, '') // Strip HTML tags
+        .replace(/\(Source:.*?\)/gi, '') // Strip (Source: ...)
+        .replace(/\[Written by MAL Rewrite\]/g, "")
+        .trim() 
+    : ""
 
   return (
     <motion.div layout className={containerClassName}>

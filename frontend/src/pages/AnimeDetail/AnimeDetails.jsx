@@ -22,7 +22,6 @@ import { getImageUrl } from "../../utils/image"
 import ReviewSection from "../../components/Anime/ReviewSection/ReviewSection"
 import AnimeInfoBox from "../../components/Watch/AnimeInfoBox"
 import TrendingSidebar from "../../components/Watch/TrendingSidebar"
-import ReactPlayer from "react-player/youtube"
 
 export default function AnimeDetails() {
   const { id } = useParams()
@@ -92,6 +91,8 @@ export default function AnimeDetails() {
   useEffect(() => {
     if (trailerId) {
       setIsVideoLoaded(false);
+      const timer = setTimeout(() => setIsVideoLoaded(true), 3000);
+      return () => clearTimeout(timer);
     }
   }, [trailerId]);
 
@@ -130,46 +131,28 @@ export default function AnimeDetails() {
       {/* Background Video & Image Fallback */}
       <div className="absolute top-0 left-0 w-full h-[90vh] overflow-hidden pointer-events-none z-0 bg-[#0e0b12]">
         {trailerId ? (
-          <div className={`w-full h-[120%] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-opacity duration-[2000ms] ease-in-out pointer-events-none scale-[1.3] ${isVideoLoaded ? "opacity-60" : "opacity-0"}`}>
-            <ReactPlayer
-              url={`https://www.youtube.com/watch?v=${trailerId}`}
-              playing={true}
-              muted={true}
-              loop={true}
-              controls={false}
-              width="100%"
-              height="100%"
-              onPlay={() => setIsVideoLoaded(true)}
-              config={{
-                youtube: {
-                  playerVars: { 
-                    showinfo: 0, 
-                    modestbranding: 1, 
-                    rel: 0, 
-                    disablekb: 1, 
-                    playsinline: 1,
-                    iv_load_policy: 3,
-                    fs: 0
-                  }
-                }
-              }}
-            />
-          </div>
+          <iframe
+            src={`https://www.youtube.com/embed/${trailerId}?autoplay=1&mute=1&loop=1&playlist=${trailerId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&disablekb=1&fs=0`}
+            allow="autoplay; encrypted-media"
+            className={`w-full h-[120%] object-cover pointer-events-none scale-[1.35] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-opacity duration-[2000ms] ease-in-out ${isVideoLoaded ? "opacity-60" : "opacity-0"}`}
+            style={{ border: "none", pointerEvents: "none" }}
+            tabIndex="-1"
+          ></iframe>
         ) : malBanner ? (
           <img
             src={malBanner}
-            className="absolute inset-0 w-full h-full object-cover opacity-30 transform scale-105"
+            className="absolute inset-0 w-full h-full object-cover opacity-30 transform scale-105 pointer-events-none"
             alt="MAL Background"
           />
         ) : (
           <img
             src={getImageUrl(anime.cover || anime.thumbnail)}
-            className="absolute inset-0 w-full h-full object-cover opacity-20 blur-2xl transform scale-110"
+            className="absolute inset-0 w-full h-full object-cover opacity-20 blur-2xl transform scale-110 pointer-events-none"
             alt="background fallback"
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0e0b12]/30 via-[#0e0b12]/70 to-[#0e0b12] z-10"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0e0b12] via-transparent to-transparent z-10"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0e0b12]/30 via-[#0e0b12]/70 to-[#0e0b12] z-10 pointer-events-none"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0e0b12] via-transparent to-transparent z-10 pointer-events-none"></div>
       </div>
 
       <div className="max-w-[1700px] mx-auto px-4 relative z-10 grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6 items-start">
