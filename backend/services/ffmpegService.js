@@ -316,8 +316,8 @@ const processAnimeVideo = async (
           "-c:v libx264", // Use H.264 video codec for maximum compatibility
           "-profile:v main", // Use Main profile for broad device support (older phones/TVs)
           "-pix_fmt yuv420p", // Standard pixel format widely supported by web players
-          "-preset veryfast", // Video transfer and process speed (fastest encoding, larger file size)
-          "-threads 1", // Limit to 1 CPU thread to prevent server overload (OOM fix)
+          "-preset ultrafast", // Video transfer and process speed (fastest encoding)
+          "-threads 1", // CRITICAL FOR RENDER: Limit to 1 thread to prevent OOM crash on 512MB RAM
           "-g 48", // Force a keyframe every 48 frames (Group of Pictures size)
           "-keyint_min 48", // Minimum distance between keyframes
           "-sc_threshold 0", // Disable scene change detection to keep strict and predictable segment times

@@ -78,7 +78,7 @@ export default function AdminDashboard() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 md:ml-[260px] pt-[80px] min-h-screen pb-[100px] md:pb-0">
+      <main className="flex-1 md:ml-[260px] pt-[60px] md:pt-8 min-h-screen pb-[100px] md:pb-0">
         <div className="p-4 md:p-8 max-w-[1600px] mx-auto w-full overflow-x-hidden">
           <AnimatePresence mode="wait">
             <motion.div

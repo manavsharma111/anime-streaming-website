@@ -5,7 +5,6 @@ const CustomCursor = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [hoveredElement, setHoveredElement] = useState(null)
   const [isOverPlayer, setIsOverPlayer] = useState(false)
-  const [, setScrollForceUpdate] = useState(0)
   
   // Detect if it's a touch device or mobile
   const [isTouchDevice, setIsTouchDevice] = useState(false)
@@ -13,6 +12,12 @@ const CustomCursor = () => {
   useEffect(() => {
     if (window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768) {
       setIsTouchDevice(true)
+    } else {
+      document.body.classList.add('hide-cursor')
+    }
+    
+    return () => {
+      document.body.classList.remove('hide-cursor')
     }
   }, [])
 
@@ -49,22 +54,14 @@ const CustomCursor = () => {
       }
     }
     
-    const handleScroll = () => {
-      if (hoveredElement) {
-        setScrollForceUpdate(prev => prev + 1);
-      }
-    }
-
     window.addEventListener("mousemove", updateMousePosition)
     window.addEventListener("mouseover", handleMouseOver)
     window.addEventListener("mouseout", handleMouseOut)
-    window.addEventListener("scroll", handleScroll, { passive: true })
 
     return () => {
       window.removeEventListener("mousemove", updateMousePosition)
       window.removeEventListener("mouseover", handleMouseOver)
       window.removeEventListener("mouseout", handleMouseOut)
-      window.removeEventListener("scroll", handleScroll)
     }
   }, [hoveredElement])
 
@@ -109,40 +106,30 @@ const CustomCursor = () => {
     } : {},
   };
 
-  const dotVariants = {
-    default: {
-      x: mousePosition.x - 4,
-      y: mousePosition.y - 4,
-      scale: 1,
-      opacity: isOverPlayer ? 0 : 1,
-    },
-    hover: {
-      x: mousePosition.x - 4,
-      y: mousePosition.y - 4,
-      scale: 0.5,
-      opacity: 0,
-    },
-  };
-
   if (isTouchDevice) return null;
 
   return (
     <>
+      {/* Main Cursor */}
       <motion.div
+        className="fixed top-0 left-0 pointer-events-none z-[9999] hidden md:block"
         variants={variants}
         animate={hoveredElement ? "hover" : "default"}
-        transition={{ type: "spring", stiffness: 400, damping: 28, mass: 0.5 }}
-        className="fixed top-0 left-0 pointer-events-none z-[9999] hidden md:block"
-        style={{ transformOrigin: "center" }}
+        transition={{ type: "spring", stiffness: 300, damping: 20, mass: 0.5 }}
       />
+      {/* Dot Cursor */}
       <motion.div
-        variants={dotVariants}
-        animate={hoveredElement ? "hover" : "default"}
-        transition={{ type: "tween", ease: "easeOut", duration: 0.15 }}
-        className="fixed top-0 left-0 w-2 h-2 bg-[#f33767] rounded-full pointer-events-none z-[9999] hidden md:block"
+        className="fixed top-0 left-0 w-1.5 h-1.5 bg-[#f33767] rounded-full pointer-events-none z-[10000] hidden md:block"
+        animate={{
+          x: mousePosition.x - 3,
+          y: mousePosition.y - 3,
+          opacity: hoveredElement || isOverPlayer ? 0 : 1,
+          scale: hoveredElement ? 0 : 1,
+        }}
+        transition={{ type: "spring", stiffness: 500, damping: 28, mass: 0.1 }}
       />
     </>
-  );
-};
+  )
+}
 
-export default CustomCursor;
+export default CustomCursor

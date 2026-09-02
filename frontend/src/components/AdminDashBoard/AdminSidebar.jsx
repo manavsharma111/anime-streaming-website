@@ -46,7 +46,7 @@ export default function AdminSidebar({
       )}
 
       <aside
-        className={`fixed left-0 top-0 h-screen w-[260px] bg-neutral-950 border-r border-white/5 flex flex-col z-50 pt-[80px] transition-transform duration-300 md:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed left-0 top-0 h-screen w-[260px] bg-neutral-950 border-r border-white/5 flex flex-col z-50 pt-[60px] md:pt-0 transition-transform duration-300 md:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="flex-1 px-4 py-8 overflow-y-auto">
           <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-4 px-3">

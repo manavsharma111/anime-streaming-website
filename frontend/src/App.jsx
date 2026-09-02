@@ -127,7 +127,7 @@ export default function App() {
                   path="/admin"
                   element={
                     <ProtectedRoute requireAdmin={true}>
-                      <PageTransition><AdminDashboard /></PageTransition>
+                      <AdminDashboard />
                     </ProtectedRoute>
                   }
                 />

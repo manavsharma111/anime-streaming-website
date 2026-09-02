@@ -84,7 +84,7 @@ button {
 }
 
 @media (pointer: fine) {
-  *, *::before, *::after {
+  .hide-cursor, .hide-cursor *, .hide-cursor *::before, .hide-cursor *::after {
     cursor: none !important;
   }
 }

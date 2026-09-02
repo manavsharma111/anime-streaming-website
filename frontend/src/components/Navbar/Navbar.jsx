@@ -136,7 +136,7 @@ export default function Navbar() {
       )}
 
       <motion.div
-        className="fixed z-[60] select-none flex items-center justify-center w-full pointer-events-none"
+        className="fixed w-full z-[60] select-none flex items-center justify-center pointer-events-none"
         initial={false}
         animate={{
           top: isMobile ? "auto" : isScrolled ? 24 : 0,
