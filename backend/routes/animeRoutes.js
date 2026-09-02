@@ -6,7 +6,9 @@ const {
   incrementViews,
   getAnimeGenres,
   getMalTrending,
+  getSmartRecommendations,
 } = require("../controllers/animeController")
+const { verifyToken } = require("../middleware/authMiddleware")
 
 // get all animes
 router.get("/", getAnimes)
@@ -16,6 +18,9 @@ router.get("/genres", getAnimeGenres)
 
 // get MAL trending (MUST be before /:id)
 router.get("/mal-trending", getMalTrending)
+
+// get smart recommendations (MUST be before /:id)
+router.get("/smart-recommendations", verifyToken, getSmartRecommendations)
 
 // get anime details
 router.get("/:id", getAnimeDetails)

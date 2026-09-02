@@ -28,6 +28,15 @@ const animeService = {
       return error
     }
   },
+  getSmartRecommendations: async () => {
+    try {
+      const response = await axiosInstance.get("/anime/smart-recommendations")
+      return response.data
+    } catch (error) {
+      console.error("Smart Recommendations fetch error:", error)
+      return error
+    }
+  },
 }
 
 export default animeService

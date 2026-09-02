@@ -16,19 +16,21 @@ import {
   PlayCircle,
   Plus,
   ArrowLeft,
+  Sparkles,
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { getImageUrl } from "../../utils/image"
 import ReviewSection from "../../components/Anime/ReviewSection/ReviewSection"
 import AnimeInfoBox from "../../components/Watch/AnimeInfoBox"
 import TrendingSidebar from "../../components/Watch/TrendingSidebar"
+import AnimeSection from "../../components/Home/AnimeSection"
 
 export default function AnimeDetails() {
   const { id } = useParams()
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
-  const { animeDetails, isLoading, error } = useSelector((state) => state.anime)
+  const { animeDetails, animeRecommendations, isLoading, error } = useSelector((state) => state.anime)
   const { reviews } = useSelector((state) => state.review)
 
   useEffect(() => {
@@ -228,6 +230,17 @@ export default function AnimeDetails() {
               </div>
             )}
           </motion.div>
+
+          {animeRecommendations && animeRecommendations.length > 0 && (
+            <div className="mt-8">
+              <AnimeSection
+                title="Recommended"
+                icon={Sparkles}
+                animes={animeRecommendations}
+                isLoading={isLoading}
+              />
+            </div>
+          )}
 
           <ReviewSection animeId={anime._id} />
         </main>

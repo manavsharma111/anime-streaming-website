@@ -1,6 +1,6 @@
 import React, { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { fetchAnimes, fetchMalTrending } from "../redux/slice/animeSlice"
+import { fetchAnimes, fetchMalTrending, fetchSmartRecommendations } from "../redux/slice/animeSlice"
 import HeroCarousel from "../components/Home/HeroCarousel"
 import QuickFilter from "../components/Home/QuickFilter"
 import TopAnime from "../components/Home/TopAnime"
@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom"
 export default function Home() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { animeList, malTrendingList, isLoading } = useSelector((state) => state.anime)
+  const { animeList, malTrendingList, smartRecommendations, isLoading } = useSelector((state) => state.anime)
   const { isAuthenticated } = useSelector((state) => state.auth)
 
   useEffect(() => {
@@ -26,6 +26,7 @@ export default function Home() {
       import("../redux/slice/historySlice").then(({ getWatchHistory }) => {
         dispatch(getWatchHistory())
       })
+      dispatch(fetchSmartRecommendations())
     }
   }, [dispatch, isAuthenticated])
 
@@ -33,7 +34,9 @@ export default function Home() {
   const liveData = malTrendingList?.length > 0 ? malTrendingList : animeList
   const trendingAnime = liveData?.slice(0, 8) || []
   const latestAnime = liveData?.slice(8, 15) || []
-  const recommendedAnime = liveData?.slice(3, 11) || []
+  const recommendedAnime = (smartRecommendations && smartRecommendations.length > 0) 
+    ? smartRecommendations 
+    : (liveData?.slice(3, 11) || [])
 
   return (
     <div className="min-h-screen bg-[#050505] text-white pt-24 pb-20 overflow-x-hidden relative">

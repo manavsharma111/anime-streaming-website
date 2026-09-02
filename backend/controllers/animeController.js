@@ -1,5 +1,8 @@
 const Anime = require("../models/Anime")
 const Episode = require("../models/Episode")
+const History = require("../models/History")
+const Wishlist = require("../models/Wishlist")
+const mongoose = require("mongoose")
 
 // Get all Animes with filtering, sorting and pagination
 const redisClient = require("../config/redis")
@@ -288,6 +291,59 @@ const getAnimeGenres = async (req, res, next) => {
     next(error)
   }
 }
+// Get smart recommendations based on user's history and wishlist
+const getSmartRecommendations = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    // 1. Fetch user's History and Wishlist
+    const history = await History.find({ user: userId }).populate("anime").lean();
+    const wishlist = await Wishlist.find({ 
+      user: userId, 
+      status: { $in: ["Completed", "Watching", "Planning"] } 
+    }).populate("anime").lean();
+
+    // Collect all known anime
+    const allKnownAnimes = [...history.map(h => h.anime), ...wishlist.map(w => w.anime)].filter(Boolean);
+    const excludedIds = allKnownAnimes.map(a => a._id);
+
+    // 2. Tally genres
+    const genreCounts = {};
+    allKnownAnimes.forEach(anime => {
+      if (anime.genres && Array.isArray(anime.genres)) {
+        anime.genres.forEach(g => {
+          genreCounts[g] = (genreCounts[g] || 0) + 1;
+        });
+      }
+    });
+
+    // 3. Find top 3 genres
+    const topGenres = Object.entries(genreCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(entry => entry[0]);
+
+    let recommendedAnimes = [];
+
+    // 4. Fetch recommendations if we have top genres
+    if (topGenres.length > 0) {
+      recommendedAnimes = await Anime.find({
+        genres: { $in: topGenres },
+        _id: { $nin: excludedIds }
+      })
+      .sort({ rating: -1 })
+      .limit(10);
+    }
+
+    res.status(200).json({
+      success: true,
+      data: recommendedAnimes,
+    });
+  } catch (error) {
+    console.error("Smart Recommendation Error:", error);
+    next(error);
+  }
+};
 
 module.exports = {
   getAnimes,
@@ -295,4 +351,5 @@ module.exports = {
   incrementViews,
   getAnimeGenres,
   getMalTrending,
+  getSmartRecommendations,
 }

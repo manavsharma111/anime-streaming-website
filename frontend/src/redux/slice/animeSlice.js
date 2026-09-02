@@ -42,11 +42,26 @@ export const fetchMalTrending = createAsyncThunk(
   },
 )
 
+// Thunk for fetching smart recommendations
+export const fetchSmartRecommendations = createAsyncThunk(
+  "anime/fetchSmartRecommendations",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await animeService.getSmartRecommendations()
+      return response.data
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to fetch smart recommendations")
+    }
+  },
+)
+
 const animeSlice = createSlice({
   name: "anime",
   initialState: {
     animeList: [],
     malTrendingList: [],
+    smartRecommendations: [],
+    animeRecommendations: [],
     animeDetails: null,
     pagination: null,
     isLoading: false,
@@ -85,6 +100,7 @@ const animeSlice = createSlice({
     builder.addCase(fetchAnimeDetails.fulfilled, (state, action) => {
       state.isLoading = false
       state.animeDetails = action.payload?.data || action.payload
+      state.animeRecommendations = action.payload?.recommended || []
     })
     builder.addCase(fetchAnimeDetails.rejected, (state, action) => {
       state.isLoading = false
@@ -101,6 +117,20 @@ const animeSlice = createSlice({
       state.malTrendingList = action.payload?.data || action.payload || []
     })
     builder.addCase(fetchMalTrending.rejected, (state, action) => {
+      state.isLoading = false
+      state.error = action.payload
+    })
+
+    // Fetch Smart Recommendations
+    builder.addCase(fetchSmartRecommendations.pending, (state) => {
+      state.isLoading = true
+      state.error = null
+    })
+    builder.addCase(fetchSmartRecommendations.fulfilled, (state, action) => {
+      state.isLoading = false
+      state.smartRecommendations = action.payload?.data || action.payload || []
+    })
+    builder.addCase(fetchSmartRecommendations.rejected, (state, action) => {
       state.isLoading = false
       state.error = action.payload
     })
