@@ -90,18 +90,23 @@ export default function QuickFilter() {
     navigate(`/search?${params.toString()}`)
   }
 
+  const handleClear = () => {
+    setFilters({ genres: "", year: "", status: "", sort: "" })
+    navigate("/search") // or preserve other query params if needed, but usually clear means clear all.
+  }
+
   return (
-    <div className="bg-[#110e16] p-6 rounded-2xl border border-white/5 shadow-xl w-full relative">
+    <div className="bg-[#110e16] p-5 sm:p-6 rounded-2xl border border-white/5 shadow-xl w-full relative">
       <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none -z-10">
         <div className="absolute top-0 right-0 w-32 h-32 bg-[#f33767]/5 rounded-full blur-3xl"></div>
       </div>
 
-      <h3 className="text-white font-black text-lg mb-6 flex items-center gap-2 uppercase tracking-widest">
+      <h3 className="text-white font-black text-lg mb-5 sm:mb-6 flex items-center gap-2 uppercase tracking-widest">
         <Filter className="text-[#f33767]" size={20} />
         Advanced Search
       </h3>
 
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6">
         {filterOptions.map((filterGroup) => (
           <div key={filterGroup.key} className="relative group">
             <label className="block text-[10px] text-neutral-500 font-bold uppercase tracking-widest mb-1.5 pl-1">
@@ -121,22 +126,30 @@ export default function QuickFilter() {
               value={filters[filterGroup.key]}
               onChange={(val) => handleChange(filterGroup.key, val)}
               placeholder={filterGroup.label}
-              className="w-full bg-[#1a1721] hover:bg-[#201d2a] border border-white/5 group-hover:border-white/10 text-neutral-300 text-xs font-bold uppercase tracking-wider py-3 pl-4 pr-4 rounded-xl transition-colors outline-none cursor-pointer"
+              className="w-full bg-[#1a1721] hover:bg-[#201d2a] border border-white/5 group-hover:border-white/10 text-neutral-300 text-xs font-bold uppercase tracking-wider py-3 pl-3 pr-3 rounded-xl transition-colors outline-none cursor-pointer"
             />
           </div>
         ))}
       </div>
 
-      <button
-        onClick={handleSearch}
-        className="w-full bg-[#f33767] hover:bg-transparent border border-[#f33767] text-white font-black uppercase tracking-widest py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(243,55,103,0.3)] text-xs group hover:scale-[1.02] active:scale-[0.98]"
-      >
-        <Search
-          size={16}
-          className="group-hover:translate-x-1 transition-transform"
-        />
-        Search Anime
-      </button>
+      <div className="flex flex-row gap-3">
+        <button
+          onClick={handleClear}
+          className="flex-1 sm:flex-none sm:w-1/3 bg-[#1a1721] hover:bg-[#201d2a] border border-white/10 hover:border-white/20 text-neutral-300 font-black uppercase tracking-widest py-3.5 rounded-xl flex items-center justify-center transition-all text-xs"
+        >
+          Clear
+        </button>
+        <button
+          onClick={handleSearch}
+          className="flex-[2] sm:flex-none sm:w-2/3 bg-[#f33767] hover:bg-transparent border border-[#f33767] text-white font-black uppercase tracking-widest py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(243,55,103,0.3)] text-xs group hover:scale-[1.02] active:scale-[0.98]"
+        >
+          <Search
+            size={16}
+            className="hidden sm:block group-hover:translate-x-1 transition-transform"
+          />
+          Search
+        </button>
+      </div>
     </div>
   )
 }
