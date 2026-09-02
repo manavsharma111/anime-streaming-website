@@ -135,6 +135,19 @@ export default function Search() {
 
   const pageNumbers = getPageNumbers()
 
+  const handlePageChange = (newPage) => {
+    if (newPage === currentPage) return
+    const newParams = new URLSearchParams(location.search)
+    newParams.set("page", newPage)
+    navigate(`/search?${newParams.toString()}`)
+    
+    if (window.lenis) {
+      window.lenis.scrollTo(0, { immediate: false, duration: 1.2 })
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#050505] text-white pt-24 pb-20 relative overflow-hidden">
       {/* Decorative Background */}
@@ -190,11 +203,7 @@ export default function Search() {
                 {/* First Page */}
                 <button
                   disabled={!pageParam || pageParam === "1"}
-                  onClick={() => {
-                    const newParams = new URLSearchParams(location.search)
-                    newParams.set("page", 1)
-                    navigate(`/search?${newParams.toString()}`)
-                  }}
+                  onClick={() => handlePageChange(1)}
                   className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center bg-[#1e1c22] hover:bg-[#2a2730] rounded-full text-neutral-400 hover:text-white disabled:opacity-30 disabled:hover:bg-[#1e1c22] disabled:hover:text-neutral-400 transition-all shadow-sm"
                 >
                   <ChevronsLeft size={18} />
@@ -203,12 +212,7 @@ export default function Search() {
                 {/* Previous Page */}
                 <button
                   disabled={!pageParam || pageParam === "1"}
-                  onClick={() => {
-                    const newParams = new URLSearchParams(location.search)
-                    const currentPage = parseInt(pageParam) || 1
-                    newParams.set("page", currentPage - 1)
-                    navigate(`/search?${newParams.toString()}`)
-                  }}
+                  onClick={() => handlePageChange(currentPage - 1)}
                   className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center bg-[#1e1c22] hover:bg-[#2a2730] rounded-full text-neutral-400 hover:text-white disabled:opacity-30 disabled:hover:bg-[#1e1c22] disabled:hover:text-neutral-400 transition-all shadow-sm"
                 >
                   <ChevronLeft size={18} />
@@ -218,12 +222,7 @@ export default function Search() {
                 {pageNumbers.map((num) => (
                   <button
                     key={num}
-                    onClick={() => {
-                      if (num === currentPage) return
-                      const newParams = new URLSearchParams(location.search)
-                      newParams.set("page", num)
-                      navigate(`/search?${newParams.toString()}`)
-                    }}
+                    onClick={() => handlePageChange(num)}
                     className={`w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-full font-bold text-sm sm:text-base transition-all duration-300 shadow-sm ${
                       currentPage === num
                         ? "bg-[#ffe082] text-[#110e16] scale-105 cursor-default shadow-[0_0_15px_rgba(255,224,130,0.3)]"
@@ -237,12 +236,7 @@ export default function Search() {
                 {/* Next Page */}
                 <button
                   disabled={currentPage >= totalPages}
-                  onClick={() => {
-                    const newParams = new URLSearchParams(location.search)
-                    const currentPage = parseInt(pageParam) || 1
-                    newParams.set("page", currentPage + 1)
-                    navigate(`/search?${newParams.toString()}`)
-                  }}
+                  onClick={() => handlePageChange(currentPage + 1)}
                   className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center bg-[#1e1c22] hover:bg-[#2a2730] rounded-full text-neutral-400 hover:text-white disabled:opacity-30 disabled:hover:bg-[#1e1c22] disabled:hover:text-neutral-400 transition-all shadow-sm"
                 >
                   <ChevronRight size={18} />
@@ -251,11 +245,7 @@ export default function Search() {
                 {/* Last Page */}
                 <button
                   disabled={currentPage >= totalPages}
-                  onClick={() => {
-                    const newParams = new URLSearchParams(location.search)
-                    newParams.set("page", totalPages)
-                    navigate(`/search?${newParams.toString()}`)
-                  }}
+                  onClick={() => handlePageChange(totalPages)}
                   className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center bg-[#1e1c22] hover:bg-[#2a2730] rounded-full text-neutral-400 hover:text-white disabled:opacity-30 disabled:hover:bg-[#1e1c22] disabled:hover:text-neutral-400 transition-all shadow-sm"
                 >
                   <ChevronsRight size={18} />

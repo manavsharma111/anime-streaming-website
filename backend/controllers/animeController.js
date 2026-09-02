@@ -46,8 +46,15 @@ const getAnimes = async (req, res, next) => {
 
     // Sorting
     const sortOption = {}
-    if (sort === "latest") sortOption.createdAt = -1
-    if (sort === "oldest") sortOption.createdAt = 1
+    if (sort === "latest") {
+      sortOption.year = -1
+      sortOption.updatedAt = -1
+      sortOption.createdAt = -1
+    }
+    if (sort === "oldest") {
+      sortOption.year = 1
+      sortOption.createdAt = 1
+    }
     if (sort === "rating") sortOption.rating = -1
 
     // Pagination- ek saath sbb na load hoe wrna server pe load pdta h
@@ -56,11 +63,31 @@ const getAnimes = async (req, res, next) => {
     const skip = (pageNumber - 1) * limitNumber
 
     // Execute queries
-    const animes = await Anime.find(query)
+    let animes = await Anime.find(query)
       .sort(sortOption)
       .skip(skip)
       .limit(limitNumber)
-    const total = await Anime.countDocuments(query)
+    let total = await Anime.countDocuments(query)
+
+    // Proxy MAL search results if a search query is present
+    if (search && pageNumber === 1) {
+      try {
+        const axios = require("axios")
+        const jikanRes = await axios.get(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(search)}&limit=5`)
+        if (jikanRes.data && jikanRes.data.data) {
+          const malAnimes = jikanRes.data.data.map(mapJikanToAnime)
+          const localTitles = animes.map(a => a.title.toLowerCase())
+          
+          const newMalAnimes = malAnimes.filter(ma => !localTitles.some(t => t.includes(ma.title.toLowerCase()) || ma.title.toLowerCase().includes(t)))
+          
+          animes = [...animes, ...newMalAnimes]
+          total = total + newMalAnimes.length
+        }
+      } catch (err) {
+        console.error("MAL search proxy error:", err.message)
+      }
+    }
+
     const responsePayload = {
       success: true,
       data: animes,
@@ -88,7 +115,7 @@ const getAnimes = async (req, res, next) => {
 const mongoose = require("mongoose")
 
 // Helper to map Jikan Anime to our DB Anime format
-const mapJikanToAnime = (malAnime) => {
+function mapJikanToAnime(malAnime) {
   return {
     _id: malAnime.mal_id.toString(),
     title: malAnime.title_english || malAnime.title,
@@ -119,15 +146,14 @@ const getAnimeDetails = async (req, res, next) => {
     if (!anime) {
       // Try fetching from MAL (Jikan API)
       try {
-        const fetch = (await import("node-fetch")).default || require("node-fetch")
-        const jikanRes = await fetch(`https://api.jikan.moe/v4/anime/${req.params.id}`)
-        const jikanData = await jikanRes.json()
+        const axios = require("axios")
+        const jikanRes = await axios.get(`https://api.jikan.moe/v4/anime/${req.params.id}`)
         
-        if (jikanData && jikanData.data) {
-          anime = mapJikanToAnime(jikanData.data)
+        if (jikanRes.data && jikanRes.data.data) {
+          anime = mapJikanToAnime(jikanRes.data.data)
         }
       } catch (err) {
-        console.error("Failed to proxy MAL data:", err)
+        console.error("Failed to proxy MAL data:", err.message)
       }
     }
 
@@ -155,9 +181,9 @@ const getAnimeDetails = async (req, res, next) => {
 
 const getMalTrending = async (req, res, next) => {
   try {
-    const fetch = (await import("node-fetch")).default || require("node-fetch")
-    const jikanRes = await fetch("https://api.jikan.moe/v4/top/anime?filter=airing&limit=15")
-    const jikanData = await jikanRes.json()
+    const axios = require("axios")
+    const jikanRes = await axios.get("https://api.jikan.moe/v4/top/anime?filter=airing&limit=15")
+    const jikanData = jikanRes.data
     
     if (!jikanData || !jikanData.data) {
       return res.status(500).json({ message: "Failed to fetch MAL trending" })
@@ -170,6 +196,7 @@ const getMalTrending = async (req, res, next) => {
       data: trendingAnimes,
     })
   } catch (error) {
+    console.error("MAL Trending fetch error:", error.message)
     next(error)
   }
 }
