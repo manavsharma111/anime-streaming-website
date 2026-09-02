@@ -23,7 +23,8 @@ import { UploadProvider } from "./context/UploadContext"
 import GlobalUploadProgress from "./components/GlobalUploadProgress"
 import ProtectedRoute from "./components/ProtectedRoute"
 import CustomCursor from "./components/common/animation/CustomCursor"
-
+import { AnimatePresence } from "framer-motion"
+import PageTransition from "./components/common/animation/PageTransition"
 export default function App() {
   const dispatch = useDispatch()
   const location = useLocation()
@@ -95,44 +96,46 @@ export default function App() {
               </div>
             }
           >
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/home" element={<Home />} />
-              <Route path="/anime/:id" element={<AnimeDetails />} />
-              <Route path="/search" element={<Search />} />
-              <Route path="/watch/:episodeId" element={<Watch />} />
+            <AnimatePresence mode="wait">
+              <Routes location={location} key={location.pathname}>
+                <Route path="/" element={<PageTransition><LandingPage /></PageTransition>} />
+                <Route path="/home" element={<PageTransition><Home /></PageTransition>} />
+                <Route path="/anime/:id" element={<PageTransition><AnimeDetails /></PageTransition>} />
+                <Route path="/search" element={<PageTransition><Search /></PageTransition>} />
+                <Route path="/watch/:episodeId" element={<PageTransition><Watch /></PageTransition>} />
 
-              {/* Protected User Routes */}
-              <Route
-                path="/wishlist"
-                element={
-                  <ProtectedRoute>
-                    <Wishlist />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <Profile />
-                  </ProtectedRoute>
-                }
-              />
+                {/* Protected User Routes */}
+                <Route
+                  path="/wishlist"
+                  element={
+                    <ProtectedRoute>
+                      <PageTransition><Wishlist /></PageTransition>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <PageTransition><Profile /></PageTransition>
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Protected Admin Routes */}
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute requireAdmin={true}>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
+                {/* Protected Admin Routes */}
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <PageTransition><AdminDashboard /></PageTransition>
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Fallback Route */}
-              <Route path="*" element={<Navigate to="/home" replace />} />
-            </Routes>
+                {/* Fallback Route */}
+                <Route path="*" element={<Navigate to="/home" replace />} />
+              </Routes>
+            </AnimatePresence>
           </Suspense>
         </SmoothScroll>
       </div>
