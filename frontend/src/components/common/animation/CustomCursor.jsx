@@ -6,6 +6,15 @@ const CustomCursor = () => {
   const [hoveredElement, setHoveredElement] = useState(null)
   const [isOverPlayer, setIsOverPlayer] = useState(false)
   const [, setScrollForceUpdate] = useState(0)
+  
+  // Detect if it's a touch device or mobile
+  const [isTouchDevice, setIsTouchDevice] = useState(false)
+  
+  useEffect(() => {
+    if (window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768) {
+      setIsTouchDevice(true)
+    }
+  }, [])
 
   useEffect(() => {
     const updateMousePosition = (e) => {
@@ -115,9 +124,7 @@ const CustomCursor = () => {
     },
   };
 
-  if (typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches) {
-    return null;
-  }
+  if (isTouchDevice) return null;
 
   return (
     <>
