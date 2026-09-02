@@ -14,7 +14,9 @@ export default function CustomSelect({
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
+  const [dropdownPosition, setDropdownPosition] = useState("bottom")
   const dropdownRef = useRef(null)
+  const buttonRef = useRef(null)
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -30,6 +32,25 @@ export default function CustomSelect({
     if (!isOpen) setSearchTerm("")
   }, [isOpen])
 
+  const toggleDropdown = () => {
+    if (!isOpen) {
+      if (buttonRef.current) {
+        const rect = buttonRef.current.getBoundingClientRect()
+        const spaceBelow = window.innerHeight - rect.bottom
+        // If space below is less than 300px (approx dropdown height + navbar height) 
+        // and there's more space above than below, open upwards
+        if (spaceBelow < 300 && rect.top > spaceBelow) {
+          setDropdownPosition("top")
+        } else {
+          setDropdownPosition("bottom")
+        }
+      }
+      setIsOpen(true)
+    } else {
+      setIsOpen(false)
+    }
+  }
+
   const selectedOption = options.find((opt) => opt.value === value)
   const filteredOptions = searchable
     ? options.filter((opt) =>
@@ -44,7 +65,8 @@ export default function CustomSelect({
     <div className={`relative ${containerClassName || ""}`} ref={dropdownRef}>
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        ref={buttonRef}
+        onClick={toggleDropdown}
         className={`w-full flex items-center justify-between outline-none ${className || ""}`}
       >
         <span className="truncate">
@@ -59,11 +81,13 @@ export default function CustomSelect({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            initial={{ opacity: 0, y: dropdownPosition === "top" ? 10 : -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            exit={{ opacity: 0, y: dropdownPosition === "top" ? 10 : -10, scale: 0.95 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute z-[70] w-full mt-2 bg-[#1a1721] border border-white/10 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto [&::-webkit-scrollbar]:hidden"
+            className={`absolute z-[70] w-full bg-[#1a1721] border border-white/10 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto [&::-webkit-scrollbar]:hidden ${
+              dropdownPosition === "top" ? "bottom-full mb-2" : "top-full mt-2"
+            }`}
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             data-lenis-prevent="true"
           >
@@ -118,3 +142,4 @@ export default function CustomSelect({
     </div>
   )
 }
+
