@@ -86,7 +86,7 @@ export default function App() {
         <CustomCursor />
         <GlobalUploadProgress />
         <SmoothScroll>
-          {location.pathname !== "/" && <Navbar />}
+          {location.pathname !== "/" && !location.pathname.startsWith("/admin") && <Navbar />}
 
           <Suspense 
             fallback={
