@@ -88,7 +88,7 @@ const getAnimes = async (req, res, next) => {
           const malAnimes = alRes.data.data.Page.media.map(mapAnilistToAnime)
           const localTitles = animes.map(a => a.title.toLowerCase())
           
-          const newMalAnimes = malAnimes.filter(ma => !localTitles.some(t => t.includes(ma.title.toLowerCase()) || ma.title.toLowerCase().includes(t)))
+          const newMalAnimes = malAnimes.filter(ma => !localTitles.includes(ma.title.toLowerCase()))
           
           animes = [...animes, ...newMalAnimes]
           total = total + newMalAnimes.length
