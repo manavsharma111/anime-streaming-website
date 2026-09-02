@@ -11,6 +11,7 @@ const {
   getQueueStatus,
   retryJob,
   deleteJob,
+  nukeQueue,
   addEpisodeLink,
   bulkFetchEpisodes,
   getSystemStats,
@@ -49,6 +50,7 @@ router.delete("/episode/:id", admin, deleteEpisode)
 
 // Queue Routes
 router.get("/queue", admin, getQueueStatus)
+router.post("/queue/nuke", admin, nukeQueue)
 router.post("/queue/retry/:id", admin, retryJob)
 router.delete("/queue/:id", admin, deleteJob)
 

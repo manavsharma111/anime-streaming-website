@@ -337,6 +337,25 @@ const deleteJob = async (req, res, next) => {
     next(err)
   }
 }
+
+// nuke queue (force clear all jobs and kill ffmpeg)
+const nukeQueue = async (req, res, next) => {
+  try {
+    // 1. Flush all Redis keys to instantly obliterate the BullMQ queue
+    await redisClient.flushall()
+
+    // 2. Force kill any running ffmpeg processes
+    const { exec } = require("child_process")
+    exec("pkill -f ffmpeg || taskkill /IM ffmpeg.exe /F", (error, stdout, stderr) => {
+      console.log("Nuked FFmpeg processes:", stdout || stderr || "None found")
+    })
+
+    res.status(200).json({ success: true, message: "Queue nuked and processes killed successfully" })
+  } catch (err) {
+    next(err)
+  }
+}
+
 // add direct link episode
 const addEpisodeLink = async (req, res, next) => {
   const keys = await redisClient.keys("animes:*")
@@ -580,6 +599,7 @@ module.exports = {
   getQueueStatus,
   retryJob,
   deleteJob,
+  nukeQueue,
   addEpisodeLink,
   bulkFetchEpisodes,
   getSystemStats,

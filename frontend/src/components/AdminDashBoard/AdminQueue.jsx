@@ -68,6 +68,23 @@ export default function AdminQueue() {
     }
   }
 
+  const handleNukeQueue = async () => {
+    const confirm = window.confirm("WARNING: This will forcefully clear ALL waiting and active jobs, and kill any running FFmpeg processes. Are you sure you want to clear the queue?")
+    if (!confirm) return
+
+    try {
+      const res = await axiosInstance.post(`/anime-admin/queue/nuke`)
+      if (res.data.success) {
+        alert("Queue cleared successfully!")
+        fetchQueue()
+      }
+    } catch (err) {
+      console.error("Failed to clear queue", err)
+      alert("Failed to clear queue")
+    }
+  }
+
+
   useEffect(() => {
     fetchQueue()
     const interval = setInterval(fetchQueue, 5000) // Polling fallback
@@ -195,12 +212,20 @@ export default function AdminQueue() {
             Real-time status of background FFMPEG encoding jobs.
           </p>
         </div>
-        <button
-          onClick={fetchQueue}
-          className="p-3 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl transition-all"
-        >
-          <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
-        </button>
+        <div className="flex gap-4">
+          <button
+            onClick={handleNukeQueue}
+            className="px-6 py-3 bg-red-600 hover:bg-red-500 text-white font-black text-sm uppercase tracking-wider rounded-xl transition-all shadow-[0_0_20px_rgba(220,38,38,0.3)] hover:shadow-[0_0_30px_rgba(220,38,38,0.5)] flex items-center gap-2"
+          >
+            <Trash2 size={18} /> Clear Queue
+          </button>
+          <button
+            onClick={fetchQueue}
+            className="p-3 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl transition-all"
+          >
+            <RefreshCw size={20} className={loading ? "animate-spin text-neutral-400" : ""} />
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
