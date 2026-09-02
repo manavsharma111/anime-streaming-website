@@ -7,11 +7,13 @@ import {
   Star,
   Info,
   ArrowLeft,
+  ChevronDown,
 } from "lucide-react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import axiosInstance from "../../services/api"
 
 export default function EditAnime({ anime, onBack, onSuccess }) {
+  const [isFormatDropdownOpen, setIsFormatDropdownOpen] = useState(false)
   const [animeData, setAnimeData] = useState({
     title: "",
     description: "",
@@ -200,7 +202,7 @@ export default function EditAnime({ anime, onBack, onSuccess }) {
             </label>
             <input
               type="number"
-              step="0.1"
+              step="0.01"
               max="10"
               min="0"
               value={animeData.rating}
@@ -217,17 +219,46 @@ export default function EditAnime({ anime, onBack, onSuccess }) {
             <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-2">
               <Film className="w-4 h-4" /> Format
             </label>
-            <select
-              value={animeData.type}
-              onChange={(e) =>
-                setAnimeData({ ...animeData, type: e.target.value })
-              }
-              className="w-full bg-neutral-950/50 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:border-indigo-500 text-white cursor-pointer transition-colors"
-            >
-              <option value="TV">TV Series</option>
-              <option value="Movie">Movie</option>
-              <option value="OVA">OVA</option>
-            </select>
+            <div className="relative">
+              <div
+                onClick={() => setIsFormatDropdownOpen(!isFormatDropdownOpen)}
+                className="w-full bg-neutral-950/50 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm flex items-center justify-between cursor-pointer hover:border-indigo-500/50 transition-colors text-white"
+              >
+                <span>
+                  {animeData.type === "TV" ? "TV Series" : animeData.type}
+                </span>
+                <ChevronDown
+                  className={`w-4 h-4 text-neutral-400 transition-transform duration-300 ${isFormatDropdownOpen ? "rotate-180" : ""}`}
+                />
+              </div>
+
+              <AnimatePresence>
+                {isFormatDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute top-full left-0 right-0 mt-2 bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden z-50 shadow-xl"
+                  >
+                    {["TV", "Movie", "OVA"].map((format) => (
+                      <div
+                        key={format}
+                        onClick={() => {
+                          setAnimeData({ ...animeData, type: format })
+                          setIsFormatDropdownOpen(false)
+                        }}
+                        className={`px-4 py-3 text-sm cursor-pointer transition-colors flex items-center justify-between
+                          ${animeData.type === format ? "bg-indigo-500/20 text-indigo-500 font-bold" : "text-neutral-300 hover:bg-white/5"}
+                        `}
+                      >
+                        {format === "TV" ? "TV Series" : format}
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
 

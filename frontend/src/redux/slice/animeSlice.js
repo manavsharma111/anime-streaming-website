@@ -7,7 +7,7 @@ export const fetchAnimes = createAsyncThunk(
   async (query = {}, { rejectWithValue }) => {
     try {
       const response = await animeService.getAnimes(query)
-      return response.data
+      return response
     } catch (error) {
       return rejectWithValue(error.response?.data || "Failed to fetch animes")
     }
@@ -20,7 +20,7 @@ export const fetchAnimeDetails = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const response = await animeService.getAnimeDetails(id)
-      return response.data
+      return response
     } catch (error) {
       return rejectWithValue(
         error.response?.data || "Failed to fetch anime details",
@@ -35,7 +35,7 @@ export const fetchMalTrending = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await animeService.getMalTrendingAnimes()
-      return response.data
+      return response
     } catch (error) {
       return rejectWithValue(error.response?.data || "Failed to fetch MAL trending")
     }
@@ -48,7 +48,7 @@ export const fetchSmartRecommendations = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await animeService.getSmartRecommendations()
-      return response.data
+      return response
     } catch (error) {
       return rejectWithValue(error.response?.data || "Failed to fetch smart recommendations")
     }
