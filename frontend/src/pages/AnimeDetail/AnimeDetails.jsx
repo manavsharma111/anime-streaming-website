@@ -110,7 +110,15 @@ export default function AnimeDetails() {
 
       {/* Background Video & Image Fallback */}
       <div className="absolute top-0 left-0 w-full h-[90vh] overflow-hidden pointer-events-none z-0 bg-[#0e0b12]">
-        {malBanner ? (
+        {trailerId ? (
+          <iframe
+            src={`https://www.youtube.com/embed/${trailerId}?autoplay=1&mute=1&loop=1&playlist=${trailerId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&disablekb=1&fs=0`}
+            allow="autoplay; encrypted-media"
+            className="w-full h-[120%] object-cover opacity-30 pointer-events-none scale-[1.3] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+            style={{ border: "none", pointerEvents: "none" }}
+            tabIndex="-1"
+          ></iframe>
+        ) : malBanner ? (
           <img
             src={malBanner}
             className="absolute inset-0 w-full h-full object-cover opacity-30 transform scale-105"
@@ -122,16 +130,6 @@ export default function AnimeDetails() {
             className="absolute inset-0 w-full h-full object-cover opacity-20 blur-2xl transform scale-110"
             alt="background fallback"
           />
-        )}
-        
-        {trailerId && !malBanner && (
-          <iframe
-            src={`https://www.youtube.com/embed/${trailerId}?autoplay=1&mute=1&loop=1&playlist=${trailerId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&disablekb=1&fs=0`}
-            allow="autoplay; encrypted-media"
-            className="w-full h-[120%] object-cover opacity-30 pointer-events-none scale-[1.3] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
-            style={{ border: "none", pointerEvents: "none" }}
-            tabIndex="-1"
-          ></iframe>
         )}
         <div className="absolute inset-0 bg-gradient-to-b from-[#0e0b12]/30 via-[#0e0b12]/70 to-[#0e0b12] z-10"></div>
         <div className="absolute inset-0 bg-gradient-to-r from-[#0e0b12] via-transparent to-transparent z-10"></div>
