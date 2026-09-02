@@ -46,43 +46,46 @@ const processAnimeVideo = async (
       // ==========================================
       // STEP 2: PROBE VIDEO FOR AUDIO & SUBTITLES
       // ==========================================
-      // We use ffprobe to analyze the input video file. 
-      // This tells us exactly how many audio tracks (e.g., English, Japanese) 
-      // and subtitle tracks (e.g., ASS, SRT) are embedded inside the MKV/MP4 file.
-      // Probe input to dynamically count audio/subtitle streams
       const streamCounts = await new Promise((res, rej) => {
-        ffmpeg.ffprobe(inputPath, (err, metadata) => {
+        const { execFile } = require('child_process')
+        execFile(ffprobeStatic.path, [
+          '-v', 'error',
+          '-probesize', '5000000',
+          '-analyzeduration', '1000000',
+          '-show_streams',
+          '-print_format', 'json',
+          inputPath
+        ], (err, stdout) => {
           if (err) return rej(err)
-          let aCount = 0
-          let sCount = 0
-          let subStreams = []
-          let audioStreams = []
-          metadata.streams.forEach((s) => {
-            if (s.codec_type === "audio") {
-              aCount++
-              audioStreams.push({
-                index: s.index,
-                lang:
-                  s.tags && s.tags.language
-                    ? s.tags.language
-                    : `Audio${aCount}`,
-              })
-            }
-            if (s.codec_type === "subtitle") {
-              sCount++
-              // Only keep text-based subtitles for VTT extraction
-              if (["subrip", "ass", "ssa", "mov_text"].includes(s.codec_name)) {
-                subStreams.push({
+          try {
+            const metadata = JSON.parse(stdout)
+            let aCount = 0
+            let sCount = 0
+            let subStreams = []
+            let audioStreams = []
+            metadata.streams.forEach((s) => {
+              if (s.codec_type === "audio") {
+                aCount++
+                audioStreams.push({
                   index: s.index,
-                  lang:
-                    s.tags && s.tags.language
-                      ? s.tags.language
-                      : `Track ${sCount}`,
+                  codec_name: s.codec_name,
+                  lang: s.tags && s.tags.language ? s.tags.language : `Audio${aCount}`,
                 })
               }
-            }
-          })
-          res({ aCount, sCount, subStreams, audioStreams })
+              if (s.codec_type === "subtitle") {
+                sCount++
+                if (["subrip", "ass", "ssa", "mov_text"].includes(s.codec_name)) {
+                  subStreams.push({
+                    index: s.index,
+                    lang: s.tags && s.tags.language ? s.tags.language : `Track ${sCount}`,
+                  })
+                }
+              }
+            })
+            res({ aCount, sCount, subStreams, audioStreams })
+          } catch (e) {
+            rej(e)
+          }
         })
       })
 
@@ -257,12 +260,21 @@ const processAnimeVideo = async (
           for (let i = 0; i < streamCounts.audioStreams.length; i++) {
             const a = streamCounts.audioStreams[i];
             const audioCmd = ffmpeg().input(inputPath);
-            audioCmd.output(path.join(streamDir, `audio_${audioIndex}/manifest.m3u8`)).outputOptions([
+            const isAac = a.codec_name === 'aac';
+            
+            let aOptions = [
               `-map 0:${a.index}`,
-              "-c:a", "aac", "-b:a", "128k", "-ar", "48000", "-ac", "2",
               "-f", "hls", "-hls_time", "6", "-hls_playlist_type", "vod",
               "-hls_segment_filename", path.join(streamDir, `audio_${audioIndex}/segment%03d.ts`)
-            ]);
+            ]
+            
+            if (isAac) {
+              aOptions.splice(1, 0, "-c:a", "copy")
+            } else {
+              aOptions.splice(1, 0, "-c:a", "aac", "-b:a", "128k", "-ar", "48000", "-ac", "2")
+            }
+
+            audioCmd.output(path.join(streamDir, `audio_${audioIndex}/manifest.m3u8`)).outputOptions(aOptions);
             await runFfmpegCommand(audioCmd, `Audio Track ${audioIndex + 1}`, 0.05, overallProgress);
             overallProgress.base += 5;
             audioPlaylists.push({ id: audioIndex, name: a.lang || `Audio ${audioIndex + 1}` });
@@ -304,8 +316,8 @@ const processAnimeVideo = async (
           "-c:v libx264", // Use H.264 video codec for maximum compatibility
           "-profile:v main", // Use Main profile for broad device support (older phones/TVs)
           "-pix_fmt yuv420p", // Standard pixel format widely supported by web players
-          "-preset ultrafast", // Video transfer and process speed (fastest encoding, larger file size)
-          "-threads 2", // Limit to 2 CPU threads to prevent server overload
+          "-preset veryfast", // Video transfer and process speed (fastest encoding, larger file size)
+          "-threads 1", // Limit to 1 CPU thread to prevent server overload (OOM fix)
           "-g 48", // Force a keyframe every 48 frames (Group of Pictures size)
           "-keyint_min 48", // Minimum distance between keyframes
           "-sc_threshold 0", // Disable scene change detection to keep strict and predictable segment times
@@ -316,57 +328,51 @@ const processAnimeVideo = async (
 
         // Adjust remaining weight for video tasks
         let remainingWeight = 100 - overallProgress.base - 5 - 5; // 5 for thumbnails, 5 for mp4s
-        let w1080 = (remainingWeight * 0.45) / 100;
-        let w720 = (remainingWeight * 0.35) / 100;
-        let w480 = (remainingWeight * 0.20) / 100;
 
         // ==========================================
-        // STEP 6: ENCODE VIDEO INTO MULTIPLE RESOLUTIONS
+        // STEP 6: ENCODE VIDEO INTO MULTIPLE RESOLUTIONS (SINGLE DECODE)
         // ==========================================
-        // Now that audio is handled, we process ONLY the video stream (`-map 0:v:0` and `-an` to drop audio).
-        // We create 3 different quality tiers (1080p, 720p, 480p) to allow the player to adapt based on internet speed.
-
-        // 1. HLS 1080p Task
-        const hls1080Cmd = ffmpeg().input(inputPath)
-        hls1080Cmd.output(path.join(streamDir, "0/manifest.m3u8")).outputOptions([
-          "-map 0:v:0", // Select only the first video stream from input
-          "-an", // Remove audio (audio is processed separately)
-          "-s:v:0 1920x1080", // Scale video to 1080p resolution
-          "-b:v:0 3000k", // Set video bitrate to 3000 kbps for high quality
-          ...baseHlsOptions,
-          "-hls_segment_filename", // Naming pattern for the video chunks
-          path.join(streamDir, "0/segment%03d.ts")
+        // We use -filter_complex with split=3 to decode the video only ONCE.
+        // It outputs to 3 different resolutions simultaneously to save massive CPU time.
+        
+        const videoCmd = ffmpeg().input(inputPath)
+        
+        videoCmd.complexFilter([
+          "[0:v:0]split=3[v1][v2][v3]",
+          "[v1]scale=-2:1080[v1out]",
+          "[v2]scale=-2:720[v2out]",
+          "[v3]scale=-2:480[v3out]"
         ])
-        await runFfmpegCommand(hls1080Cmd, "HLS 1080p", w1080, overallProgress)
-        overallProgress.base += w1080 * 100
 
-        // 2. HLS 720p Task
-        const hls720Cmd = ffmpeg().input(inputPath)
-        hls720Cmd.output(path.join(streamDir, "1/manifest.m3u8")).outputOptions([
-          "-map 0:v:0", // Select only the first video stream from input
-          "-an", // Remove audio
-          "-s:v:0 1280x720", // Scale video to 720p resolution
-          "-b:v:0 1500k", // Set video bitrate to 1500 kbps for medium quality
+        // 1080p
+        videoCmd.output(path.join(streamDir, "0/manifest.m3u8")).outputOptions([
+          "-map [v1out]",
+          "-an",
+          "-b:v 3000k",
           ...baseHlsOptions,
-          "-hls_segment_filename", // Naming pattern for the video chunks
-          path.join(streamDir, "1/segment%03d.ts")
+          "-hls_segment_filename", path.join(streamDir, "0/segment%03d.ts")
         ])
-        await runFfmpegCommand(hls720Cmd, "HLS 720p", w720, overallProgress)
-        overallProgress.base += w720 * 100
 
-        // 3. HLS 480p Task
-        const hls480Cmd = ffmpeg().input(inputPath)
-        hls480Cmd.output(path.join(streamDir, "2/manifest.m3u8")).outputOptions([
-          "-map 0:v:0", // Select only the first video stream from input
-          "-an", // Remove audio
-          "-s:v:0 854x480", // Scale video to 480p resolution
-          "-b:v:0 800k", // Set video bitrate to 800 kbps for data saving
+        // 720p
+        videoCmd.output(path.join(streamDir, "1/manifest.m3u8")).outputOptions([
+          "-map [v2out]",
+          "-an",
+          "-b:v 1500k",
           ...baseHlsOptions,
-          "-hls_segment_filename", // Naming pattern for the video chunks
-          path.join(streamDir, "2/segment%03d.ts")
+          "-hls_segment_filename", path.join(streamDir, "1/segment%03d.ts")
         ])
-        await runFfmpegCommand(hls480Cmd, "HLS 480p", w480, overallProgress)
-        overallProgress.base += w480 * 100
+
+        // 480p
+        videoCmd.output(path.join(streamDir, "2/manifest.m3u8")).outputOptions([
+          "-map [v3out]",
+          "-an",
+          "-b:v 800k",
+          ...baseHlsOptions,
+          "-hls_segment_filename", path.join(streamDir, "2/segment%03d.ts")
+        ])
+
+        await runFfmpegCommand(videoCmd, "HLS Video Encode", remainingWeight / 100, overallProgress)
+        overallProgress.base += remainingWeight
 
         // ==========================================
         // STEP 7: GENERATE MASTER PLAYLIST
@@ -437,7 +443,7 @@ const processAnimeVideo = async (
         const thumbCmd = ffmpeg().input(inputPath)
         thumbCmd
           .output(path.join(thumbDir, "thumb_%04d.png"))
-          .outputOptions(["-vf fps=1/60", "-vframes 5", "-threads 1"])
+          .outputOptions(["-vf fps=1/60,scale=320:180", "-vframes 5", "-threads 1"])
         await runFfmpegCommand(thumbCmd, "Thumbnails", 0.05, overallProgress)
 
         const pathSegments = outputDir.split(path.sep)
