@@ -53,8 +53,9 @@ const initCronJobs = () => {
   });
   console.log('[Cron] Anime Auto-Sync Job initialized (Runs daily at midnight).');
   
-  // Optionally run once on startup for the first time if needed, 
-  // but better to just let cron handle it or trigger manually.
+  // Run once immediately on startup
+  console.log('[Cron] Running initial sync on startup...');
+  syncLatestAnime();
 };
 
 module.exports = {
