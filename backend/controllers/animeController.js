@@ -125,7 +125,6 @@ const getAnimes = async (req, res, next) => {
   }
 }
 
-const mongoose = require("mongoose")
 
 // Helper to map Anilist Anime to our DB Anime format
 function mapAnilistToAnime(alAnime) {
