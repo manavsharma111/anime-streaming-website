@@ -182,10 +182,13 @@ const getAnimeDetails = async (req, res, next) => {
     }
 
     // Find recommended animes based on similar genres (from our DB)
-    const recommendedAnimes = await Anime.find({
-      genres: { $in: anime.genres },
-      _id: { $ne: anime._id },
-    })
+    const findQuery = { genres: { $in: anime.genres } }
+    
+    if (mongoose.Types.ObjectId.isValid(anime._id)) {
+      findQuery._id = { $ne: anime._id }
+    }
+
+    const recommendedAnimes = await Anime.find(findQuery)
       .sort({ rating: -1 })
       .limit(10)
 
