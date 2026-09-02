@@ -22,6 +22,7 @@ import { getImageUrl } from "../../utils/image"
 import ReviewSection from "../../components/Anime/ReviewSection/ReviewSection"
 import AnimeInfoBox from "../../components/Watch/AnimeInfoBox"
 import TrendingSidebar from "../../components/Watch/TrendingSidebar"
+import ReactPlayer from "react-player/youtube"
 
 export default function AnimeDetails() {
   const { id } = useParams()
@@ -85,6 +86,15 @@ export default function AnimeDetails() {
     }
   }, [animeDetails]);
 
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const trailerId = animeDetails ? (getYoutubeId(animeDetails.trailerUrl) || dynamicTrailerId) : null;
+
+  useEffect(() => {
+    if (trailerId) {
+      setIsVideoLoaded(false);
+    }
+  }, [trailerId]);
+
   if (isLoading || !animeDetails) {
     return (
       <div className="min-h-screen bg-[#110e16] flex justify-center items-center">
@@ -112,8 +122,6 @@ export default function AnimeDetails() {
         ).toFixed(1)
       : (anime.rating || 0).toFixed(1)
 
-  const trailerId = getYoutubeId(anime.trailerUrl) || dynamicTrailerId
-
   return (
     <div className="min-h-screen bg-[#0e0b12] text-white pt-24 pb-20 relative overflow-hidden font-sans">
       {/* Background Glow */}
@@ -122,13 +130,31 @@ export default function AnimeDetails() {
       {/* Background Video & Image Fallback */}
       <div className="absolute top-0 left-0 w-full h-[90vh] overflow-hidden pointer-events-none z-0 bg-[#0e0b12]">
         {trailerId ? (
-          <iframe
-            src={`https://www.youtube.com/embed/${trailerId}?autoplay=1&mute=1&loop=1&playlist=${trailerId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&disablekb=1&fs=0`}
-            allow="autoplay; encrypted-media"
-            className="w-full h-[120%] object-cover opacity-30 pointer-events-none scale-[1.3] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
-            style={{ border: "none", pointerEvents: "none" }}
-            tabIndex="-1"
-          ></iframe>
+          <div className={`w-full h-[120%] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-opacity duration-[2000ms] ease-in-out pointer-events-none scale-[1.3] ${isVideoLoaded ? "opacity-60" : "opacity-0"}`}>
+            <ReactPlayer
+              url={`https://www.youtube.com/watch?v=${trailerId}`}
+              playing={true}
+              muted={true}
+              loop={true}
+              controls={false}
+              width="100%"
+              height="100%"
+              onPlay={() => setIsVideoLoaded(true)}
+              config={{
+                youtube: {
+                  playerVars: { 
+                    showinfo: 0, 
+                    modestbranding: 1, 
+                    rel: 0, 
+                    disablekb: 1, 
+                    playsinline: 1,
+                    iv_load_policy: 3,
+                    fs: 0
+                  }
+                }
+              }}
+            />
+          </div>
         ) : malBanner ? (
           <img
             src={malBanner}
