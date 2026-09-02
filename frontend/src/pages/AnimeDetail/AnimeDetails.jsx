@@ -50,29 +50,40 @@ export default function AnimeDetails() {
   const [dynamicTrailerId, setDynamicTrailerId] = useState(null)
   const [malBanner, setMalBanner] = useState(null)
 
-  // Fetch dynamic trailer and high-quality MAL image if available
+  // Fetch dynamic trailer and high-quality banner image from Anilist if available
   useEffect(() => {
-    if (animeDetails) {
-      fetch(
-        `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(animeDetails.title)}&limit=1`,
-      )
+    if (animeDetails && !animeDetails.isMalProxy) {
+      const query = `
+        query($search: String) {
+          Media(search: $search, type: ANIME) {
+            bannerImage
+            trailer { id site }
+          }
+        }
+      `;
+      fetch("https://graphql.anilist.co", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({ query, variables: { search: animeDetails.title } })
+      })
         .then((res) => res.json())
         .then((data) => {
-          if (data.data && data.data.length > 0) {
-            const malAnime = data.data[0]
-            if (!getYoutubeId(animeDetails.trailerUrl) && malAnime.trailer?.youtube_id) {
-              setDynamicTrailerId(malAnime.trailer.youtube_id)
+          if (data.data && data.data.Media) {
+            const alAnime = data.data.Media;
+            if (!getYoutubeId(animeDetails.trailerUrl) && alAnime.trailer?.site === "youtube" && alAnime.trailer?.id) {
+              setDynamicTrailerId(alAnime.trailer.id);
             }
-            if (malAnime.trailer?.images?.maximum_image_url) {
-              setMalBanner(malAnime.trailer.images.maximum_image_url)
-            } else if (malAnime.images?.webp?.large_image_url) {
-              setMalBanner(malAnime.images.webp.large_image_url)
+            if (alAnime.bannerImage) {
+              setMalBanner(alAnime.bannerImage);
             }
           }
         })
-        .catch((err) => console.error("Failed to fetch MAL data", err))
+        .catch((err) => console.error("Failed to fetch Anilist data", err));
     }
-  }, [animeDetails])
+  }, [animeDetails]);
 
   if (isLoading || !animeDetails) {
     return (
