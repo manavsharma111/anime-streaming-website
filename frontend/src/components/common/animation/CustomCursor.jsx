@@ -112,14 +112,14 @@ const CustomCursor = () => {
     <>
       {/* Main Cursor */}
       <motion.div
-        className="fixed top-0 left-0 pointer-events-none z-[9999] hidden md:block"
+        className="fixed top-0 left-0 pointer-events-none z-[999999] hidden md:block"
         variants={variants}
         animate={hoveredElement ? "hover" : "default"}
         transition={{ type: "spring", stiffness: 300, damping: 20, mass: 0.5 }}
       />
       {/* Dot Cursor */}
       <motion.div
-        className="fixed top-0 left-0 w-1.5 h-1.5 bg-[#f33767] rounded-full pointer-events-none z-[10000] hidden md:block"
+        className="fixed top-0 left-0 w-1.5 h-1.5 bg-[#f33767] rounded-full pointer-events-none z-[999999] hidden md:block"
         animate={{
           x: mousePosition.x - 3,
           y: mousePosition.y - 3,

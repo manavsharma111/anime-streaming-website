@@ -1,12 +1,9 @@
 config:
   target: "https://anime-streaming-website-q60l.onrender.com" # Directly testing your live Render server!
   phases:
-    - name: "Warm up (Low Traffic)"
+    - name: "Raw Stress Test (10s)"
       duration: 10
-      arrivalRate: 5
-    - name: "Spike (High Traffic)"
-      duration: 20
-      arrivalRate: 30
+      arrivalRate: 50
 
 scenarios:
   - name: "Real User Browsing Journey"
