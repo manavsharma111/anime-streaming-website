@@ -13,7 +13,6 @@ const processAnimeVideo = async (
   outputDir,
   job,
 ) => {
-  return new Promise(async (resolve, reject) => {
     try {
       const finalFfmpegPath = ffmpegPath || ffmpegStatic.path
       ffmpeg.setFfmpegPath(finalFfmpegPath)
@@ -451,7 +450,7 @@ const processAnimeVideo = async (
         const baseFolder = `/uploads/processed/${folderId}`
 
         // Match the Episode.js Schema exactly
-        resolve({
+        return {
           hlsMaster: `${baseFolder}/streaming/master.m3u8`,
           downloads: {
             1080: `${baseFolder}/downloads/1080p.mp4`,
@@ -460,14 +459,13 @@ const processAnimeVideo = async (
           },
           thumbnails: `${baseFolder}/thumbnails/`,
           embeddedSubtitles: extractedSubs,
-        })
+        }
       } catch (err) {
-        reject(err)
+        throw err
       }
     } catch (error) {
-      reject(error)
+      throw error
     }
-  })
 }
 
 module.exports = { processAnimeVideo }
