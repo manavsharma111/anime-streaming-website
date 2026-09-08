@@ -60,9 +60,13 @@ const processAnimeVideo = async (
             const metadata = JSON.parse(stdout)
             let aCount = 0
             let sCount = 0
+            let vHeight = null
             let subStreams = []
             let audioStreams = []
             metadata.streams.forEach((s) => {
+              if (s.codec_type === "video" && !vHeight && s.height) {
+                vHeight = s.height
+              }
               if (s.codec_type === "audio") {
                 aCount++
                 audioStreams.push({
@@ -81,7 +85,7 @@ const processAnimeVideo = async (
                 }
               }
             })
-            res({ aCount, sCount, subStreams, audioStreams })
+            res({ aCount, sCount, subStreams, audioStreams, vHeight })
           } catch (e) {
             rej(e)
           }
@@ -320,55 +324,88 @@ const processAnimeVideo = async (
           "-g 48", // Force a keyframe every 48 frames (Group of Pictures size)
           "-keyint_min 48", // Minimum distance between keyframes
           "-sc_threshold 0", // Disable scene change detection to keep strict and predictable segment times
+          "-r 30", // Limit to 30fps to avoid memory spikes and reduce CPU load
           "-f", "hls", // Output format as HTTP Live Streaming (HLS)
           "-hls_time", "6", // Duration of each video segment in seconds (6s chunks)
           "-hls_playlist_type", "vod" // Video on Demand playlist type (tells player it's not a live stream)
         ]
 
-        // Adjust remaining weight for video tasks
-        let remainingWeight = 100 - overallProgress.base - 5 - 5; // 5 for thumbnails, 5 for mp4s
+        // Determine which resolutions to generate to avoid upscaling
+        const height = streamCounts.vHeight || 1080 // default to 1080 if detection fails
+        const gen1080 = height >= 1080
+        const gen720 = height >= 720
+        const gen480 = true // Always generate at least 480p
+
+        let mp4TotalBase = (gen1080 ? 2 : 0) + (gen720 ? 2 : 0) + (gen480 ? 1 : 0);
+        let remainingWeight = 100 - overallProgress.base - 5 - mp4TotalBase; 
 
         // ==========================================
         // STEP 6: ENCODE VIDEO INTO MULTIPLE RESOLUTIONS (SINGLE DECODE)
         // ==========================================
-        // We use -filter_complex with split=3 to decode the video only ONCE.
-        // It outputs to 3 different resolutions simultaneously to save massive CPU time.
-        
         const videoCmd = ffmpeg().input(inputPath)
         
-        videoCmd.complexFilter([
-          "[0:v:0]split=3[v1][v2][v3]",
-          "[v1]scale=-2:1080[v1out]",
-          "[v2]scale=-2:720[v2out]",
-          "[v3]scale=-2:480[v3out]"
-        ])
+        let numOutputs = (gen1080 ? 1 : 0) + (gen720 ? 1 : 0) + (gen480 ? 1 : 0);
+        let complexFilters = [];
+        let splitOutputs = "";
+        for (let i = 1; i <= numOutputs; i++) splitOutputs += `[v${i}]`;
+        
+        if (numOutputs > 1) {
+          complexFilters.push(`[0:v:0]split=${numOutputs}${splitOutputs}`);
+        }
+        
+        let currentSplitIdx = 1;
+        let map1080, map720, map480;
+        
+        if (gen1080) {
+          let inPad = numOutputs > 1 ? `[v${currentSplitIdx++}]` : `[0:v:0]`;
+          map1080 = `[v1080out]`;
+          complexFilters.push(`${inPad}scale=-2:1080${map1080}`);
+        }
+        if (gen720) {
+          let inPad = numOutputs > 1 ? `[v${currentSplitIdx++}]` : `[0:v:0]`;
+          map720 = `[v720out]`;
+          complexFilters.push(`${inPad}scale=-2:720${map720}`);
+        }
+        if (gen480) {
+          let inPad = numOutputs > 1 ? `[v${currentSplitIdx++}]` : `[0:v:0]`;
+          map480 = `[v480out]`;
+          complexFilters.push(`${inPad}scale=-2:480${map480}`);
+        }
+        
+        videoCmd.complexFilter(complexFilters);
 
         // 1080p
-        videoCmd.output(path.join(streamDir, "0/manifest.m3u8")).outputOptions([
-          "-map [v1out]",
-          "-an",
-          "-b:v 3000k",
-          ...baseHlsOptions,
-          "-hls_segment_filename", path.join(streamDir, "0/segment%03d.ts")
-        ])
+        if (gen1080) {
+          videoCmd.output(path.join(streamDir, "0/manifest.m3u8")).outputOptions([
+            `-map ${map1080}`,
+            "-an",
+            "-b:v 3000k",
+            ...baseHlsOptions,
+            "-hls_segment_filename", path.join(streamDir, "0/segment%03d.ts")
+          ])
+        }
 
         // 720p
-        videoCmd.output(path.join(streamDir, "1/manifest.m3u8")).outputOptions([
-          "-map [v2out]",
-          "-an",
-          "-b:v 1500k",
-          ...baseHlsOptions,
-          "-hls_segment_filename", path.join(streamDir, "1/segment%03d.ts")
-        ])
+        if (gen720) {
+          videoCmd.output(path.join(streamDir, "1/manifest.m3u8")).outputOptions([
+            `-map ${map720}`,
+            "-an",
+            "-b:v 1500k",
+            ...baseHlsOptions,
+            "-hls_segment_filename", path.join(streamDir, "1/segment%03d.ts")
+          ])
+        }
 
         // 480p
-        videoCmd.output(path.join(streamDir, "2/manifest.m3u8")).outputOptions([
-          "-map [v3out]",
-          "-an",
-          "-b:v 800k",
-          ...baseHlsOptions,
-          "-hls_segment_filename", path.join(streamDir, "2/segment%03d.ts")
-        ])
+        if (gen480) {
+          videoCmd.output(path.join(streamDir, "2/manifest.m3u8")).outputOptions([
+            `-map ${map480}`,
+            "-an",
+            "-b:v 800k",
+            ...baseHlsOptions,
+            "-hls_segment_filename", path.join(streamDir, "2/segment%03d.ts")
+          ])
+        }
 
         await runFfmpegCommand(videoCmd, "HLS Video Encode", remainingWeight / 100, overallProgress)
         overallProgress.base += remainingWeight
@@ -376,10 +413,6 @@ const processAnimeVideo = async (
         // ==========================================
         // STEP 7: GENERATE MASTER PLAYLIST
         // ==========================================
-        // This is the brain of the HLS stream. `master.m3u8` tells the video player (like Hls.js)
-        // what resolutions are available (1080p, 720p, 480p) and what audio tracks it can switch between.
-        
-        // Manually write master.m3u8
         let masterPlaylist = "#EXTM3U\n"
         if (audioPlaylists.length > 0) {
           audioPlaylists.forEach((ap, idx) => {
@@ -387,20 +420,15 @@ const processAnimeVideo = async (
           })
         }
         let audioStr = audioPlaylists.length > 0 ? ',AUDIO="audio"' : '';
-        masterPlaylist += `#EXT-X-STREAM-INF:BANDWIDTH=3000000,RESOLUTION=1920x1080${audioStr}\n0/manifest.m3u8\n`
-        masterPlaylist += `#EXT-X-STREAM-INF:BANDWIDTH=1500000,RESOLUTION=1280x720${audioStr}\n1/manifest.m3u8\n`
-        masterPlaylist += `#EXT-X-STREAM-INF:BANDWIDTH=800000,RESOLUTION=854x480${audioStr}\n2/manifest.m3u8\n`
+        if (gen1080) masterPlaylist += `#EXT-X-STREAM-INF:BANDWIDTH=3000000,RESOLUTION=1920x1080${audioStr}\n0/manifest.m3u8\n`
+        if (gen720) masterPlaylist += `#EXT-X-STREAM-INF:BANDWIDTH=1500000,RESOLUTION=1280x720${audioStr}\n1/manifest.m3u8\n`
+        if (gen480) masterPlaylist += `#EXT-X-STREAM-INF:BANDWIDTH=800000,RESOLUTION=854x480${audioStr}\n2/manifest.m3u8\n`
         fs.writeFileSync(path.join(streamDir, "master.m3u8"), masterPlaylist)
 
 
         // ==========================================
         // STEP 8: GENERATE DOWNLOADABLE MP4 FILES
         // ==========================================
-        // Since HLS creates hundreds of tiny .ts chunk files, users can't easily download the video.
-        // Here, we take the processed HLS streams and mux them back into single .mp4 files 
-        // (combining video and the primary audio track) so users can download them for offline viewing.
-
-        // MP4 Tasks
         const setupMp4Cmd = (cmd, manifestPath) => {
           cmd.input(path.join(streamDir, manifestPath))
           if (audioPlaylists.length > 0) {
@@ -411,26 +439,37 @@ const processAnimeVideo = async (
           }
         }
 
-        // 4. 1080p MP4 Task (Lightning Fast Copy from HLS)
-        const mp41080Cmd = ffmpeg()
-        setupMp4Cmd(mp41080Cmd, "0/manifest.m3u8")
-        mp41080Cmd.output(path.join(downloadDir, "1080p.mp4"))
-        await runFfmpegCommand(mp41080Cmd, "MP4 1080p", 0.02, overallProgress)
-        overallProgress.base += 2
+        let mp4Downloads = {};
 
-        // 5. 720p MP4 Task (Lightning Fast Copy from HLS)
-        const mp4720Cmd = ffmpeg()
-        setupMp4Cmd(mp4720Cmd, "1/manifest.m3u8")
-        mp4720Cmd.output(path.join(downloadDir, "720p.mp4"))
-        await runFfmpegCommand(mp4720Cmd, "MP4 720p", 0.02, overallProgress)
-        overallProgress.base += 2
+        // 1080p MP4 Task
+        if (gen1080) {
+          const mp41080Cmd = ffmpeg()
+          setupMp4Cmd(mp41080Cmd, "0/manifest.m3u8")
+          mp41080Cmd.output(path.join(downloadDir, "1080p.mp4"))
+          await runFfmpegCommand(mp41080Cmd, "MP4 1080p", 0.02, overallProgress)
+          overallProgress.base += 2
+          mp4Downloads["1080"] = `${baseFolder}/downloads/1080p.mp4`;
+        }
 
-        // 6. 480p MP4 Task (Lightning Fast Copy from HLS)
-        const mp4480Cmd = ffmpeg()
-        setupMp4Cmd(mp4480Cmd, "2/manifest.m3u8")
-        mp4480Cmd.output(path.join(downloadDir, "480p.mp4"))
-        await runFfmpegCommand(mp4480Cmd, "MP4 480p", 0.01, overallProgress)
-        overallProgress.base += 1
+        // 720p MP4 Task
+        if (gen720) {
+          const mp4720Cmd = ffmpeg()
+          setupMp4Cmd(mp4720Cmd, "1/manifest.m3u8")
+          mp4720Cmd.output(path.join(downloadDir, "720p.mp4"))
+          await runFfmpegCommand(mp4720Cmd, "MP4 720p", 0.02, overallProgress)
+          overallProgress.base += 2
+          mp4Downloads["720"] = `${baseFolder}/downloads/720p.mp4`;
+        }
+
+        // 480p MP4 Task
+        if (gen480) {
+          const mp4480Cmd = ffmpeg()
+          setupMp4Cmd(mp4480Cmd, "2/manifest.m3u8")
+          mp4480Cmd.output(path.join(downloadDir, "480p.mp4"))
+          await runFfmpegCommand(mp4480Cmd, "MP4 480p", 0.01, overallProgress)
+          overallProgress.base += 1
+          mp4Downloads["480"] = `${baseFolder}/downloads/480p.mp4`;
+        }
 
         // ==========================================
         // STEP 9: GENERATE THUMBNAIL SPRITE SHEET
@@ -452,11 +491,7 @@ const processAnimeVideo = async (
         // Match the Episode.js Schema exactly
         return {
           hlsMaster: `${baseFolder}/streaming/master.m3u8`,
-          downloads: {
-            1080: `${baseFolder}/downloads/1080p.mp4`,
-            720: `${baseFolder}/downloads/720p.mp4`,
-            480: `${baseFolder}/downloads/480p.mp4`,
-          },
+          downloads: mp4Downloads,
           thumbnails: `${baseFolder}/thumbnails/`,
           embeddedSubtitles: extractedSubs,
         }
