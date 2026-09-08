@@ -157,6 +157,7 @@ export default function FeaturedShowcase({ animeList = [], loading }) {
           <button
             key={i}
             onClick={() => setActive(i)}
+            aria-label={`Go to slide ${i + 1}`}
             className={`h-2 rounded-full transition-all duration-500 ${i === active ? "w-12 bg-white" : "w-2 bg-white/30 hover:bg-white/50"}`}
           />
         ))}

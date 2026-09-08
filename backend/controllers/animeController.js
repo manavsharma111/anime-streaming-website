@@ -206,6 +206,18 @@ const getAnimeDetails = async (req, res, next) => {
 
 const getMalTrending = async (req, res, next) => {
   try {
+    const redisKey = `animes:trending`
+    
+    // Try to fetch from cache
+    try {
+      const cachedData = await redisClient.get(redisKey)
+      if (cachedData) {
+        return res.status(200).json(JSON.parse(cachedData))
+      }
+    } catch (redisError) {
+      console.log("Redis cache error, falling back to MAL:", redisError.message)
+    }
+
     const axios = require("axios")
     const queryStr = `
       query {
@@ -220,10 +232,19 @@ const getMalTrending = async (req, res, next) => {
     const alRes = await axios.post("https://graphql.anilist.co", { query: queryStr })
     const trendingAnimes = alRes.data.data.Page.media.map(mapAnilistToAnime)
 
-    res.status(200).json({
+    const responsePayload = {
       success: true,
       data: trendingAnimes,
-    })
+    }
+
+    // Try to set cache (cache for 1 hour)
+    try {
+      await redisClient.setex(redisKey, 3600, JSON.stringify(responsePayload))
+    } catch (redisError) {
+      console.log("Redis cache set error:", redisError.message)
+    }
+
+    res.status(200).json(responsePayload)
   } catch (error) {
     console.error("MAL Trending fetch error:", error.message)
     next(error)

@@ -49,9 +49,12 @@ export default function HorizontalLookbook({ animeList = [], loading }) {
               <motion.img
                 key={activeIndex}
                 src={
-                  displayList[activeIndex].images?.webp?.large_image_url ||
-                  displayList[activeIndex].images?.jpg?.large_image_url
+                  displayList[activeIndex].images?.webp?.image_url ||
+                  displayList[activeIndex].images?.jpg?.image_url ||
+                  displayList[activeIndex].images?.webp?.large_image_url
                 }
+                loading="lazy"
+                decoding="async"
                 initial={{ opacity: 0, scale: 1.1 }}
                 animate={{ opacity: 0.25, scale: 1 }}
                 exit={{ opacity: 0 }}
@@ -93,6 +96,8 @@ export default function HorizontalLookbook({ animeList = [], loading }) {
                     <img
                       src={imgUrl}
                       alt={rawTitle}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover transition-transform duration-[1500ms] ease-out scale-105 group-hover:scale-100"
                     />
                   ) : (

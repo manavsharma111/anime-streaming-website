@@ -59,11 +59,11 @@ Use this verified statement on your resume:
 | :--- | :--- |
 | **Total Virtual Users (VUs)** | Scaled up to 1,000 |
 | **Duration** | 6.5 Minutes |
-| **Total Requests Handled** | 187,678 |
-| **Average Throughput** | 480.74 req/sec |
-| **Average Response Time** | 731.77 ms |
-| **P95 Latency** | 1,307.70 ms |
-| **Successful Responses (200)** | 187,678 |
+| **Total Requests Handled** | 149,217 |
+| **Average Throughput** | 363.28 req/sec |
+| **Average Response Time** | 963.88 ms |
+| **P95 Latency** | 1,635.25 ms |
+| **Successful Responses (200)** | 149,217 |
 | **Errors (4xx/5xx)** | 0 |
 | **Success Rate** | **100.00%** |
 
@@ -73,4 +73,4 @@ Use this verified statement on your resume:
 ## 📝 Updated Suggested Resume Bullet Point
 Use this highly impressive, verified statement on your resume:
 
-> *"Architected and load-tested a resilient Node.js backend using k6, seamlessly processing **~187,000 requests** over 6.5 minutes with **1,000 concurrent virtual users**. Achieved a sustained throughput of **480 req/sec** with a **100% success rate** and zero dropped requests, demonstrating robust horizontal scaling, effective Redis caching, and efficient event-loop management."*
+> *"Architected and load-tested a resilient Node.js backend using k6, seamlessly processing **~150,000 requests** over 6 minutes with **1,000 concurrent virtual users**. Achieved a sustained throughput of **363 req/sec** with a **100% success rate** and zero dropped requests, demonstrating robust horizontal scaling and efficient event-loop management."*
