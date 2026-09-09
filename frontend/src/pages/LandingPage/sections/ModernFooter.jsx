@@ -7,18 +7,18 @@ export default function ModernFooter() {
     <footer className="bg-[#020202] border-t border-white/[0.06] py-16 px-6 relative z-10">
       <div className="max-w-4xl mx-auto flex flex-col items-center gap-6 text-center">
         {/* Brand */}
-        <p className="text-white/20 text-xs tracking-[0.5em] uppercase font-bold">
+        <p className="text-white/50 text-xs tracking-[0.5em] uppercase font-bold">
           Anime Stream
         </p>
 
         {/* Credit line */}
-        <p className="text-white/40 text-sm md:text-base leading-relaxed">
+        <p className="text-white/50 text-sm md:text-base leading-relaxed">
           This website is designed and developed by{" "}
           <span className="text-white font-semibold">Manav Sharma</span>.
         </p>
 
         {/* Subline */}
-        <p className="text-white/25 text-xs md:text-sm">
+        <p className="text-white/50 text-xs md:text-sm">
           Want to build something like this? Contact him.
         </p>
 
@@ -40,7 +40,7 @@ export default function ModernFooter() {
         <div className="w-16 h-[1px] bg-white/10 mt-2" />
 
         {/* Copyright */}
-        <p className="text-white/15 text-xs tracking-widest">
+        <p className="text-white/50 text-xs tracking-widest">
           © {new Date().getFullYear()} Anime Stream. All rights reserved.
         </p>
       </div>

@@ -79,7 +79,7 @@ export default function UserReviews() {
                 </div>
                 <div>
                   <div className="text-white font-bold">{review.name}</div>
-                  <div className="text-sm text-neutral-500">{review.role}</div>
+                  <div className="text-sm text-neutral-400">{review.role}</div>
                 </div>
               </div>
             </div>

@@ -89,14 +89,14 @@ export default function CinematicHero() {
             transition={{ duration: 1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-wrap items-center gap-6"
           >
-            <Link to="/home">
+            <Link to="/home" className="inline-block">
               <button className="group relative px-8 py-4 bg-white text-black font-bold rounded-full overflow-hidden flex items-center gap-3 transition-transform hover:scale-105 active:scale-95">
                 <span className="relative z-10">Start Watching</span>
                 <Play size={20} className="relative z-10 fill-black" />
                 <div className="absolute inset-0 bg-gradient-to-r from-gray-200 to-gray-400 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
               </button>
             </Link>
-            <Link to="/search">
+            <Link to="/search" className="inline-block">
               <button className="group px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded-full backdrop-blur-md flex items-center gap-3 transition-all hover:border-white/30">
                 <Info
                   size={20}

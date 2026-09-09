@@ -47,7 +47,7 @@ export default function FAQAccordion() {
                 {/* Background hover reveal */}
                 <div className="absolute inset-0 bg-white/[0.02] transform -translate-x-full group-hover:translate-x-0 transition-transform duration-700 ease-out pointer-events-none" />
 
-                <h3 className="text-2xl md:text-5xl font-black text-neutral-600 group-hover:text-white transition-colors duration-500 tracking-tighter relative z-10">
+                <h3 className="text-2xl md:text-5xl font-black text-neutral-400 group-hover:text-white transition-colors duration-500 tracking-tighter relative z-10">
                   {faq.q}
                 </h3>
 
