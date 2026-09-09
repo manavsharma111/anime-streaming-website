@@ -143,6 +143,8 @@ export default function StackedGenreCards() {
       let mm = gsap.matchMedia();
 
       mm.add("(min-width: 768px)", () => {
+        if (!containerRef.current || !cardsRef.current.length) return;
+        
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: containerRef.current,
@@ -179,6 +181,8 @@ export default function StackedGenreCards() {
       });
 
       mm.add("(max-width: 767px)", () => {
+        if (!containerRef.current || !sliderRef.current || !cardsRef.current.length) return;
+
         // Horizontal scroll tied to vertical scroll for mobile
         gsap.set(cardsRef.current, { clearProps: "all" })
 

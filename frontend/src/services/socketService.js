@@ -7,7 +7,6 @@ const socketService = {
     if (!socket) {
       socket = io(import.meta.env.VITE_BASE_URL, {
         withCredentials: true,
-        transports: ["websocket", "polling"],
       })
       socket.on("connect", () => {
         console.log("Connected to server", socket.id)

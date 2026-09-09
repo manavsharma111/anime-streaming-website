@@ -7,7 +7,7 @@ const animeService = {
       return response.data
     } catch (error) {
       console.error("Anime fetch error:", error)
-      return error
+      throw error
     }
   },
   getAnimeDetails: async (id) => {
@@ -16,7 +16,7 @@ const animeService = {
       return response.data
     } catch (error) {
       console.error("Anime details fetch error:", error)
-      return error
+      throw error
     }
   },
   getMalTrendingAnimes: async () => {
@@ -25,7 +25,7 @@ const animeService = {
       return response.data
     } catch (error) {
       console.error("MAL Trending fetch error:", error)
-      return error
+      throw error
     }
   },
   getSmartRecommendations: async () => {
@@ -34,7 +34,7 @@ const animeService = {
       return response.data
     } catch (error) {
       console.error("Smart Recommendations fetch error:", error)
-      return error
+      throw error
     }
   },
 }
