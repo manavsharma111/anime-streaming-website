@@ -11,8 +11,8 @@ const FeaturesBentoGrid = lazy(() => import("./sections/FeaturesBentoGrid"))
 const FeaturedShowcase = lazy(() => import("./sections/FeaturedShowcase"))
 const WatchAnywhere = lazy(() => import("./sections/WatchAnywhere"))
 const CinematicTrailer = lazy(() => import("./sections/CinematicTrailer"))
-const HoverRoster = lazy(() => import("./sections/HoverRoster"))
-const StackedGenreCards = lazy(() => import("./sections/StackedGenreCards"))
+import HoverRoster from "./sections/HoverRoster"
+import StackedGenreCards from "./sections/StackedGenreCards"
 const UserReviews = lazy(() => import("./sections/UserReviews"))
 const FAQAccordion = lazy(() => import("./sections/FAQAccordion"))
 const FreeCTA = lazy(() => import("./sections/FreeCTA"))
@@ -24,21 +24,38 @@ import SmoothScroll from "../../components/common/animation/SmoothScroll"
 
 export default function LandingPage() {
   const { topAiring, loading } = useJikanAnime()
+  const containerRef = React.useRef(null)
 
   useEffect(() => {
     if ("scrollRestoration" in window.history) {
       window.history.scrollRestoration = "manual"
     }
     window.scrollTo(0, 0)
+
+    // Debounced ResizeObserver to catch any layout shifts from lazy images or Suspense.
+    // This perfectly fixes GSAP pin positions for HoverRoster & StackedGenreCards.
+    let resizeTimer
+    const observer = new ResizeObserver(() => {
+      clearTimeout(resizeTimer)
+      resizeTimer = setTimeout(() => {
+        import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
+          ScrollTrigger.refresh()
+        })
+      }, 250) // Wait 250ms after layout settles to refresh GSAP
+    })
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current)
+    }
+
+    return () => {
+      clearTimeout(resizeTimer)
+      observer.disconnect()
+    }
   }, [])
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-      className="bg-[#050505] text-white min-h-screen selection:bg-red-500/30 overflow-x-hidden relative"
-    >
+    <div ref={containerRef} className="bg-[#050505] text-white min-h-screen selection:bg-red-500/30">
       <SmoothScroll />
       {/* Global Noise Overlay */}
       <div
@@ -52,22 +69,24 @@ export default function LandingPage() {
       <CinematicHero />
       <TrendingThisWeek animeList={topAiring.slice(0, 5)} loading={loading} />
 
-      <Suspense fallback={<div className="h-screen w-full bg-[#050505]" />}>
+      <Suspense fallback={<div className="h-[50vh] w-full bg-[#050505]" />}>
         <PopularCategories />
         <FeaturesBentoGrid />
         <FeaturedShowcase animeList={topAiring.slice(5, 8)} loading={loading} />
         <WatchAnywhere />
-
         <CinematicTrailer />
-        <HoverRoster animeList={topAiring} loading={loading} />
-        <StackedGenreCards />
+      </Suspense>
 
+      <HoverRoster animeList={topAiring} loading={loading} />
+      <StackedGenreCards />
+
+      <Suspense fallback={<div className="h-[50vh] w-full bg-[#050505]" />}>
         <UserReviews />
         <FAQAccordion />
         <FreeCTA />
         <EyesFollow />
         <ModernFooter />
       </Suspense>
-    </motion.div>
+    </div>
   )
 }

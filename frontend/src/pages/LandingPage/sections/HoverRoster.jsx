@@ -239,7 +239,7 @@ export default function HoverRoster({ animeList = [], loading }) {
             className="relative w-full h-full"
           >
             {/* Clip-path wipe transition */}
-            <AnimatePresence mode="wait">
+            <AnimatePresence >
               <motion.div
                 key={"poster-" + activeIdx}
                 className="absolute inset-0"
@@ -267,7 +267,7 @@ export default function HoverRoster({ animeList = [], loading }) {
 
             {/* Counter badge */}
             <div className="absolute top-6 left-6 md:top-9 md:left-9 z-20">
-              <AnimatePresence mode="wait">
+              <AnimatePresence >
                 <motion.div
                   key={"ctr-" + activeIdx}
                   className="flex items-center gap-3"
@@ -289,7 +289,7 @@ export default function HoverRoster({ animeList = [], loading }) {
 
             {/* Genre pill */}
             <div className="absolute bottom-6 left-6 md:bottom-9 md:left-9 z-20">
-              <AnimatePresence mode="wait">
+              <AnimatePresence >
                 <motion.span
                   key={"genre-" + activeIdx}
                   className="inline-flex px-4 py-1.5 md:px-5 md:py-2 rounded-full text-[10px] md:text-xs font-black tracking-[0.35em] uppercase backdrop-blur-md border"
@@ -333,7 +333,7 @@ export default function HoverRoster({ animeList = [], loading }) {
           {/* Ghost index */}
           {/* <div className="relative h-12 md:h-20 overflow-hidden pointer-events-none select-none"> */}
           <div className="relative h-24 md:h-32 pointer-events-none select-none">
-            <AnimatePresence mode="wait">
+            <AnimatePresence >
               <motion.span
                 key={"idx-" + activeIdx}
                 className="absolute inset-0 flex items-center font-black text-[4rem] md:text-[7rem] leading-none"
@@ -352,7 +352,7 @@ export default function HoverRoster({ animeList = [], loading }) {
           </div>
 
           {/* Title */}
-          <AnimatePresence mode="wait">
+          <AnimatePresence >
             <motion.div
               key={"title-" + activeIdx}
               exit={{ opacity: 0, y: -14, transition: { duration: 0.22 } }}
@@ -366,7 +366,7 @@ export default function HoverRoster({ animeList = [], loading }) {
           </AnimatePresence>
 
           {/* Gradient rule */}
-          <AnimatePresence mode="wait">
+          <AnimatePresence >
             <motion.div
               key={"rule-" + activeIdx}
               className="h-[1px] rounded-full origin-left"
@@ -385,7 +385,7 @@ export default function HoverRoster({ animeList = [], loading }) {
           </AnimatePresence>
 
           {/* Stats */}
-          <AnimatePresence mode="wait">
+          <AnimatePresence >
             <motion.div
               key={"stats-" + activeIdx}
               className="flex gap-7 md:gap-10 items-center"
@@ -428,7 +428,7 @@ export default function HoverRoster({ animeList = [], loading }) {
           </AnimatePresence>
 
           {/* CTA */}
-          <AnimatePresence mode="wait">
+          <AnimatePresence >
             <motion.button
               key={"cta-" + activeIdx}
               className="self-start relative flex items-center gap-2.5 px-6 md:px-8 py-3 rounded-full text-xs md:text-sm font-black tracking-[0.18em] uppercase overflow-hidden group"

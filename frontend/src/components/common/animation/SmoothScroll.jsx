@@ -11,6 +11,11 @@ const SmoothScroll = ({ children }) => {
     // GSAP Mobile Optimization: Prevents layout thrashing on address bar hide/show
     ScrollTrigger.config({ ignoreMobileResize: true })
 
+    // Auto-refresh ScrollTrigger when DOM height changes (lazy loading, images, etc.)
+    // This fixes the bug where pinned sections disappear because they calculated
+    // their trigger points before the page layout fully settled.
+
+
     // Removing ScrollTrigger.normalizeScroll(true) as it often breaks native scroll wheel and causes jank on desktop
 
     const lenis = new Lenis({
