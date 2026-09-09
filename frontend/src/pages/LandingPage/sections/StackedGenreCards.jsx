@@ -186,15 +186,13 @@ export default function StackedGenreCards() {
           scrollTrigger: {
             trigger: containerRef.current,
             start: "top top",
-            end: `+=${genres.length * 100}%`, // Scroll duration
-            scrub: 1,
+            end: `+=${genres.length * 100}%`,
+            scrub: true, // true = direct sync with no artificial lag/delay
             pin: true,
           },
         })
 
-        // Calculate the total distance to move
-        // We move the slider container to the left by (100% - viewport width)
-        const paddingRight = 24 // Accounts for px-6
+        const paddingRight = 24
         tl.to(sliderRef.current, {
           x: () => -(sliderRef.current.scrollWidth - window.innerWidth + paddingRight),
           ease: "none",
@@ -209,7 +207,7 @@ export default function StackedGenreCards() {
   return (
     <section
       ref={containerRef}
-      className="relative w-full min-h-screen bg-[#050505] flex flex-col items-start md:items-center md:justify-center z-20 py-16 md:py-12 overflow-hidden"
+      className="relative w-full min-h-screen bg-[#050505] flex flex-col items-start md:items-center md:justify-center z-20 pt-32 pb-16 md:py-24 overflow-hidden"
     >
       <div className="w-full flex flex-col items-center z-30 mb-8 md:mb-10 px-4 md:px-0">
         <h2 className="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 tracking-tighter mb-2 text-center leading-none">
@@ -219,13 +217,13 @@ export default function StackedGenreCards() {
 
       <div
         ref={sliderRef}
-        className="relative flex flex-row md:block w-max md:w-full max-w-none md:max-w-5xl md:h-[75vh] gap-6 md:gap-0 px-6 md:px-0 mt-0 self-start md:self-auto"
+        className="relative flex flex-row md:block w-full md:w-full max-w-none md:max-w-5xl md:h-[75vh] gap-6 md:gap-0 px-6 md:px-0 mt-0 self-start md:self-auto will-change-transform"
       >
         {genres.map((genre, i) => (
           <div
             key={i}
             ref={(el) => (cardsRef.current[i] = el)}
-            className="shrink-0 w-[80vw] md:w-full relative md:absolute md:top-0 left-0 h-[65vh] md:h-full rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl flex items-center justify-center border border-white/10 origin-top"
+            className="shrink-0 w-[85vw] md:w-full relative md:absolute md:top-0 left-0 h-[65vh] md:h-full rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl flex items-center justify-center border border-white/10 origin-top"
             style={{ zIndex: i }}
           >
             {/* Background Image */}

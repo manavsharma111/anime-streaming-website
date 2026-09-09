@@ -11,8 +11,8 @@ const FeaturesBentoGrid = lazy(() => import("./sections/FeaturesBentoGrid"))
 const FeaturedShowcase = lazy(() => import("./sections/FeaturedShowcase"))
 const WatchAnywhere = lazy(() => import("./sections/WatchAnywhere"))
 const CinematicTrailer = lazy(() => import("./sections/CinematicTrailer"))
-import HoverRoster from "./sections/HoverRoster"
-import StackedGenreCards from "./sections/StackedGenreCards"
+const HoverRoster = lazy(() => import("./sections/HoverRoster"))
+const StackedGenreCards = lazy(() => import("./sections/StackedGenreCards"))
 const UserReviews = lazy(() => import("./sections/UserReviews"))
 const FAQAccordion = lazy(() => import("./sections/FAQAccordion"))
 const FreeCTA = lazy(() => import("./sections/FreeCTA"))
@@ -75,12 +75,8 @@ export default function LandingPage() {
         <FeaturedShowcase animeList={topAiring.slice(5, 8)} loading={loading} />
         <WatchAnywhere />
         <CinematicTrailer />
-      </Suspense>
-
-      <HoverRoster animeList={topAiring} loading={loading} />
-      <StackedGenreCards />
-
-      <Suspense fallback={<div className="h-[50vh] w-full bg-[#050505]" />}>
+        <HoverRoster animeList={topAiring} loading={loading} />
+        <StackedGenreCards />
         <UserReviews />
         <FAQAccordion />
         <FreeCTA />

@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform } from "framer-motion"
 import { Link } from "react-router-dom"
 import { Play, Compass, Info } from "lucide-react"
 import gsap from "gsap"
+import { optimizeImage } from "../../../utils/optimizeImage"
 
 export default function CinematicHero() {
   const containerRef = useRef(null)
@@ -50,8 +51,9 @@ export default function CinematicHero() {
 
         {/* Collage/Background (Your Name official art for cinematic feel) */}
         <img
-          src="https://image.tmdb.org/t/p/original/1czz0r7urqCPP0CZTAEkCk4TZY1.jpg"
+          src={optimizeImage("https://image.tmdb.org/t/p/original/1czz0r7urqCPP0CZTAEkCk4TZY1.jpg", 1920, 80)}
           alt="Hero Background"
+          fetchPriority="high"
           className="w-full h-full object-cover scale-[1.15] filter brightness-75"
         />
 

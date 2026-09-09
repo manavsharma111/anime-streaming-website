@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import { motion } from "framer-motion"
 import { Star, PlayCircle } from "lucide-react"
+import { optimizeImage } from "../../../utils/optimizeImage"
 
 const fallbackAnime = [
   {
@@ -83,11 +84,13 @@ export default function TrendingThisWeek({ animeList = [], loading }) {
                   flex: isActive ? 8 : 1,
                 }}
                 transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
-                className="relative overflow-hidden rounded-3xl cursor-pointer border border-white/10 group min-h-[80px]"
+                className="relative overflow-hidden rounded-3xl border border-white/10 group min-h-[80px]"
               >
                 <img
-                  src={anime.img}
+                  src={optimizeImage(anime.img, 800, 80)}
                   alt={anime.title}
+                  loading={index === 0 ? "eager" : "lazy"}
+                  fetchPriority={index === 0 ? "high" : "auto"}
                   className="absolute inset-0 w-full h-full object-cover"
                 />
 
@@ -124,7 +127,7 @@ export default function TrendingThisWeek({ animeList = [], loading }) {
                   transition={{ duration: 0.4, delay: isActive ? 0.2 : 0 }}
                   className="absolute inset-0 p-6 md:p-10 flex flex-col justify-end pointer-events-none"
                 >
-                  <div className="flex items-center gap-2 mb-4 bg-black/60 w-max px-3 py-1.5 rounded-full backdrop-blur-md border border-white/20">
+                  <div className="flex items-center gap-2 mb-4 bg-black/60 w-max px-3 py-1.5 rounded-full border border-white/20">
                     <Star
                       size={14}
                       className="text-yellow-500 fill-yellow-500"
@@ -139,10 +142,10 @@ export default function TrendingThisWeek({ animeList = [], loading }) {
                   </h3>
 
                   <div className="flex items-center gap-3 text-sm font-bold text-neutral-200">
-                    <span className="bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-md border border-white/10 uppercase tracking-wide">
+                    <span className="bg-white/20 px-3 py-1.5 rounded-full border border-white/10 uppercase tracking-wide">
                       {anime.genre}
                     </span>
-                    <span className="bg-black/40 px-3 py-1.5 rounded-full backdrop-blur-md uppercase tracking-wide">
+                    <span className="bg-black/40 px-3 py-1.5 rounded-full uppercase tracking-wide">
                       {anime.ep} Episodes
                     </span>
                   </div>

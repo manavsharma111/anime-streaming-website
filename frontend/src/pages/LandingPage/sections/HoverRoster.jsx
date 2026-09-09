@@ -9,6 +9,7 @@ import {
 } from "framer-motion"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { optimizeImage } from "../../../utils/optimizeImage"
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -117,7 +118,8 @@ export default function HoverRoster({ animeList = [], loading }) {
   const shineY = useTransform(mouseY, [0, 1], [0, 100])
   const shine = useMotionTemplate`radial-gradient(circle 300px at ${shineX}% ${shineY}%, rgba(255,255,255,0.06), transparent 65%)`
 
-  usePreload(roster.map((r) => r.img))
+  // Removed aggressive main-thread blocking preloading to restore LCP performance.
+  // The browser will lazy-load optimized WebP images efficiently.
 
   // ── GSAP pin, NO snap — snap conflicted with Lenis causing items to skip.
   // onUpdate reads Lenis-smoothed scroll (via lenis.on("scroll",ScrollTrigger.update)
@@ -178,9 +180,11 @@ export default function HoverRoster({ animeList = [], loading }) {
           transition={{ duration: 1.4 }}
         >
           <img
-            src={cur.img}
+            src={optimizeImage(cur.img, 1080, 70)}
             alt=""
             aria-hidden
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover scale-110 blur-xl md:blur-[90px] brightness-[0.2] md:brightness-[0.12] saturate-150 md:saturate-200"
             style={{
               willChange: "opacity",
@@ -249,8 +253,10 @@ export default function HoverRoster({ animeList = [], loading }) {
                 transition={{ duration: 0.85, ease: [0.76, 0, 0.24, 1] }}
               >
                 <img
-                  src={cur.img}
+                  src={optimizeImage(cur.img, 1080, 80)}
                   alt={cur.title}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover"
                   style={{ willChange: "transform" }}
                 />
