@@ -29,8 +29,8 @@ export default function CinematicTrailer() {
         >
           {/* Authentic High-Quality Anime Aesthetic - Fallback for mobile and iframe for desktop */}
           <div className="absolute inset-0 w-full h-full block md:hidden">
-            <img 
-              src="https://media1.tenor.com/m/bm-59zifr-oAAAAd/reze-chainsaw-man-reze.gif" 
+            <img
+              src="https://media1.tenor.com/m/bm-59zifr-oAAAAd/reze-chainsaw-man-reze.gif"
               alt="Anime Action"
               className="w-full h-full object-cover brightness-[0.6]"
             />

@@ -332,7 +332,7 @@ export default function HoverRoster({ animeList = [], loading }) {
 
           {/* Ghost index */}
           {/* <div className="relative h-12 md:h-20 overflow-hidden pointer-events-none select-none"> */}
-            <div className="relative h-24 md:h-32 pointer-events-none select-none">
+          <div className="relative h-24 md:h-32 pointer-events-none select-none">
             <AnimatePresence mode="wait">
               <motion.span
                 key={"idx-" + activeIdx}

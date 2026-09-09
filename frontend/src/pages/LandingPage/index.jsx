@@ -51,7 +51,7 @@ export default function LandingPage() {
 
       <CinematicHero />
       <TrendingThisWeek animeList={topAiring.slice(0, 5)} loading={loading} />
-      
+
       <Suspense fallback={<div className="h-screen w-full bg-[#050505]" />}>
         <PopularCategories />
         <FeaturesBentoGrid />

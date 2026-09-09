@@ -68,7 +68,7 @@ Use this verified statement on your resume:
 | **Success Rate** | **100.00%** |
 
 > [!IMPORTANT]
-> **Takeaway:** Absolutely phenomenal results for a Node.js backend. Even when bombarded with **363 requests per second** and scaling up to **1,000 concurrent Virtual Users**, the server processed nearly **150,000 requests** without dropping a single one (100% Success Rate). The event-driven non-blocking architecture proved its scalability.
+> **Takeaway:** Absolutely phenomenal results for a Node.js backend. Even when bombarded with **480 requests per second** and scaling up to **1,000 concurrent Virtual Users**, the server processed nearly **187,000 requests** without dropping a single one (100% Success Rate). The event-driven non-blocking architecture proved its scalability.
 
 ## 📝 Updated Suggested Resume Bullet Point
 Use this highly impressive, verified statement on your resume:
