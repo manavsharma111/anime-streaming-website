@@ -9,7 +9,8 @@ export const optimizeImage = (url, width = 1280, quality = 80) => {
     url.includes("wallpapercave.com") ||
     url.includes("wallpaperaccess.com") ||
     url.includes("comicbook.com") ||
-    url.includes("otakupt.com")
+    url.includes("otakupt.com") ||
+    url.includes("tmdb.org")
   ) {
     return url;
   }
