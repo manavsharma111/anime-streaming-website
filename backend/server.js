@@ -9,29 +9,31 @@ const compression = require("compression")
 // Load env vars
 dotenv.config()
 
-// Connect to database
-connectDB().catch((err) =>
-  console.error("DB Connection Failed on startup:", err),
-)
+// Connect to database and then initialize services
+connectDB()
+  .then(() => {
+    // Start the background worker for video processing
+    try {
+      require("./services/worker")
+    } catch (err) {
+      console.warn("[Server] Worker could not be started:", err.message)
+    }
 
-// Start the background worker for video processing
-try {
-  require("./services/worker")
-} catch (err) {
-  console.warn("[Server] Worker could not be started:", err.message)
-}
+    // Initialize cron jobs (Auto-Sync Anime)
+    try {
+      const { initCronJobs } = require("./services/cronService")
+      initCronJobs()
 
-// Initialize cron jobs (Auto-Sync Anime)
-try {
-  const { initCronJobs } = require("./services/cronService")
-  initCronJobs()
-
-  // Initialize Subscription Expiration Cron
-  const initSubscriptionCron = require("./cron/subscriptionCron")
-  initSubscriptionCron()
-} catch (err) {
-  console.warn("[Server] Cron jobs could not be started:", err.message)
-}
+      // Initialize Subscription Expiration Cron
+      const initSubscriptionCron = require("./cron/subscriptionCron")
+      initSubscriptionCron()
+    } catch (err) {
+      console.warn("[Server] Cron jobs could not be started:", err.message)
+    }
+  })
+  .catch((err) =>
+    console.error("DB Connection Failed on startup:", err),
+  )
 
 const app = express()
 
@@ -85,6 +87,9 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use(compression())
+
+// Trust proxy (needed for Render/Heroku with express-rate-limit)
+app.set("trust proxy", 1)
 
 // rate Limiter
 const rateLimit = require("express-rate-limit")
