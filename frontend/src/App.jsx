@@ -138,9 +138,11 @@ export default function App() {
                 <Route
                   path="/watch/:episodeId"
                   element={
-                    <PageTransition>
-                      <Watch />
-                    </PageTransition>
+                    <ProtectedRoute>
+                      <PageTransition>
+                        <Watch />
+                      </PageTransition>
+                    </ProtectedRoute>
                   }
                 />
                 <Route
