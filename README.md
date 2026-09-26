@@ -1,128 +1,209 @@
 <div align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=timeGradient&height=200&section=header&text=Anime%20Streaming%20Platform&fontSize=50&animation=fadeIn&fontAlignY=38&desc=A%20Next-Gen%20Anime%20Platform%20Built%20with%20MERN&descAlignY=55&descAlign=50" />
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=f33767,9333ea&height=220&section=header&text=Adaptive%20Bitrate%20HLS%20Streaming&fontSize=42&animation=fadeIn&fontAlignY=38&desc=A%20Next-Gen%20Premium%20Anime%20Streaming%20Platform%20Built%20with%20MERN&descAlignY=56&descAlign=50&fontColor=ffffff" />
 </div>
 
 <div align="center">
-  <a href="#features">Features</a> •
-  <a href="#architecture">Architecture</a> •
-  <a href="#tech-stack">Tech Stack</a> •
-  <a href="#backend-overview">Backend</a> •
-  <a href="#frontend--state-management">Frontend</a>
+
+[![Live Demo](https://img.shields.io/badge/🚀%20Live%20Demo-anime--streaming--website--seven.vercel.app-f33767?style=for-the-badge)](https://anime-streaming-website-seven.vercel.app)
+[![GitHub](https://img.shields.io/badge/GitHub-manavsharma111-181717?style=for-the-badge&logo=github)](https://github.com/manavsharma111/anime-streaming-website)
+
+</div>
+
+<div align="center">
+  <a href="#-overview">Overview</a> •
+  <a href="#-features">Features</a> •
+  <a href="#-tech-stack">Tech Stack</a> •
+  <a href="#-backend-architecture">Backend</a> •
+  <a href="#-redux-state-management">Frontend</a> •
+  <a href="#-getting-started">Setup</a>
 </div>
 
 <br/>
 
+---
+
 ## 🚀 Overview
 
-Welcome to the **Next-Generation Anime Streaming Platform with Adaptive HLS Playback**, a highly scalable, full-stack web application designed to deliver a seamless and premium anime viewing experience. Built with modern web technologies, this platform features an ultra-fast HLS video player, an intelligent bulk episode fetcher, real-time transcoding queues, and a stunning glassmorphism user interface.
+**Adaptive Bitrate HLS Streaming Platform** is a highly scalable, full-stack **premium anime streaming platform** with a complete monetization system. Built from scratch with modern web technologies, it features:
 
-Whether you're streaming via third-party providers or encoding raw `.mp4`/`.mkv` files locally into adaptive bitrates (1080p, 720p, 480p), this platform is engineered for high performance and minimal latency.
+- ⚡ Ultra-fast **adaptive HLS video streaming** (1080p / 720p / 480p)
+- 💳 Full **Razorpay payment gateway** integration with subscription tiers
+- 🤖 **Intelligent bulk episode fetcher** using `@consumet/extensions`
+- 🔴 **Real-time transcoding queues** via BullMQ + Socket.io
+- 🎨 Stunning **glassmorphism dark UI** with cinematic landing page
+- 🔒 **Protected routes** — watch access requires authentication
 
 ---
 
-## 🌟 Comprehensive Feature List
+## 🌟 Features
 
 ### 🔐 Authentication & Security
 
-- **Google OAuth2 SSO**: Implemented native OAuth2 flow via Google APIs without heavy libraries like Passport.js.
-- **JWT Token Strategy**: Highly secure stateless authentication using **Access Tokens (15m)** and **Refresh Tokens (7 days)**.
-- **Secure Cookie Storage**: Tokens are stored in `httpOnly`, `secure`, and `sameSite: strict` cookies to prevent XSS and CSRF attacks.
-- **Role-Based Access Control (RBAC)**: Custom middleware to differentiate between `user` and `admin` permissions. Auto-admin assignment based on secure `.env` variables.
-
-### 🎥 Adaptive Video Processing (Backend Pipeline)
-
-- **Local Encode Engine**: Upload raw `.mp4` / `.mkv` files via **Multer** and transcode them into HLS (`.m3u8`) adaptive bitrates (1080p, 720p, 480p) using **Fluent-FFmpeg**.
-- **Intelligent Audio & Subtitle Mapping**: Explicitly maps all embedded audio tracks (e.g., dual-audio English/Japanese) and soft-subs so they are perfectly preserved in the final HLS stream.
-- **Optimized MP4 Compression**: Utilizes Constant Rate Factor (CRF) for generating highly compressed, high-quality MP4s for direct user downloads.
-- **Message Queues (BullMQ & Redis)**: Background transcoding is fully decoupled from the main thread using Redis-backed queues to prevent server blocking.
-- **Real-Time Progress Tracking**: Emits live encoding metrics to the Admin Dashboard via **Socket.io**.
-- **Cloud Object Storage**: Automatically uploads processed video chunks to **Cloudflare R2 / AWS S3** via `@aws-sdk/client-s3`.
-
-### ⚡ Dual-Mode Episode Management
-
-- **Bulk Link Fetcher**: Integrates `@consumet/extensions` directly into the backend to instantly scrape streaming sources and skip-times.
-- **Manual Uploads**: Allows admins to upload custom episodes and track their encoding status.
-
-### 🧑‍💻 User Experience & Personalization
-
-- **Watch History & Resumption**: Tracks user watch timestamps precisely so they can resume episodes seamlessly across devices.
-- **Favorites & Wishlist**: Users can manage a personalized watchlist of their favorite anime.
-- **Reviews & Ratings**: Interactive review system for users to rate and comment on anime.
-- **In-App Notifications**: Real-time notification system (mark as read, delete) for users.
-- **Profile Customization**: Users can update their avatars and usernames.
-
-### 🎨 Premium Frontend UI/UX
-
-- **Adaptive HLS Player**: Custom React video player using `hls.js` with quality selection, playback speed controls, and auto-skip.
-- **Immersive Design**: Built with **TailwindCSS** featuring glassmorphism, sleek dark mode, and vibrant gradients.
-- **Fluid Animations**: Scroll-based micro-animations powered by **Framer Motion** & **GSAP**.
-- **Smooth Scrolling**: Implemented **Lenis** for a butter-smooth scroll experience.
-- **Intelligent State Management**: Uses **Redux Toolkit** (Slices & Thunks) to manage complex global states (Auth, Catalog, Player).
-- **Admin Dashboard**: Comprehensive control panel featuring analytics (via **Recharts**), server resource tracking, and queue monitoring.
+- **Google OAuth2 SSO** — Native OAuth2 flow via Google APIs (no Passport.js).
+- **JWT Token Strategy** — Stateless auth using **Access Tokens (15m)** + **Refresh Tokens (7 days)**.
+- **Secure Cookie Storage** — Tokens stored in `httpOnly`, `secure`, `sameSite: strict` cookies.
+- **Role-Based Access Control (RBAC)** — Differentiates `user` and `admin` with custom middleware.
+- **Protected Watch Routes** — Unauthenticated users are redirected away from the video player.
+- **Profile Customization** — Users can update their username and upload a custom avatar.
 
 ---
 
-## 🛠️ Tech Stack & Libraries
+### 💳 Monetization & Subscriptions
 
-### **Frontend**
+- **Razorpay Payment Gateway** — End-to-end integration with **HMAC SHA256 signature verification** to prevent fraudulent activations.
+- **Subscription Tiers** — Multiple plans (e.g., Super Saiyan, Mastered Ultra) with different perks:
+  - Max video resolution unlocked (480p → 720p → 1080p)
+  - Offline download access
+  - Priority server routing
+- **Pricing Page** — Beautiful, animated plan comparison page with Razorpay checkout flow.
+- **Auto Status Management** — Subscriptions are automatically tracked and expired via scheduled cron jobs.
+- **Automated Cron Jobs** — Daily midnight job (`node-cron`) checks for subscriptions expiring in 3 days and auto-updates statuses.
+- **Email Notifications** — Nodemailer sends expiration reminders and purchase confirmations to users.
+- **Admin Revenue Dashboard** — View total active subscriptions, total revenue, and filter/sort users by status and days remaining.
 
-- **React 18** (Vite) - Core framework for fast rendering.
-- **Redux Toolkit** - Centralized state management for users, anime catalogs, and watch history.
-- **TailwindCSS** - Utility-first styling for a beautiful, responsive layout.
-- **HLS.js** - For parsing and streaming `.m3u8` video playlists.
-- **React Router DOM** - For seamless SPA navigation.
-- **Lucide React** - Clean and modern SVG iconography.
-- **Axios** - For robust HTTP requests.
-- **Socket.io-client** - Real-time websocket connection for dashboard analytics and encode progress.
+---
 
-### **Backend**
+### 🎥 Adaptive Video Processing (Backend Pipeline)
 
-- **Node.js & Express.js** - High-performance server environment.
-- **MongoDB (Mongoose)** - NoSQL database for flexible data modeling (Anime, Episodes, Users).
-- **Redis & BullMQ** - Robust background job queue for processing heavy FFmpeg tasks.
-- **Fluent-FFmpeg** - A Node.js wrapper around FFmpeg to transcode videos into multi-bitrate HLS segments.
-- **@aws-sdk/client-s3** - For uploading video chunks to Cloudflare R2 object storage.
-- **@consumet/extensions** - Native web-scraping library for bulk fetching episode links directly on the backend.
-- **Socket.io** - Real-time bi-directional communication.
+- **Local Encode Engine** — Upload raw `.mp4` / `.mkv` via **Multer** and transcode to HLS using **Fluent-FFmpeg**.
+- **Multi-Bitrate Output** — Generates 1080p, 720p, 480p renditions with a master `.m3u8` playlist.
+- **Intelligent Audio & Subtitle Mapping** — Preserves all embedded audio tracks (dual-audio Japanese/English) and soft-subs.
+- **Optimized MP4 Compression** — CRF-based compression for high-quality downloads.
+- **Message Queues (BullMQ & Redis)** — Transcoding decoupled from main thread to prevent server blocking.
+- **Real-Time Progress Tracking** — Live encoding metrics pushed to Admin Dashboard via **Socket.io**.
+- **Cloud Object Storage** — Processed HLS chunks uploaded to **Cloudflare R2 / AWS S3**.
+
+---
+
+### ⚡ Dual-Mode Episode Management
+
+- **Bulk Link Fetcher** — Integrates `@consumet/extensions` to instantly scrape streaming sources + skip-times.
+- **Manual Uploads** — Admins can upload custom episodes and track encoding status in real-time.
+- **Admin Catalog** — Full CRUD for anime: create, edit, delete series and episodes.
+- **Upload Queue** — Real-time BullMQ queue panel showing job progress, success, and failures.
+
+---
+
+### 🧑‍💻 User Experience & Personalization
+
+- **Watch History & Resumption** — Precise per-episode timestamp tracking; resumes exactly where left off.
+- **Favorites & Wishlist** — Personalized watchlist management.
+- **Reviews & Ratings** — Star rating + comment system with replies.
+- **In-App Notifications** — Real-time Socket.io notifications (mark read, delete).
+- **Surprise Me** — Random anime/episode picker.
+- **Auto-Next & Auto-Skip** — Automatically plays next episode and skips OP/ED segments.
+
+---
+
+### 🎨 Premium Frontend UI/UX
+
+- **Custom HLS Video Player** — Built from scratch using `hls.js` with quality selector, speed controls, PiP, fullscreen, and keyboard shortcuts.
+- **Cinematic Landing Page** — Eye-catching hero with parallax scrolling, animated typography, horizontal lookbook, and GSAP effects.
+- **Glassmorphism Dark Mode** — Sleek UI with gradients, frosted glass panels, and vibrant accents.
+- **Fluid Animations** — Scroll-based micro-animations via **Framer Motion** & **GSAP**.
+- **Smooth Scrolling** — **Lenis** for butter-smooth inertia scrolling.
+- **Custom Cursor** — Premium interactive custom cursor animation.
+- **Responsive Design** — Fully mobile-optimized: bottom-sheet mobile menus, responsive tables, adaptive layouts.
+- **Admin Dashboard** — Analytics (Recharts), queue monitoring, and full user + subscription management panel.
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+
+| Library | Purpose |
+|---|---|
+| **React 18** (Vite) | Core UI framework |
+| **Redux Toolkit** | Global state (Auth, Anime, History, Subscriptions) |
+| **TailwindCSS** | Utility-first responsive styling |
+| **Framer Motion** | Page transitions & micro-animations |
+| **GSAP** | Scroll-based cinematic animations |
+| **HLS.js** | `.m3u8` adaptive video playback |
+| **React Router DOM** | Client-side SPA routing with protected routes |
+| **Axios** | HTTP client with interceptors |
+| **Socket.io-client** | Real-time notifications & encoding progress |
+| **Lenis** | Smooth scroll library |
+| **Recharts** | Analytics charts in Admin Dashboard |
+| **Lucide React** | Modern SVG icon set |
+
+### Backend
+
+| Library | Purpose |
+|---|---|
+| **Node.js & Express.js** | REST API server |
+| **MongoDB (Mongoose)** | Primary NoSQL database |
+| **Redis & BullMQ** | Background job queues |
+| **Fluent-FFmpeg** | Video transcoding to HLS |
+| **@aws-sdk/client-s3** | Cloudflare R2 / S3 object storage |
+| **@consumet/extensions** | Anime source scraping |
+| **Socket.io** | Real-time bi-directional events |
+| **Razorpay SDK** | Payment processing & signature verification |
+| **Node-Cron** | Scheduled subscription expiry jobs |
+| **Nodemailer** | Transactional email delivery |
+| **Multer** | File & avatar upload middleware |
 
 ---
 
 ## ⚙️ Backend Architecture
 
-The backend is designed using an event-driven, queue-based architecture to handle heavy computational tasks (like video encoding) without slowing down the main API thread.
+The backend uses an **event-driven, queue-based architecture** separating heavy compute from API logic.
 
-1. **RESTful API**: Clean architecture separating Controllers, Services, and Routes.
-2. **Video Processing Pipeline**:
-   - When a user uploads a video via "Local Encode", the file is directly streamed to **Cloudflare R2** to bypass backend server storage limits.
-   - A job is added to **BullMQ** (backed by Redis).
-   - A background worker picks up the job. To prevent Out-Of-Memory (OOM) crashes on constrained servers (e.g., 512MB RAM), the worker dynamically downloads the raw video locally via memory-efficient streams.
-   - **FFmpeg** converts the video into 3 resolutions (1080p, 720p, 480p) and generates a master `.m3u8` playlist. CPU threads and muxing queues are strictly limited to prevent server saturation.
-   - Progress is emitted via **Socket.io** back to the admin frontend.
-   - Once completed, the HLS segments are streamed back to **Cloudflare R2** and local temp files are securely purged.
-3. **Automated Fetching**: Uses `@consumet/extensions` natively to bypass rate limits and fetch streaming sources directly from providers.
-4. **Authentication**: Secured using **JWT** (JSON Web Tokens) and **Bcrypt** for password hashing.
+```
+Client Request
+     │
+     ▼
+Express REST API (Controllers → Services → MongoDB)
+     │
+     ├── Video Upload → Cloudflare R2 (raw file)
+     │        └── BullMQ Job Added
+     │                 └── Worker picks up job
+     │                          └── FFmpeg encodes (1080p / 720p / 480p)
+     │                                   └── HLS chunks → Cloudflare R2
+     │                                            └── Socket.io Progress → Admin
+     │
+     ├── Payment → Razorpay Order → Frontend Checkout
+     │        └── Verify Signature → Activate Subscription in DB
+     │
+     └── Cron (Midnight) → Check expiring subs → Send Email → Update Status
+```
+
+### Key Design Decisions
+
+1. **Memory-Safe FFmpeg** — Videos are streamed to disk locally before FFmpeg to avoid `SIGSEGV` crashes on 512MB RAM servers.
+2. **Stateless Auth** — JWT in httpOnly cookies; no server-side sessions.
+3. **Payment Security** — Razorpay signatures verified server-side using HMAC SHA256 before any subscription activates.
+4. **Decoupled Workers** — BullMQ workers run as a separate process to prevent event loop blocking.
 
 ---
 
-## 🏆 Engineering Challenges Solved (Placement Highlights)
+## 🏆 Engineering Challenges Solved
 
-- **Handling Strict Memory Constraints**: Successfully ran heavy FFmpeg HLS encoding on a **512MB RAM server**. Avoided HTTP streaming `SIGSEGV` memory leaks by implementing a "local-first" streaming download architecture before pushing to FFmpeg.
-- **HLS Keyframe Synchronization**: Resolved critical HLS segmenter crashes by strictly syncing `-g 48` and `-keyint_min 48` across all video resolutions, ensuring adaptive bitrate streaming switches perfectly without buffering.
-- **Audio Sample Rate Downmixing**: Fixed AAC encoder `NaN` crashes by natively downmixing unpredictable MKV audio (FLAC/TrueHD) to a standardized 48kHz stereo format.
-- **Asynchronous Task Queues**: Built a scalable system where long-running encoding tasks run in the background (BullMQ) so the main Node.js event loop is never blocked, keeping the website ultra-fast for other users.
+| Challenge | Solution |
+|---|---|
+| FFmpeg crashing on 512MB RAM server | "Local-first" download stream before encoding to avoid OOM |
+| HLS keyframe sync crashes | Strict `-g 48 -keyint_min 48` across all resolutions |
+| AAC NaN crash on MKV files | Downmix FLAC/TrueHD to 48kHz stereo before encoding |
+| Razorpay payment fraud prevention | Server-side HMAC SHA256 signature verification |
+| Mobile table layout overflow | `min-w-0` + `overflow-x-auto` flex containment fix |
+| Mongoose silently dropping avatar data | Added missing `avatar` field to User schema |
 
 ---
 
-## 🧠 Frontend & State Management (Redux)
+## 🧠 Redux State Management
 
-The frontend is structured to be highly maintainable. **Redux Toolkit** is utilized to handle complex global state effortlessly.
+```
+store/
+├── authSlice         → User session, JWT, roles, notifications
+├── animeSlice        → Catalog, search results, trending
+├── episodeSlice      → Active episode, skip times, source URLs
+├── historySlice      → Watch timestamps, resume positions
+├── wishlistSlice     → User saved anime list
+├── reviewSlice       → Reviews & ratings
+└── subscriptionSlice → Subscription plans & loading state
+```
 
-- **`authSlice`**: Manages user sessions, JWT tokens, and role-based access (Admin vs User).
-- **`animeSlice`**: Caches the main anime catalog, search results, and trending lists to reduce unnecessary API calls.
-- **`episodeSlice`**: Manages the currently playing episode data, skip times (Intro/Outro), and source URLs.
-- **`historySlice`**: Tracks user watch history and timestamps to resume playback exactly where they left off.
-
-Each slice is paired with dedicated Redux Thunks or RTK Query for asynchronous API communication.
+Each slice uses **Redux Thunks** for async API calls with proper `pending / fulfilled / rejected` states.
 
 ---
 
@@ -130,68 +211,76 @@ Each slice is paired with dedicated Redux Thunks or RTK Query for asynchronous A
 
 ### Prerequisites
 
-- Node.js (v18+)
+- Node.js v18+
 - MongoDB instance
-- Redis Server (Running locally or via Docker)
-- FFmpeg installed on your machine/server
+- Redis Server
+- FFmpeg installed
+- Razorpay account (for payments)
 
 ### Installation
 
-1. **Clone the repository**
-
+1. **Clone the repo**
    ```bash
-   git clone https://github.com/your-username/anime-platform.git
-   cd anime-platform
+   git clone https://github.com/manavsharma111/anime-streaming-website.git
+   cd anime-streaming-website
    ```
 
-2. **Install Backend Dependencies**
-
+2. **Install Backend**
    ```bash
-   cd backend
-   npm install
+   cd backend && npm install
    ```
 
-3. **Install Frontend Dependencies**
-
+3. **Install Frontend**
    ```bash
-   cd ../frontend
-   npm install
+   cd ../frontend && npm install
    ```
 
-4. **Environment Variables**
-   Create a `.env` file in the `backend` directory:
-
+4. **Environment Variables** — Create `backend/.env`:
    ```env
    PORT=4000
    MONGO_URI=your_mongodb_uri
    REDIS_HOST=127.0.0.1
    REDIS_PORT=6379
    JWT_SECRET=your_super_secret_key
-   R2_ENDPOINT=your_cloudflare_r2_endpoint
+   REFRESH_TOKEN_SECRET=your_refresh_secret
+
+   # Google OAuth
+   GOOGLE_CLIENT_ID=your_google_client_id
+   GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+   # Cloudflare R2 / S3
+   R2_ENDPOINT=your_r2_endpoint
    R2_ACCESS_KEY_ID=your_access_key
    R2_SECRET_ACCESS_KEY=your_secret_key
    R2_BUCKET_NAME=your_bucket_name
+
+   # Razorpay
+   RAZORPAY_KEY_ID=your_razorpay_key_id
+   RAZORPAY_KEY_SECRET=your_razorpay_secret
+
+   # Email (Gmail App Password)
+   EMAIL_USER=your_email@gmail.com
+   EMAIL_PASS=your_app_password
+
+   # URLs
+   FRONTEND_URL=http://localhost:5173
+   SERVER_URL=http://localhost:4000
    ```
 
-5. **Run the Application**
-   Open two terminals:
-
-   _Terminal 1 (Backend)_
+5. **Run the App**
 
    ```bash
-   cd backend
-   npm run dev
-   ```
+   # Terminal 1 — Backend
+   cd backend && npm run dev
 
-   _Terminal 2 (Frontend)_
-
-   ```bash
-   cd frontend
-   npm run dev
+   # Terminal 2 — Frontend
+   cd frontend && npm run dev
    ```
 
 ---
 
 <div align="center">
-  <i>Built with ❤️ for Anime Lovers</i>
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=f33767,9333ea&height=120&section=footer" />
+  <br/>
+  <i>Built with ❤️ for Anime Lovers by <a href="https://github.com/manavsharma111">Manav Sharma</a></i>
 </div>
