@@ -70,6 +70,7 @@ const getAnimes = async (req, res, next) => {
       .sort(sortOption)
       .skip(skip)
       .limit(limitNumber)
+      .lean()
     let total = await Anime.countDocuments(query)
 
     // Proxy MAL search results if a search query is present
@@ -162,7 +163,7 @@ const getAnimeDetails = async (req, res, next) => {
     let anime = null
 
     if (mongoose.Types.ObjectId.isValid(req.params.id)) {
-      anime = await Anime.findById(req.params.id).populate("episodes")
+      anime = await Anime.findById(req.params.id).populate("episodes").lean()
     }
 
     if (!anime) {
@@ -206,6 +207,7 @@ const getAnimeDetails = async (req, res, next) => {
     const recommendedAnimes = await Anime.find(findQuery)
       .sort({ rating: -1 })
       .limit(10)
+      .lean()
 
     res.status(200).json({
       success: true,
@@ -288,7 +290,7 @@ const incrementViews = async (req, res, next) => {
       }
     }
 
-    const episode = await Episode.findById(episodeId)
+    const episode = await Episode.findById(episodeId).select("+viewers")
     if (!episode) return res.status(404).json({ message: "Episode not found" })
 
     // Check if the identifier has already viewed the episode
@@ -298,7 +300,7 @@ const incrementViews = async (req, res, next) => {
       await episode.save()
 
       // Update Anime as well
-      const anime = await Anime.findById(episode.anime)
+      const anime = await Anime.findById(episode.anime).select("+viewers")
       if (anime) {
         if (!anime.viewers.includes(identifier)) {
           anime.viewers.push(identifier)
@@ -375,6 +377,7 @@ const getSmartRecommendations = async (req, res, next) => {
       })
         .sort({ rating: -1 })
         .limit(10)
+        .lean()
     }
 
     res.status(200).json({

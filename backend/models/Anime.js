@@ -5,6 +5,7 @@ const animeSchema = new mongoose.Schema(
     title: {
       type: String,
       required: true,
+      index: true,
     },
     description: {
       type: String,
@@ -13,11 +14,13 @@ const animeSchema = new mongoose.Schema(
     year: {
       type: Number,
       required: true,
+      index: true,
     },
     rating: {
       // This is MAL rating
       type: Number,
       required: true,
+      index: true,
     },
     platformRating: {
       // This is User platform rating
@@ -43,11 +46,13 @@ const animeSchema = new mongoose.Schema(
     genres: {
       type: [String],
       required: true,
+      index: true,
     },
     status: {
       type: String,
       enum: ["ongoing", "completed"],
       default: "ongoing",
+      index: true,
     },
     episodes: [
       {
@@ -62,10 +67,12 @@ const animeSchema = new mongoose.Schema(
     views: {
       type: Number,
       default: 0,
+      index: true,
     },
     viewers: {
       type: [String],
       default: [],
+      select: false, // Don't fetch the heavy viewers array by default
     },
   },
   {

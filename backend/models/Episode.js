@@ -112,10 +112,12 @@ const episodeSchema = new mongoose.Schema(
     views: {
       type: Number,
       default: 0,
+      index: true,
     },
     viewers: {
       type: [String],
       default: [],
+      select: false,
     },
   },
   {
