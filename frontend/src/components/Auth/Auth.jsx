@@ -32,12 +32,12 @@ export default function AuthDropdown() {
             />
           ) : (
             <div className="w-11 h-11 rounded-full bg-[#2a2a2a] flex items-center justify-center text-white font-black text-lg">
-              {user.name ? user.name.charAt(0).toUpperCase() : "U"}
+              {user.username ? user.username.charAt(0).toUpperCase() : "U"}
             </div>
           )}
           <div className="flex flex-col overflow-hidden">
             <h3 className="text-white font-bold text-[15px] truncate leading-tight mb-0.5">
-              {user.name || "User"}
+              {user.role === "admin" ? "Admin" : user.username || "User"}
             </h3>
             <p className="text-[11px] text-neutral-400 truncate">
               {user.email}
