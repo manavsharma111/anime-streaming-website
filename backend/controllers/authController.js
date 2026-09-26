@@ -230,7 +230,7 @@ const updateProfile = async (req, res) => {
     // If a file was uploaded, use its URL, otherwise fallback to the provided URL string
     if (req.file) {
       const serverUrl =
-        process.env.SERVER_URL || `http://localhost:${process.env.PORT || 4000}`
+        process.env.SERVER_URL || `${req.protocol}://${req.get("host")}`
       user.avatar = `${serverUrl}/uploads/avatars/${req.file.filename}`
     } else if (avatar) {
       user.avatar = avatar
