@@ -42,37 +42,41 @@ const worker = new Worker(
         const publicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL
         if (publicUrl) {
           const r2Url = `${publicUrl}/${inputPath}`
-          console.log(`[Worker] Downloading video locally from R2 to save memory: ${r2Url}`)
-          
+          console.log(
+            `[Worker] Downloading video locally from R2 to save memory: ${r2Url}`,
+          )
+
           const axios = require("axios")
           const path = require("path")
-          
+
           // Create temp directory if it doesn't exist
           const tempDir = path.join(__dirname, "..", "uploads", "temp")
           if (!fs.existsSync(tempDir)) {
             fs.mkdirSync(tempDir, { recursive: true })
           }
-          
+
           tempFilePath = path.join(tempDir, `temp_${Date.now()}.mp4`)
-          
+
           const response = await axios({
             url: r2Url,
-            method: 'GET',
-            responseType: 'stream',
+            method: "GET",
+            responseType: "stream",
             timeout: 0, // No timeout for large video files
             maxRedirects: 5,
           })
-          
+
           const writer = fs.createWriteStream(tempFilePath)
           response.data.pipe(writer)
-          
+
           await new Promise((resolve, reject) => {
-            writer.on('finish', resolve)
-            writer.on('error', reject)
+            writer.on("finish", resolve)
+            writer.on("error", reject)
           })
-          
+
           finalInputPath = tempFilePath
-          console.log(`[Worker] Download complete. Processing local file: ${finalInputPath}`)
+          console.log(
+            `[Worker] Download complete. Processing local file: ${finalInputPath}`,
+          )
         }
       }
 
@@ -168,7 +172,9 @@ const worker = new Worker(
       }
 
       if (tempFilePath && fs.existsSync(tempFilePath)) {
-        console.log(`[Worker] Deleting temporary downloaded file: ${tempFilePath}`)
+        console.log(
+          `[Worker] Deleting temporary downloaded file: ${tempFilePath}`,
+        )
         fs.unlinkSync(tempFilePath)
       }
 
@@ -177,12 +183,14 @@ const worker = new Worker(
     } catch (error) {
       console.error(`[Worker] Job ${job.id} failed:`, error)
       await Episode.findByIdAndUpdate(episodeId, { status: "failed" })
-      
+
       if (tempFilePath && fs.existsSync(tempFilePath)) {
-        console.log(`[Worker] Deleting temporary downloaded file after error: ${tempFilePath}`)
+        console.log(
+          `[Worker] Deleting temporary downloaded file after error: ${tempFilePath}`,
+        )
         fs.unlinkSync(tempFilePath)
       }
-      
+
       throw error
     }
   },

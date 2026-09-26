@@ -37,7 +37,9 @@ export const fetchMalTrending = createAsyncThunk(
       const response = await animeService.getMalTrendingAnimes()
       return response
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Failed to fetch MAL trending")
+      return rejectWithValue(
+        error.response?.data || "Failed to fetch MAL trending",
+      )
     }
   },
 )
@@ -50,7 +52,9 @@ export const fetchSmartRecommendations = createAsyncThunk(
       const response = await animeService.getSmartRecommendations()
       return response
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Failed to fetch smart recommendations")
+      return rejectWithValue(
+        error.response?.data || "Failed to fetch smart recommendations",
+      )
     }
   },
 )

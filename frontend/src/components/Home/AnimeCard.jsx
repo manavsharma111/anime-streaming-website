@@ -1,10 +1,9 @@
-import {useState} from "react"
+import { useState } from "react"
 import { Link } from "react-router-dom"
 import { Play, Captions, Mic } from "lucide-react"
 import { getImageUrl } from "../../utils/image"
 import { motion } from "framer-motion"
 import AnimeHoverCard from "../AnimeHoverCard"
-
 
 const AnimeCard = ({ anime }) => {
   const [hoverPos, setHoverPos] = useState("right")

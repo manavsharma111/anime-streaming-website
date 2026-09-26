@@ -14,11 +14,11 @@ scenarios:
           capture:
             - json: "$.data[0]._id"
               as: "firstAnimeId"
-      
+
       # Step 2: User scrolls and loads popular animes
       - get:
           url: "/api/anime?limit=10&sort=popular"
-      
+
       # Step 3: User clicks on the first anime from the homepage to see details
       - get:
           url: "/api/anime/{{ firstAnimeId }}"

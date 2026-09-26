@@ -8,6 +8,7 @@ import {
   LogOut,
   Settings,
   Activity,
+  Users,
 } from "lucide-react"
 import { useDispatch } from "react-redux"
 import { logout } from "../../redux/slice/authSlice"
@@ -29,6 +30,7 @@ export default function AdminSidebar({
 
   const navItems = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
+    { id: "users", label: "Users & Subs", icon: Users },
     { id: "catalog", label: "Catalog", icon: Library },
     { id: "create", label: "Create Anime", icon: PlusCircle },
     { id: "upload", label: "Upload Episode", icon: UploadCloud },

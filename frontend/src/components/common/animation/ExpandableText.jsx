@@ -12,12 +12,12 @@ export default function ExpandableText({
 }) {
   const [isExpanded, setIsExpanded] = useState(false)
 
-  const cleanText = text 
+  const cleanText = text
     ? text
-        .replace(/<[^>]*>?/gm, '') // Strip HTML tags
-        .replace(/\(Source:.*?\)/gi, '') // Strip (Source: ...)
+        .replace(/<[^>]*>?/gm, "") // Strip HTML tags
+        .replace(/\(Source:.*?\)/gi, "") // Strip (Source: ...)
         .replace(/\[Written by MAL Rewrite\]/g, "")
-        .trim() 
+        .trim()
     : ""
 
   return (

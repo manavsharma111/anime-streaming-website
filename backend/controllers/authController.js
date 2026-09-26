@@ -1,4 +1,5 @@
 const User = require("../models/User")
+const Subscription = require("../models/Subscription")
 const jwt = require("jsonwebtoken")
 const bcrypt = require("bcryptjs")
 const dotenv = require("dotenv")
@@ -123,7 +124,7 @@ const googleCallback = async (req, res) => {
     })
 
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173"
-    
+
     // Read the original route from state
     let returnTo = req.query.state || "/home"
     if (user.role === "admin") {
@@ -138,6 +139,45 @@ const googleCallback = async (req, res) => {
 }
 
 // logout
+const devLogin = async (req, res) => {
+  if (process.env.NODE_ENV === "production") {
+    return res.status(403).json({ message: "Forbidden in production" })
+  }
+
+  try {
+    let user = await User.findOne()
+    if (!user) {
+      user = new User({
+        username: "Dev User",
+        email: "dev@example.com",
+        role: "admin", // Admin so they can test everything
+      })
+      await user.save()
+    }
+
+    const accessToken = generateAccessToken(user._id)
+    const refreshToken = generateRefreshToken(user._id)
+
+    res.cookie("token", accessToken, {
+      httpOnly: true,
+      secure: false, // Since it's local
+      sameSite: "strict",
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    })
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false, // Since it's local
+      sameSite: "strict",
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    })
+
+    res.status(200).json({ success: true, user })
+  } catch (error) {
+    res.status(500).json({ message: "Dev login failed" })
+  }
+}
+
 const logout = (req, res) => {
   const isProduction = process.env.NODE_ENV === "production"
   const cookieOptions = {
@@ -157,7 +197,18 @@ const getCurrentUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" })
     }
-    res.json({ success: true, data: user })
+
+    const activeSubscription = await Subscription.findOne({
+      userId: user._id,
+      status: "active",
+    }).populate("planId")
+
+    const userObject = user.toObject()
+    if (activeSubscription) {
+      userObject.subscription = activeSubscription
+    }
+
+    res.json({ success: true, data: userObject })
   } catch (error) {
     console.error("Get Current User Error:", error)
     res.status(500).json({ message: "Server Error" })
@@ -175,7 +226,15 @@ const updateProfile = async (req, res) => {
     }
 
     if (username) user.username = username
-    if (avatar) user.avatar = avatar
+
+    // If a file was uploaded, use its URL, otherwise fallback to the provided URL string
+    if (req.file) {
+      const serverUrl =
+        process.env.SERVER_URL || `http://localhost:${process.env.PORT || 4000}`
+      user.avatar = `${serverUrl}/uploads/avatars/${req.file.filename}`
+    } else if (avatar) {
+      user.avatar = avatar
+    }
 
     await user.save()
 
@@ -251,4 +310,5 @@ module.exports = {
   getNotifications,
   markNotificationRead,
   deleteNotification,
+  devLogin,
 }

@@ -29,6 +29,8 @@ export default function VideoPlayer({
   autoNext = true,
   onPlayNext,
   onEnded,
+  maxAllowedResolution = 480,
+  isAllowedDownloads = false,
 }) {
   const containerRef = useRef(null)
   const videoRef = useRef(null)
@@ -77,7 +79,7 @@ export default function VideoPlayer({
     changeQuality,
     changeAudioTrack,
     changeSubtitleTrack: changeHlsSubtitleTrack,
-  } = useHls(streamUrl, videoRef)
+  } = useHls(streamUrl, videoRef, maxAllowedResolution)
 
   // Custom Subtitle State for External VTTs
   const [extSubtitle, setExtSubtitle] = React.useState(-1)
@@ -245,6 +247,8 @@ export default function VideoPlayer({
     playbackSpeed,
     downloadQualities: episodeData?.downloadQualities,
     videoUrl: episodeData?.videoUrl,
+    isAllowedDownloads,
+    maxAllowedResolution,
     onQualityChange: changeQuality,
     onAudioChange: changeAudioTrack,
     onSubtitleChange: changeSubtitleTrack,
@@ -268,7 +272,7 @@ export default function VideoPlayer({
         "relative w-full bg-transparent group select-none player-container font-sans text-white shadow-2xl",
         isFullscreen ? "h-screen w-screen" : "aspect-video",
         !showControls && "hide-cursor",
-        subtitlePosition === "top" ? "subtitle-pos-top" : "subtitle-pos-bottom"
+        subtitlePosition === "top" ? "subtitle-pos-top" : "subtitle-pos-bottom",
       )}
     >
       {/* NATIVE VIDEO ELEMENT */}
@@ -290,7 +294,11 @@ export default function VideoPlayer({
           onEnded={handleVideoEnded}
           onClick={() => togglePlay(videoRef.current)}
           onDoubleClick={(e) => {
-            if (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) return
+            if (
+              window.matchMedia &&
+              window.matchMedia("(pointer: coarse)").matches
+            )
+              return
             toggleFullscreen()
           }}
           className="w-full h-full object-cover"

@@ -104,7 +104,9 @@ const wishlistSlice = createSlice({
     builder.addCase(updateWishlistStatus.fulfilled, (state, action) => {
       if (action.payload?.data) {
         const updatedItem = action.payload.data
-        const index = state.wishlist.findIndex(item => item._id === updatedItem._id)
+        const index = state.wishlist.findIndex(
+          (item) => item._id === updatedItem._id,
+        )
         if (index !== -1) {
           state.wishlist[index].status = updatedItem.status
         }

@@ -2,7 +2,7 @@ import React from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { logout } from "../../redux/slice/authSlice"
 import { Link } from "react-router-dom"
-import { LogOut, LayoutDashboard, User } from "lucide-react"
+import { LogOut, LayoutDashboard, User, Crown } from "lucide-react"
 
 export default function AuthDropdown() {
   const dispatch = useDispatch()
@@ -44,19 +44,29 @@ export default function AuthDropdown() {
             </p>
           </div>
         </div>
-        <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col gap-2">
           <Link
             to="/profile"
             onClick={() => document.dispatchEvent(new Event("click"))}
-            className="w-full py-3 px-4 bg-[#231216] hover:bg-[#2a151a] text-[#f33767] rounded-xl font-semibold transition-all active:scale-95 flex justify-center items-center gap-2.5"
+            className="w-full py-2.5 px-4 bg-[#231216] hover:bg-[#2a151a] text-[#f33767] rounded-xl font-semibold transition-all active:scale-95 flex justify-center items-center gap-2 whitespace-nowrap"
           >
             <User size={18} />
             My Profile
           </Link>
+
+          <Link
+            to="/pricing"
+            onClick={() => document.dispatchEvent(new Event("click"))}
+            className="w-full py-2.5 px-4 bg-gradient-to-r from-[#f33767] to-purple-600 hover:from-[#e02e5a] hover:to-purple-500 text-white rounded-xl font-bold transition-all active:scale-95 flex justify-center items-center gap-2 shadow-[0_0_15px_rgba(243,55,103,0.3)] whitespace-nowrap"
+          >
+            <Crown size={18} />
+            {user.isPremium ? "Manage Subscription" : "Get Premium"}
+          </Link>
+
           {user.role === "admin" && (
             <Link
               to="/admin"
-              className="w-full py-3 px-4 bg-[#231216] hover:bg-[#2a151a] text-red-500 rounded-xl font-semibold transition-all active:scale-95 flex justify-center items-center gap-2.5"
+              className="w-full py-2.5 px-4 bg-[#231216] hover:bg-[#2a151a] text-red-500 rounded-xl font-semibold transition-all active:scale-95 flex justify-center items-center gap-2 whitespace-nowrap"
             >
               <LayoutDashboard size={18} />
               Admin Dashboard
@@ -64,7 +74,7 @@ export default function AuthDropdown() {
           )}
           <button
             onClick={handleLogout}
-            className="w-full py-3 px-4 bg-[#1a1a1a] hover:bg-[#222222] text-[#f33767] rounded-xl font-semibold transition-all active:scale-95 flex justify-center items-center gap-2.5"
+            className="w-full py-2.5 px-4 bg-[#1a1a1a] hover:bg-[#222222] text-[#f33767] rounded-xl font-semibold transition-all active:scale-95 flex justify-center items-center gap-2 whitespace-nowrap"
           >
             <LogOut size={18} />
             Sign Out
@@ -114,6 +124,24 @@ export default function AuthDropdown() {
         </svg>
         Continue with Google
       </button>
+
+      {/* Local Development Fake Login Button */}
+      {import.meta.env.DEV && (
+        <button
+          onClick={async () => {
+            try {
+              const { default: api } = await import("../../services/api")
+              await api.post("/auth/dev-login")
+              window.location.reload()
+            } catch (error) {
+              console.error(error)
+            }
+          }}
+          className="w-full mt-3 py-3.5 px-4 bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white rounded-xl font-bold transition-transform active:scale-95 flex justify-center items-center gap-3 shadow-[0_0_20px_rgba(168,85,247,0.4)]"
+        >
+          🛠️ Dev Login (Local Only)
+        </button>
+      )}
     </div>
   )
 }

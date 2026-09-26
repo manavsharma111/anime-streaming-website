@@ -12,7 +12,7 @@ import {
   CartesianGrid,
   Legend,
   AreaChart,
-  Area
+  Area,
 } from "recharts"
 import {
   Tv,
@@ -24,7 +24,7 @@ import {
   Cpu,
   Database,
   Eye,
-  Calendar
+  Calendar,
 } from "lucide-react"
 import { motion } from "framer-motion"
 import axiosInstance from "../../services/api"
@@ -41,7 +41,7 @@ export default function AdminAnalytics({ animes }) {
       if (epRes.data.success) {
         setRecentEpisodes(epRes.data.data)
       }
-      
+
       const sysRes = await axiosInstance.get("/anime-admin/system-stats")
       if (sysRes.data.success) {
         setSystemStats(sysRes.data.data)
@@ -66,7 +66,7 @@ export default function AdminAnalytics({ animes }) {
     animes.forEach((anime) => {
       const epCount = anime.totalEpisodes || anime.episodes?.length || 0
       totalEpisodes += epCount
-      
+
       totalViews += anime.views || 0
       tvCount++
 
@@ -80,9 +80,12 @@ export default function AdminAnalytics({ animes }) {
     const topViewedAnimes = [...animes]
       .sort((a, b) => (b.views || 0) - (a.views || 0))
       .slice(0, 5)
-      .map(anime => ({
-        name: anime.title.length > 15 ? anime.title.substring(0, 15) + "..." : anime.title,
-        views: anime.views || 0
+      .map((anime) => ({
+        name:
+          anime.title.length > 15
+            ? anime.title.substring(0, 15) + "..."
+            : anime.title,
+        views: anime.views || 0,
       }))
 
     return {
@@ -96,11 +99,16 @@ export default function AdminAnalytics({ animes }) {
 
   const uploadTimeline = useMemo(() => {
     const dates = {}
-    recentEpisodes.forEach(ep => {
-      const date = new Date(ep.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+    recentEpisodes.forEach((ep) => {
+      const date = new Date(ep.createdAt).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      })
       dates[date] = (dates[date] || 0) + 1
     })
-    return Object.keys(dates).map(date => ({ date, uploads: dates[date] })).reverse()
+    return Object.keys(dates)
+      .map((date) => ({ date, uploads: dates[date] }))
+      .reverse()
   }, [recentEpisodes])
 
   const MetricCard = ({ title, value, icon: Icon, colorClass, delay }) => (
@@ -252,7 +260,6 @@ export default function AdminAnalytics({ animes }) {
 
         {/* Right side Advanced Charts */}
         <div className="lg:col-span-2 flex flex-col gap-6">
-          
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {/* Top 5 Viewed Animes */}
             <motion.div
@@ -272,17 +279,41 @@ export default function AdminAnalytics({ animes }) {
                       data={stats.topViewedAnimes}
                       margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                     >
-                      <XAxis dataKey="name" stroke="#737373" fontSize={10} tickLine={false} axisLine={false} />
-                      <YAxis stroke="#737373" fontSize={10} tickLine={false} axisLine={false} allowDecimals={false} />
+                      <XAxis
+                        dataKey="name"
+                        stroke="#737373"
+                        fontSize={10}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis
+                        stroke="#737373"
+                        fontSize={10}
+                        tickLine={false}
+                        axisLine={false}
+                        allowDecimals={false}
+                      />
                       <Tooltip
                         cursor={{ fill: "#ffffff05" }}
-                        contentStyle={{ backgroundColor: "#171717", border: "1px solid #262626", borderRadius: "12px", color: "#fff" }}
+                        contentStyle={{
+                          backgroundColor: "#171717",
+                          border: "1px solid #262626",
+                          borderRadius: "12px",
+                          color: "#fff",
+                        }}
                       />
-                      <Bar dataKey="views" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                      <Bar
+                        dataKey="views"
+                        fill="#3b82f6"
+                        radius={[4, 4, 0, 0]}
+                        maxBarSize={40}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="flex items-center justify-center h-full text-neutral-500">No data available</div>
+                  <div className="flex items-center justify-center h-full text-neutral-500">
+                    No data available
+                  </div>
                 )}
               </div>
             </motion.div>
@@ -306,21 +337,60 @@ export default function AdminAnalytics({ animes }) {
                       margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                     >
                       <defs>
-                        <linearGradient id="colorUploads" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+                        <linearGradient
+                          id="colorUploads"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="#f97316"
+                            stopOpacity={0.3}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="#f97316"
+                            stopOpacity={0}
+                          />
                         </linearGradient>
                       </defs>
-                      <XAxis dataKey="date" stroke="#737373" fontSize={10} tickLine={false} axisLine={false} />
-                      <YAxis stroke="#737373" fontSize={10} tickLine={false} axisLine={false} allowDecimals={false} />
-                      <Tooltip
-                        contentStyle={{ backgroundColor: "#171717", border: "1px solid #262626", borderRadius: "12px", color: "#fff" }}
+                      <XAxis
+                        dataKey="date"
+                        stroke="#737373"
+                        fontSize={10}
+                        tickLine={false}
+                        axisLine={false}
                       />
-                      <Area type="monotone" dataKey="uploads" stroke="#f97316" fillOpacity={1} fill="url(#colorUploads)" />
+                      <YAxis
+                        stroke="#737373"
+                        fontSize={10}
+                        tickLine={false}
+                        axisLine={false}
+                        allowDecimals={false}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "#171717",
+                          border: "1px solid #262626",
+                          borderRadius: "12px",
+                          color: "#fff",
+                        }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="uploads"
+                        stroke="#f97316"
+                        fillOpacity={1}
+                        fill="url(#colorUploads)"
+                      />
                     </AreaChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="flex items-center justify-center h-full text-neutral-500">No data available</div>
+                  <div className="flex items-center justify-center h-full text-neutral-500">
+                    No data available
+                  </div>
                 )}
               </div>
             </motion.div>
@@ -337,25 +407,47 @@ export default function AdminAnalytics({ animes }) {
               <Activity className="w-5 h-5 text-emerald-500" />
               System Benchmark
             </h3>
-            
+
             {systemStats ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mt-4">
                 {/* Memory Usage */}
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <p className="text-sm font-bold text-neutral-400 flex items-center gap-2">
-                      <Database className="w-4 h-4 text-emerald-500" /> RAM Usage
+                      <Database className="w-4 h-4 text-emerald-500" /> RAM
+                      Usage
                     </p>
                     <p className="text-xs font-mono text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-md">
-                      {Math.round(((systemStats.totalMem - systemStats.freeMem) / systemStats.totalMem) * 100)}%
+                      {Math.round(
+                        ((systemStats.totalMem - systemStats.freeMem) /
+                          systemStats.totalMem) *
+                          100,
+                      )}
+                      %
                     </p>
                   </div>
                   <div className="w-full bg-black/40 rounded-full h-3 mb-2 border border-white/5 p-0.5 relative overflow-hidden">
-                    <div className="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${((systemStats.totalMem - systemStats.freeMem) / systemStats.totalMem) * 100}%`}}></div>
+                    <div
+                      className="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full rounded-full transition-all duration-1000 ease-out"
+                      style={{
+                        width: `${((systemStats.totalMem - systemStats.freeMem) / systemStats.totalMem) * 100}%`,
+                      }}
+                    ></div>
                   </div>
                   <div className="flex justify-between text-xs font-mono text-neutral-500">
-                    <span>{((systemStats.totalMem - systemStats.freeMem) / 1024 / 1024 / 1024).toFixed(2)} GB Used</span>
-                    <span>{(systemStats.totalMem / 1024 / 1024 / 1024).toFixed(2)} GB Total</span>
+                    <span>
+                      {(
+                        (systemStats.totalMem - systemStats.freeMem) /
+                        1024 /
+                        1024 /
+                        1024
+                      ).toFixed(2)}{" "}
+                      GB Used
+                    </span>
+                    <span>
+                      {(systemStats.totalMem / 1024 / 1024 / 1024).toFixed(2)}{" "}
+                      GB Total
+                    </span>
                   </div>
                 </div>
 
@@ -370,19 +462,30 @@ export default function AdminAnalytics({ animes }) {
                     </p>
                   </div>
                   <div className="w-full bg-black/40 rounded-full h-3 mb-2 border border-white/5 p-0.5 relative overflow-hidden">
-                    <div className="bg-gradient-to-r from-purple-600 to-purple-400 h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${Math.min(100, (systemStats.loadAvg[0] / systemStats.cpuCount) * 100)}%`}}></div>
+                    <div
+                      className="bg-gradient-to-r from-purple-600 to-purple-400 h-full rounded-full transition-all duration-1000 ease-out"
+                      style={{
+                        width: `${Math.min(100, (systemStats.loadAvg[0] / systemStats.cpuCount) * 100)}%`,
+                      }}
+                    ></div>
                   </div>
                   <div className="flex justify-between text-xs font-mono text-neutral-500">
                     <span>{systemStats.loadAvg[0].toFixed(2)} (1m avg)</span>
-                    <span className="truncate max-w-[120px]" title={systemStats.cpuModel}>{systemStats.cpuModel}</span>
+                    <span
+                      className="truncate max-w-[120px]"
+                      title={systemStats.cpuModel}
+                    >
+                      {systemStats.cpuModel}
+                    </span>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="text-neutral-500 text-sm italic flex items-center justify-center h-full">Loading system metrics...</div>
+              <div className="text-neutral-500 text-sm italic flex items-center justify-center h-full">
+                Loading system metrics...
+              </div>
             )}
           </motion.div>
-
         </div>
       </div>
     </div>

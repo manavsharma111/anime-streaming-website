@@ -37,7 +37,7 @@ export default function CustomSelect({
       if (buttonRef.current) {
         const rect = buttonRef.current.getBoundingClientRect()
         const spaceBelow = window.innerHeight - rect.bottom
-        // If space below is less than 300px (approx dropdown height + navbar height) 
+        // If space below is less than 300px (approx dropdown height + navbar height)
         // and there's more space above than below, open upwards
         if (spaceBelow < 300 && rect.top > spaceBelow) {
           setDropdownPosition("top")
@@ -81,9 +81,17 @@ export default function CustomSelect({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: dropdownPosition === "top" ? 10 : -10, scale: 0.95 }}
+            initial={{
+              opacity: 0,
+              y: dropdownPosition === "top" ? 10 : -10,
+              scale: 0.95,
+            }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: dropdownPosition === "top" ? 10 : -10, scale: 0.95 }}
+            exit={{
+              opacity: 0,
+              y: dropdownPosition === "top" ? 10 : -10,
+              scale: 0.95,
+            }}
             transition={{ duration: 0.15, ease: "easeOut" }}
             className={`absolute z-[70] w-full bg-[#1a1721] border border-white/10 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto [&::-webkit-scrollbar]:hidden ${
               dropdownPosition === "top" ? "bottom-full mb-2" : "top-full mt-2"
@@ -142,4 +150,3 @@ export default function CustomSelect({
     </div>
   )
 }
-

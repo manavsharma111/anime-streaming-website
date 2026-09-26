@@ -1,6 +1,10 @@
 import React, { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { fetchAnimes, fetchMalTrending, fetchSmartRecommendations } from "../redux/slice/animeSlice"
+import {
+  fetchAnimes,
+  fetchMalTrending,
+  fetchSmartRecommendations,
+} from "../redux/slice/animeSlice"
 import HeroCarousel from "../components/Home/HeroCarousel"
 import QuickFilter from "../components/Home/QuickFilter"
 import TopAnime from "../components/Home/TopAnime"
@@ -13,7 +17,8 @@ import { useNavigate } from "react-router-dom"
 export default function Home() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { animeList, malTrendingList, smartRecommendations, isLoading } = useSelector((state) => state.anime)
+  const { animeList, malTrendingList, smartRecommendations, isLoading } =
+    useSelector((state) => state.anime)
   const { isAuthenticated } = useSelector((state) => state.auth)
 
   useEffect(() => {
@@ -34,9 +39,10 @@ export default function Home() {
   const liveData = malTrendingList?.length > 0 ? malTrendingList : animeList
   const trendingAnime = liveData?.slice(0, 8) || []
   const latestAnime = liveData?.slice(8, 15) || []
-  const recommendedAnime = (smartRecommendations && smartRecommendations.length > 0) 
-    ? smartRecommendations 
-    : (liveData?.slice(3, 11) || [])
+  const recommendedAnime =
+    smartRecommendations && smartRecommendations.length > 0
+      ? smartRecommendations
+      : liveData?.slice(3, 11) || []
 
   return (
     <div className="min-h-screen bg-[#050505] text-white pt-24 pb-20 overflow-x-hidden relative">
@@ -49,7 +55,9 @@ export default function Home() {
         <main className="flex-1 min-w-0 flex flex-col gap-10">
           {/* Hero Section */}
           <section className="mb-4">
-            <HeroCarousel animes={malTrendingList?.length > 0 ? malTrendingList : animeList} />
+            <HeroCarousel
+              animes={malTrendingList?.length > 0 ? malTrendingList : animeList}
+            />
           </section>
 
           {/* Continue Watching (Only shows if logged in with history) */}
@@ -99,9 +107,11 @@ export default function Home() {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                {(malTrendingList?.length > 0 ? malTrendingList : animeList)?.slice(0, 5).map((anime) => (
-                  <AnimeListCard key={anime._id} anime={anime} />
-                ))}
+                {(malTrendingList?.length > 0 ? malTrendingList : animeList)
+                  ?.slice(0, 5)
+                  .map((anime) => (
+                    <AnimeListCard key={anime._id} anime={anime} />
+                  ))}
               </div>
             </div>
             {/* New Added */}
@@ -119,9 +129,11 @@ export default function Home() {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                {(malTrendingList?.length > 0 ? malTrendingList : animeList)?.slice(5, 10).map((anime) => (
-                  <AnimeListCard key={anime._id} anime={anime} />
-                ))}
+                {(malTrendingList?.length > 0 ? malTrendingList : animeList)
+                  ?.slice(5, 10)
+                  .map((anime) => (
+                    <AnimeListCard key={anime._id} anime={anime} />
+                  ))}
               </div>
             </div>
             {/* Just Completed */}
@@ -139,9 +151,11 @@ export default function Home() {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                {(malTrendingList?.length > 0 ? malTrendingList : animeList)?.slice(10, 15).map((anime) => (
-                  <AnimeListCard key={anime._id} anime={anime} />
-                ))}
+                {(malTrendingList?.length > 0 ? malTrendingList : animeList)
+                  ?.slice(10, 15)
+                  .map((anime) => (
+                    <AnimeListCard key={anime._id} anime={anime} />
+                  ))}
               </div>
             </div>
           </section>

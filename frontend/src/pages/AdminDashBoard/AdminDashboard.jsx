@@ -9,6 +9,7 @@ import AdminCatalog from "../../components/AdminDashBoard/AdminCatalog"
 import CreateAnime from "../../components/AdminDashBoard/CreateAnime"
 import AdminSidebar from "../../components/AdminDashBoard/AdminSidebar"
 import AdminQueue from "../../components/AdminDashBoard/AdminQueue"
+import AdminUsers from "../../components/AdminDashBoard/AdminUsers"
 import { motion, AnimatePresence } from "framer-motion"
 
 export default function AdminDashboard() {
@@ -16,7 +17,7 @@ export default function AdminDashboard() {
   const { animeList: animes, loading } = useSelector((state) => state.anime)
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTab = searchParams.get("tab") || "overview"
-  
+
   const setActiveTab = (tab) => {
     setSearchParams({ tab })
   }
@@ -35,6 +36,8 @@ export default function AdminDashboard() {
     switch (activeTab) {
       case "overview":
         return <AdminAnalytics animes={animes} />
+      case "users":
+        return <AdminUsers />
       case "catalog":
         return <AdminCatalog />
       case "create":
@@ -78,8 +81,8 @@ export default function AdminDashboard() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 md:ml-[260px] pt-[60px] md:pt-8 min-h-screen pb-[100px] md:pb-0">
-        <div className="p-4 md:p-8 max-w-[1600px] mx-auto w-full overflow-x-hidden">
+      <main className="flex-1 min-w-0 md:ml-[260px] pt-[60px] md:pt-8 min-h-screen pb-[100px] md:pb-0">
+        <div className="p-4 md:p-8 max-w-[1600px] mx-auto w-full min-w-0">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -87,6 +90,7 @@ export default function AdminDashboard() {
               animate={{ opacity: 1, filter: "blur(0px)" }}
               exit={{ opacity: 0, filter: "blur(10px)" }}
               transition={{ duration: 0.3 }}
+              className="w-full min-w-0"
             >
               {renderContent()}
             </motion.div>

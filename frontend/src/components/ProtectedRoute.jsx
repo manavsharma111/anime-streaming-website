@@ -3,7 +3,9 @@ import { Navigate } from "react-router-dom"
 import { useSelector } from "react-redux"
 
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
-  const { user, isAuthenticated, isLoading } = useSelector((state) => state.auth)
+  const { user, isAuthenticated, isLoading } = useSelector(
+    (state) => state.auth,
+  )
 
   if (isLoading) {
     return (

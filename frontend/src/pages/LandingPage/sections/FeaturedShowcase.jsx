@@ -160,7 +160,9 @@ export default function FeaturedShowcase({ animeList = [], loading }) {
             aria-label={`Go to slide ${i + 1}`}
             className="p-2 focus:outline-none"
           >
-            <div className={`h-2 rounded-full transition-all duration-500 ${i === active ? "w-12 bg-white" : "w-2 bg-white/30 hover:bg-white/50"}`} />
+            <div
+              className={`h-2 rounded-full transition-all duration-500 ${i === active ? "w-12 bg-white" : "w-2 bg-white/30 hover:bg-white/50"}`}
+            />
           </button>
         ))}
       </div>

@@ -146,8 +146,6 @@ export default function PlayerToolbar({
           </button>
         </div>
       </div>
-
-
     </div>
   )
 }

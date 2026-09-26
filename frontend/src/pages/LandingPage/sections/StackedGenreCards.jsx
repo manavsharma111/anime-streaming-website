@@ -140,11 +140,11 @@ export default function StackedGenreCards() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      let mm = gsap.matchMedia();
+      let mm = gsap.matchMedia()
 
       mm.add("(min-width: 768px)", () => {
-        if (!containerRef.current || !cardsRef.current.length) return;
-        
+        if (!containerRef.current || !cardsRef.current.length) return
+
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: containerRef.current,
@@ -178,10 +178,15 @@ export default function StackedGenreCards() {
             )
           }
         })
-      });
+      })
 
       mm.add("(max-width: 767px)", () => {
-        if (!containerRef.current || !sliderRef.current || !cardsRef.current.length) return;
+        if (
+          !containerRef.current ||
+          !sliderRef.current ||
+          !cardsRef.current.length
+        )
+          return
 
         // Horizontal scroll tied to vertical scroll for mobile
         gsap.set(cardsRef.current, { clearProps: "all" })
@@ -198,11 +203,11 @@ export default function StackedGenreCards() {
 
         const paddingRight = 24
         tl.to(sliderRef.current, {
-          x: () => -(sliderRef.current.scrollWidth - window.innerWidth + paddingRight),
+          x: () =>
+            -(sliderRef.current.scrollWidth - window.innerWidth + paddingRight),
           ease: "none",
         })
-      });
-
+      })
     }, containerRef)
 
     return () => ctx.revert()

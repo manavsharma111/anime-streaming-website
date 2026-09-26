@@ -55,7 +55,10 @@ export default function LandingPage() {
   }, [])
 
   return (
-    <div ref={containerRef} className="bg-[#050505] text-white min-h-screen selection:bg-red-500/30">
+    <div
+      ref={containerRef}
+      className="bg-[#050505] text-white min-h-screen selection:bg-red-500/30"
+    >
       <SmoothScroll />
       {/* Global Noise Overlay */}
       <div

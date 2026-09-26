@@ -2,7 +2,15 @@ import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { getWishlist } from "../../redux/slice/wishlistSlice"
 import AnimeCard from "../../components/Home/AnimeCard"
-import { Heart, Loader, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
+import {
+  Heart,
+  Loader,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react"
 import { Navigate } from "react-router-dom"
 
 export default function Wishlist() {
@@ -14,11 +22,11 @@ export default function Wishlist() {
   const [sortBy, setSortBy] = useState("newest")
   const [currentPage, setCurrentPage] = useState(1)
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false)
-  
+
   const itemsPerPage = 12
 
   const tabs = ["All", "Watching", "Completed", "Planning", "Paused", "Dropped"]
-  
+
   const sortOptions = [
     { value: "newest", label: "Recently Added" },
     { value: "oldest", label: "Oldest Added" },
@@ -37,9 +45,11 @@ export default function Wishlist() {
 
   // Filter and Sort
   let processedWishlist = [...(wishlist || [])]
-  
+
   if (activeTab !== "All") {
-    processedWishlist = processedWishlist.filter(item => item.status === activeTab)
+    processedWishlist = processedWishlist.filter(
+      (item) => item.status === activeTab,
+    )
   }
 
   processedWishlist.sort((a, b) => {
@@ -56,21 +66,21 @@ export default function Wishlist() {
   })
 
   const totalPages = Math.ceil(processedWishlist.length / itemsPerPage)
-  
+
   const getPageNumbers = () => {
     const pages = []
     const maxVisible = 5
-    
+
     if (totalPages <= maxVisible) {
       for (let i = 1; i <= totalPages; i++) pages.push(i)
     } else {
       let start = Math.max(1, currentPage - 2)
       let end = Math.min(totalPages, start + maxVisible - 1)
-      
+
       if (end - start < maxVisible - 1) {
         start = Math.max(1, end - maxVisible + 1)
       }
-      
+
       for (let i = start; i <= end; i++) pages.push(i)
     }
     return pages
@@ -84,7 +94,10 @@ export default function Wishlist() {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
-  const visibleWishlist = processedWishlist.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+  const visibleWishlist = processedWishlist.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  )
 
   return (
     <div className="min-h-screen bg-[#0e0b12] text-white pt-24 pb-32 md:pb-10 px-4 md:px-8 relative">
@@ -102,13 +115,16 @@ export default function Wishlist() {
         {/* Filters and Sort */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div className="flex flex-wrap gap-2">
-            {tabs.map(tab => (
+            {tabs.map((tab) => (
               <button
                 key={tab}
-                onClick={() => { setActiveTab(tab); setCurrentPage(1); }}
+                onClick={() => {
+                  setActiveTab(tab)
+                  setCurrentPage(1)
+                }}
                 className={`px-4 py-1.5 rounded-full text-sm font-bold outline-none border-none transition-colors ${
-                  activeTab === tab 
-                    ? "bg-[#f33767] text-white" 
+                  activeTab === tab
+                    ? "bg-[#f33767] text-white"
                     : "bg-white/5 text-neutral-400 hover:bg-white/10 hover:text-white"
                 }`}
               >
@@ -117,25 +133,32 @@ export default function Wishlist() {
             ))}
           </div>
           <div className="flex items-center gap-2 relative">
-            <span className="text-sm font-bold text-neutral-500 uppercase">Sort By:</span>
+            <span className="text-sm font-bold text-neutral-500 uppercase">
+              Sort By:
+            </span>
             <div className="relative">
               <button
                 onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
                 className="flex items-center justify-between gap-2 bg-[#1a1721] border border-white/10 hover:border-[#f33767] text-white text-sm rounded-lg py-2 px-3 outline-none min-w-[160px] transition-colors"
               >
-                <span>{sortOptions.find(o => o.value === sortBy)?.label}</span>
-                <ChevronDown size={16} className={`text-neutral-400 transition-transform ${isSortDropdownOpen ? "rotate-180" : ""}`} />
+                <span>
+                  {sortOptions.find((o) => o.value === sortBy)?.label}
+                </span>
+                <ChevronDown
+                  size={16}
+                  className={`text-neutral-400 transition-transform ${isSortDropdownOpen ? "rotate-180" : ""}`}
+                />
               </button>
-              
+
               {isSortDropdownOpen && (
                 <div className="absolute top-full right-0 mt-2 w-full bg-[#1a1721] border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50">
                   {sortOptions.map((option) => (
                     <button
                       key={option.value}
                       onClick={() => {
-                        setSortBy(option.value);
-                        setCurrentPage(1);
-                        setIsSortDropdownOpen(false);
+                        setSortBy(option.value)
+                        setCurrentPage(1)
+                        setIsSortDropdownOpen(false)
                       }}
                       className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
                         sortBy === option.value
@@ -208,7 +231,7 @@ export default function Wishlist() {
                 >
                   <ChevronRight size={18} />
                 </button>
-                
+
                 {/* Last Page */}
                 <button
                   disabled={currentPage >= totalPages}
@@ -225,8 +248,8 @@ export default function Wishlist() {
             <Heart size={64} className="text-neutral-600 mb-4" />
             <h2 className="text-2xl font-bold mb-2">No anime found here</h2>
             <p className="text-neutral-400 max-w-md">
-              {activeTab === "All" 
-                ? "Keep track of anime you want to watch by clicking the Add to List button on any anime page." 
+              {activeTab === "All"
+                ? "Keep track of anime you want to watch by clicking the Add to List button on any anime page."
                 : `You don't have any anime in the "${activeTab}" list.`}
             </p>
           </div>

@@ -25,7 +25,13 @@ export default function AnimeInfoBox({ anime }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   // Dropdown options
-  const listStatuses = ["Watching", "Completed", "Planning", "Paused", "Dropped"]
+  const listStatuses = [
+    "Watching",
+    "Completed",
+    "Planning",
+    "Paused",
+    "Dropped",
+  ]
   const currentStatus = wishlistItem?.status || "Add to List"
 
   const handleStatusChange = (status) => {
@@ -34,7 +40,7 @@ export default function AnimeInfoBox({ anime }) {
       toast.error("Please login to manage your list")
       return
     }
-    
+
     if (status === "Remove") {
       if (isInWishlist) {
         dispatch(deleteWishlist(wishlistItem._id))
@@ -101,7 +107,7 @@ export default function AnimeInfoBox({ anime }) {
             <h1 className="text-3xl font-black text-[#a67cff] leading-tight">
               {anime?.title}
             </h1>
-            
+
             {anime?.otherNames && anime.otherNames.length > 0 && (
               <p className="text-xs text-neutral-500 italic mt-0.5 mb-2 line-clamp-1">
                 {anime.otherNames.join(", ")}
@@ -165,17 +171,15 @@ export default function AnimeInfoBox({ anime }) {
               <div className="col-span-1 md:col-span-2 mt-1">
                 <span className="text-neutral-500 mr-2">Genres:</span>
                 <span className="text-[#a67cff]">
-                  {anime?.genres ? (
-                    [
-                      ...new Set(
-                        anime?.genres
-                          .flatMap((g) => g.split(","))
-                          .map((g) => g.trim()),
-                      ),
-                    ].join(", ")
-                  ) : (
-                    "Unknown"
-                  )}
+                  {anime?.genres
+                    ? [
+                        ...new Set(
+                          anime?.genres
+                            .flatMap((g) => g.split(","))
+                            .map((g) => g.trim()),
+                        ),
+                      ].join(", ")
+                    : "Unknown"}
                 </span>
               </div>
             </div>
@@ -186,9 +190,15 @@ export default function AnimeInfoBox({ anime }) {
                 <span className="text-neutral-500 mr-2">Scores:</span>
                 <span className="text-neutral-200">
                   {anime?.rating != null ? `${anime.rating} (MAL)` : ""}
-                  {anime?.rating != null && anime?.platformRating != null ? " • " : ""}
-                  {anime?.platformRating != null ? `${anime.platformRating} (Users)` : ""}
-                  {anime?.rating == null && anime?.platformRating == null && "N/A"}
+                  {anime?.rating != null && anime?.platformRating != null
+                    ? " • "
+                    : ""}
+                  {anime?.platformRating != null
+                    ? `${anime.platformRating} (Users)`
+                    : ""}
+                  {anime?.rating == null &&
+                    anime?.platformRating == null &&
+                    "N/A"}
                 </span>
               </div>
               <div>
@@ -219,7 +229,7 @@ export default function AnimeInfoBox({ anime }) {
             >
               <Play size={18} className="fill-current" /> Watch
             </button>
-            
+
             {/* List Status Dropdown */}
             <div className="relative">
               <button
@@ -230,10 +240,14 @@ export default function AnimeInfoBox({ anime }) {
                     : "bg-white/10 text-white hover:bg-white/20"
                 }`}
               >
-                {isInWishlist ? <Heart size={16} fill="white" /> : <Plus size={18} />}
+                {isInWishlist ? (
+                  <Heart size={16} fill="white" />
+                ) : (
+                  <Plus size={18} />
+                )}
                 {currentStatus}
               </button>
-              
+
               {isDropdownOpen && (
                 <div className="absolute top-full mt-2 left-0 w-full sm:w-48 bg-[#1a1721] border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50">
                   {listStatuses.map((status) => (
@@ -241,8 +255,8 @@ export default function AnimeInfoBox({ anime }) {
                       key={status}
                       onClick={() => handleStatusChange(status)}
                       className={`w-full text-left px-4 py-2 text-sm transition-colors ${
-                        currentStatus === status 
-                          ? "bg-white/10 text-[#f33767] font-bold" 
+                        currentStatus === status
+                          ? "bg-white/10 text-[#f33767] font-bold"
                           : "text-neutral-300 hover:bg-white/5 hover:text-white"
                       }`}
                     >

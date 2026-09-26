@@ -15,7 +15,6 @@ const SmoothScroll = ({ children }) => {
     // This fixes the bug where pinned sections disappear because they calculated
     // their trigger points before the page layout fully settled.
 
-
     // Removing ScrollTrigger.normalizeScroll(true) as it often breaks native scroll wheel and causes jank on desktop
 
     const lenis = new Lenis({

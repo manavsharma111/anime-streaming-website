@@ -10,7 +10,9 @@ export default function TopAnime() {
   const { animeList, malTrendingList } = useSelector((state) => state.anime)
 
   // Use real data, take top 10
-  const topAnimes = (malTrendingList?.length > 0 ? malTrendingList : animeList)?.slice(0, 10) || []
+  const topAnimes =
+    (malTrendingList?.length > 0 ? malTrendingList : animeList)?.slice(0, 10) ||
+    []
 
   return (
     <div className="bg-[#110e16] p-6 rounded-2xl border border-white/5 shadow-xl relative overflow-hidden">

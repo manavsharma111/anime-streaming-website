@@ -1,12 +1,41 @@
 const fs = require("fs")
 const path = require("path")
 const Episode = require("../models/Episode")
+const Subscription = require("../models/Subscription")
+const Plan = require("../models/Plan")
+
+// Helper function to get active plan
+const getActivePlan = async (userId) => {
+  if (!userId) return null
+  const sub = await Subscription.findOne({
+    userId,
+    status: "active",
+    endDate: { $gt: Date.now() },
+  }).populate("planId")
+  return sub ? sub.planId : null
+}
 
 // VIDEO STREAMING
 const streamEpisode = async (req, res, next) => {
   try {
     const episode = await Episode.findById(req.params.id)
     if (!episode) return res.status(404).json({ message: "Episode not found" })
+
+    // Check Premium Access
+    if (episode.isPremiumOnly) {
+      if (!req.user || !req.user.id) {
+        return res
+          .status(401)
+          .json({ message: "Please login to watch premium content" })
+      }
+      const activePlan = await getActivePlan(req.user.id)
+      if (!activePlan) {
+        return res.status(403).json({
+          message: "Premium subscription required to watch this episode",
+        })
+      }
+      // (Note: HLS resolution logic can be applied here later if needed)
+    }
 
     // Video file to local path
     const videoPath = path.resolve(__dirname, "..", episode.videoUrl)
@@ -59,6 +88,35 @@ const downloadEpisode = async (req, res, next) => {
     if (!episode) return res.status(404).json({ message: "Episode not found" })
 
     const quality = req.query.quality || "720p" // 720p by default
+
+    // Premium Download Checks
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "Please login to download" })
+    }
+
+    // Fetch active plan
+    const activePlan = await getActivePlan(req.user.id)
+    if (!activePlan) {
+      return res
+        .status(403)
+        .json({ message: "Premium subscription required to download" })
+    }
+
+    // Check if plan allows downloads
+    if (!activePlan.isAllowedDownloads) {
+      return res.status(403).json({
+        message:
+          "Your current plan does not support downloading. Please upgrade.",
+      })
+    }
+
+    // Restrict download quality based on maxResolution
+    const requestedRes = parseInt(quality.replace("p", ""))
+    if (activePlan.maxResolution < requestedRes) {
+      return res.status(403).json({
+        message: `Your plan only supports up to ${activePlan.maxResolution}p downloads.`,
+      })
+    }
 
     // Get the relative path for the requested quality from DB
     const downloadPathUrl =

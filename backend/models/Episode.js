@@ -15,6 +15,10 @@ const episodeSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    isPremiumOnly: {
+      type: Boolean,
+      default: false,
+    },
     // Streaming Tracks
     hlsMasterUrl: {
       type: String,

@@ -18,7 +18,7 @@ export default function Watch() {
   const dispatch = useDispatch()
 
   const { history } = useSelector((state) => state.history)
-  const { isAuthenticated } = useSelector((state) => state.auth)
+  const { isAuthenticated, user } = useSelector((state) => state.auth)
   const { animeList, isLoading, animeDetails } = useSelector(
     (state) => state.anime,
   )
@@ -176,6 +176,10 @@ export default function Watch() {
     (historyItem?.episode?._id || historyItem?.episode) === episode?._id
   const initialTime = isSameEpisode ? historyItem?.watchTime || 0 : 0
 
+  const maxAllowedResolution = user?.subscription?.planId?.maxResolution || 480
+  const isAllowedDownloads =
+    user?.subscription?.planId?.isAllowedDownloads || false
+
   const handleProgressSync = (seconds, duration) => {
     if (seconds > 5 && !hasTrackedView.current) {
       hasTrackedView.current = true
@@ -244,6 +248,8 @@ export default function Watch() {
                 autoNext={autoNext}
                 onPlayNext={handleNext}
                 onEnded={handleVideoEnded}
+                maxAllowedResolution={maxAllowedResolution}
+                isAllowedDownloads={isAllowedDownloads}
               />
             </div>
 
@@ -258,6 +264,7 @@ export default function Watch() {
               setAutoSkip={setAutoSkip}
               activeServer={activeServer}
               setActiveServer={setActiveServer}
+              isAllowedDownloads={isAllowedDownloads}
               handlePrev={handlePrev}
               handleNext={handleNext}
               currentIndex={currentIndex}

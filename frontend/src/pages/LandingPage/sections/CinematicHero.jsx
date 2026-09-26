@@ -51,7 +51,11 @@ export default function CinematicHero() {
 
         {/* Collage/Background (Your Name official art for cinematic feel) */}
         <img
-          src={optimizeImage("https://image.tmdb.org/t/p/original/1czz0r7urqCPP0CZTAEkCk4TZY1.jpg", 1920, 80)}
+          src={optimizeImage(
+            "https://image.tmdb.org/t/p/original/1czz0r7urqCPP0CZTAEkCk4TZY1.jpg",
+            1920,
+            80,
+          )}
           alt="Hero Background"
           fetchPriority="high"
           className="w-full h-full object-cover scale-[1.15] filter brightness-75"

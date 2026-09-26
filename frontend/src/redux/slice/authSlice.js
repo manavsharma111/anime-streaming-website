@@ -117,19 +117,35 @@ const authSlice = createSlice({
     // Notifications Cases
     builder.addCase(fetchNotifications.fulfilled, (state, action) => {
       state.notifications = action.payload
+      if (state.user) {
+        state.user.notifications = action.payload
+      }
     })
     builder.addCase(markNotificationReadAsync.fulfilled, (state, action) => {
-      const notification = state.notifications.find(
+      const notification = state.notifications?.find(
         (n) => n._id === action.payload,
       )
       if (notification) {
         notification.read = true
       }
+      if (state.user && state.user.notifications) {
+        const userNotif = state.user.notifications.find(
+          (n) => n._id === action.payload,
+        )
+        if (userNotif) userNotif.read = true
+      }
     })
     builder.addCase(deleteNotificationAsync.fulfilled, (state, action) => {
-      state.notifications = state.notifications.filter(
-        (n) => n._id !== action.payload,
-      )
+      if (state.notifications) {
+        state.notifications = state.notifications.filter(
+          (n) => n._id !== action.payload,
+        )
+      }
+      if (state.user && state.user.notifications) {
+        state.user.notifications = state.user.notifications.filter(
+          (n) => n._id !== action.payload,
+        )
+      }
     })
   },
 })

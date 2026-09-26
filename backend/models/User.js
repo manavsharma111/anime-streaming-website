@@ -14,6 +14,10 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
+    avatar: {
+      type: String,
+      default: "",
+    },
     role: {
       type: String,
       enum: ["user", "admin"],
@@ -47,6 +51,11 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
+    isPremium: {
+      type: Boolean,
+      default: false,
+    },
+
     notifications: [
       {
         message: String,

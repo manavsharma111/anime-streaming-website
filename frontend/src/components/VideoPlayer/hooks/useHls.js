@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import Hls from "hls.js"
 
-export const useHls = (streamUrl, videoRef) => {
+export const useHls = (streamUrl, videoRef, maxAllowedResolution = 480) => {
   const [qualities, setQualities] = useState([])
   const [audioTracks, setAudioTracks] = useState([])
   const [subtitleTracks, setSubtitleTracks] = useState([])
@@ -46,10 +46,22 @@ export const useHls = (streamUrl, videoRef) => {
         // Convert back to array, sort descending (1080p -> 720p -> etc)
         const levels = Object.values(uniqueLevels)
           .sort((a, b) => b.height - a.height)
+          .filter((level) => level.height <= maxAllowedResolution)
           .map((level) => ({
             id: level.originalIndex, // MUST use original index to tell HLS which level to switch to
             name: `${level.height}p`,
           }))
+
+        // Restrict auto level capping
+        let maxAllowedIndex = -1
+        hls.levels.forEach((l, index) => {
+          if (l.height <= maxAllowedResolution) {
+            maxAllowedIndex = Math.max(maxAllowedIndex, index)
+          }
+        })
+        if (maxAllowedIndex !== -1) {
+          hls.autoLevelCapping = maxAllowedIndex
+        }
 
         setQualities([{ id: -1, name: "Auto" }, ...levels])
 

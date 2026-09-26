@@ -152,7 +152,7 @@ const uploadEpisodeMeta = async (req, res, next) => {
         delay: scheduledAt
           ? Math.max(0, new Date(scheduledAt) - Date.now())
           : 0,
-        attempts: 2,              // retry once if it fails
+        attempts: 2, // retry once if it fails
         backoff: { type: "fixed", delay: 5000 },
       },
     )
@@ -245,7 +245,11 @@ const deleteEpisode = async (req, res, next) => {
 
     // Delete from Cloudflare R2
     try {
-      const { s3Client, ListObjectsV2Command, DeleteObjectCommand } = require("../config/s3")
+      const {
+        s3Client,
+        ListObjectsV2Command,
+        DeleteObjectCommand,
+      } = require("../config/s3")
       if (s3Client && process.env.CLOUDFLARE_R2_BUCKET) {
         const prefix = `uploads/processed/${episode._id.toString()}/`
         const listCmd = new ListObjectsV2Command({
@@ -254,14 +258,20 @@ const deleteEpisode = async (req, res, next) => {
         })
         const listedObjects = await s3Client.send(listCmd)
         if (listedObjects.Contents && listedObjects.Contents.length > 0) {
-          console.log(`[R2Delete] Found ${listedObjects.Contents.length} files to delete for episode ${episode._id}`)
+          console.log(
+            `[R2Delete] Found ${listedObjects.Contents.length} files to delete for episode ${episode._id}`,
+          )
           for (const obj of listedObjects.Contents) {
-            await s3Client.send(new DeleteObjectCommand({
-              Bucket: process.env.CLOUDFLARE_R2_BUCKET,
-              Key: obj.Key
-            }))
+            await s3Client.send(
+              new DeleteObjectCommand({
+                Bucket: process.env.CLOUDFLARE_R2_BUCKET,
+                Key: obj.Key,
+              }),
+            )
           }
-          console.log(`[R2Delete] Successfully deleted files for episode ${episode._id} from R2.`)
+          console.log(
+            `[R2Delete] Successfully deleted files for episode ${episode._id} from R2.`,
+          )
         }
       }
     } catch (r2Err) {
@@ -346,11 +356,17 @@ const nukeQueue = async (req, res, next) => {
 
     // 2. Force kill any running ffmpeg processes
     const { exec } = require("child_process")
-    exec("pkill -f ffmpeg || taskkill /IM ffmpeg.exe /F", (error, stdout, stderr) => {
-      console.log("Nuked FFmpeg processes:", stdout || stderr || "None found")
-    })
+    exec(
+      "pkill -f ffmpeg || taskkill /IM ffmpeg.exe /F",
+      (error, stdout, stderr) => {
+        console.log("Nuked FFmpeg processes:", stdout || stderr || "None found")
+      },
+    )
 
-    res.status(200).json({ success: true, message: "Queue nuked and processes killed successfully" })
+    res.status(200).json({
+      success: true,
+      message: "Queue nuked and processes killed successfully",
+    })
   } catch (err) {
     next(err)
   }
@@ -454,7 +470,10 @@ const bulkFetchEpisodes = async (req, res, next) => {
           }
         }
       `
-      const alRes = await axios.post("https://graphql.anilist.co", { query: alQuery, variables: { search: title } })
+      const alRes = await axios.post("https://graphql.anilist.co", {
+        query: alQuery,
+        variables: { search: title },
+      })
       if (alRes.data && alRes.data.data && alRes.data.data.Media) {
         malId = alRes.data.data.Media.idMal
       }

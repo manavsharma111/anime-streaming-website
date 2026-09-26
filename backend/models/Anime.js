@@ -14,13 +14,19 @@ const animeSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    rating: { // This is MAL rating
+    rating: {
+      // This is MAL rating
       type: Number,
       required: true,
     },
-    platformRating: { // This is User platform rating
+    platformRating: {
+      // This is User platform rating
       type: Number,
       default: 0,
+    },
+    isPremiumOnly: {
+      type: Boolean,
+      default: false,
     },
     thumbnail: {
       type: String,

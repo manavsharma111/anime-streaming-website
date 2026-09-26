@@ -5,19 +5,22 @@ const CustomCursor = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [hoveredElement, setHoveredElement] = useState(null)
   const [isOverPlayer, setIsOverPlayer] = useState(false)
-  
+
   // Detect if it's a touch device or mobile
   const [isTouchDevice, setIsTouchDevice] = useState(false)
-  
+
   useEffect(() => {
-    if (window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768) {
+    if (
+      window.matchMedia("(pointer: coarse)").matches ||
+      window.innerWidth < 768
+    ) {
       setIsTouchDevice(true)
     } else {
-      document.body.classList.add('hide-cursor')
+      document.body.classList.add("hide-cursor")
     }
-    
+
     return () => {
-      document.body.classList.remove('hide-cursor')
+      document.body.classList.remove("hide-cursor")
     }
   }, [])
 
@@ -27,9 +30,9 @@ const CustomCursor = () => {
         x: e.clientX,
         y: e.clientY,
       })
-      
+
       // Hide custom cursor when hovering over the video player
-      if (e.target.closest('.player-container')) {
+      if (e.target.closest(".player-container")) {
         setIsOverPlayer(true)
       } else {
         setIsOverPlayer(false)
@@ -37,31 +40,46 @@ const CustomCursor = () => {
     }
 
     const handleMouseOver = (e) => {
-      const target = e.target.closest(
-        'a, button, [role="button"], input, textarea, select, .cursor-pointer'
+      let target = e.target.closest(
+        'button, [role="button"], input, textarea, select',
       )
+      // Exclude navbar elements
+      if (target && target.closest("nav")) {
+        target = null
+      }
+
       if (target) {
         setHoveredElement(target)
       }
     }
 
     const handleMouseOut = (e) => {
-      const target = e.target.closest(
-        'a, button, [role="button"], input, textarea, select, .cursor-pointer'
+      let target = e.target.closest(
+        'button, [role="button"], input, textarea, select',
       )
+      if (target && target.closest("nav")) {
+        target = null
+      }
+
       if (target) {
         setHoveredElement(null)
       }
     }
-    
+
+    const handleScroll = () => {
+      setHoveredElement(null)
+    }
+
     window.addEventListener("mousemove", updateMousePosition)
     window.addEventListener("mouseover", handleMouseOver)
     window.addEventListener("mouseout", handleMouseOut)
+    window.addEventListener("scroll", handleScroll, { passive: true })
 
     return () => {
       window.removeEventListener("mousemove", updateMousePosition)
       window.removeEventListener("mouseover", handleMouseOver)
       window.removeEventListener("mouseout", handleMouseOut)
+      window.removeEventListener("scroll", handleScroll)
     }
   }, [hoveredElement])
 
@@ -77,7 +95,7 @@ const CustomCursor = () => {
       y: rect.top - padding / 2,
       width: rect.width + padding,
       height: rect.height + padding,
-      borderRadius: radius === "0px" ? "8px" : radius, 
+      borderRadius: radius === "0px" ? "8px" : radius,
     }
   }
 
@@ -90,23 +108,25 @@ const CustomCursor = () => {
       width: 32,
       height: 32,
       borderRadius: "50%",
-      backgroundColor: "rgba(243, 55, 103, 0)",
-      border: "1px solid rgba(243, 55, 103, 1)",
+      backgroundColor: "rgba(168, 85, 247, 0)",
+      border: "1px solid rgba(168, 85, 247, 1)",
       opacity: isOverPlayer ? 0 : 1,
     },
-    hover: hoverConfig ? {
-      x: hoverConfig.x,
-      y: hoverConfig.y,
-      width: hoverConfig.width,
-      height: hoverConfig.height,
-      borderRadius: hoverConfig.borderRadius,
-      backgroundColor: "rgba(243, 55, 103, 0.15)",
-      border: "1px solid rgba(243, 55, 103, 0.5)",
-      opacity: isOverPlayer ? 0 : 1,
-    } : {},
-  };
+    hover: hoverConfig
+      ? {
+          x: hoverConfig.x,
+          y: hoverConfig.y,
+          width: hoverConfig.width,
+          height: hoverConfig.height,
+          borderRadius: hoverConfig.borderRadius,
+          backgroundColor: "rgba(168, 85, 247, 0.15)",
+          border: "1px solid rgba(168, 85, 247, 0.5)",
+          opacity: isOverPlayer ? 0 : 1,
+        }
+      : {},
+  }
 
-  if (isTouchDevice) return null;
+  if (isTouchDevice) return null
 
   return (
     <>
@@ -119,7 +139,7 @@ const CustomCursor = () => {
       />
       {/* Dot Cursor */}
       <motion.div
-        className="fixed top-0 left-0 w-1.5 h-1.5 bg-[#f33767] rounded-full pointer-events-none z-[999999] hidden md:block"
+        className="fixed top-0 left-0 w-1.5 h-1.5 bg-[#a855f7] rounded-full pointer-events-none z-[999999] hidden md:block"
         animate={{
           x: mousePosition.x - 3,
           y: mousePosition.y - 3,

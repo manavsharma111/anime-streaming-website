@@ -30,7 +30,9 @@ export default function AnimeDetails() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
-  const { animeDetails, animeRecommendations, isLoading, error } = useSelector((state) => state.anime)
+  const { animeDetails, animeRecommendations, isLoading, error } = useSelector(
+    (state) => state.anime,
+  )
   const { reviews } = useSelector((state) => state.review)
 
   useEffect(() => {
@@ -62,41 +64,50 @@ export default function AnimeDetails() {
             trailer { id site }
           }
         }
-      `;
+      `
       fetch("https://graphql.anilist.co", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json",
+          Accept: "application/json",
         },
-        body: JSON.stringify({ query, variables: { search: animeDetails.title } })
+        body: JSON.stringify({
+          query,
+          variables: { search: animeDetails.title },
+        }),
       })
         .then((res) => res.json())
         .then((data) => {
           if (data.data && data.data.Media) {
-            const alAnime = data.data.Media;
-            if (!getYoutubeId(animeDetails.trailerUrl) && alAnime.trailer?.site === "youtube" && alAnime.trailer?.id) {
-              setDynamicTrailerId(alAnime.trailer.id);
+            const alAnime = data.data.Media
+            if (
+              !getYoutubeId(animeDetails.trailerUrl) &&
+              alAnime.trailer?.site === "youtube" &&
+              alAnime.trailer?.id
+            ) {
+              setDynamicTrailerId(alAnime.trailer.id)
             }
             if (alAnime.bannerImage) {
-              setMalBanner(alAnime.bannerImage);
+              setMalBanner(alAnime.bannerImage)
             }
           }
         })
-        .catch((err) => console.error("Failed to fetch Anilist data", err));
+        .catch((err) => console.error("Failed to fetch Anilist data", err))
     }
-  }, [animeDetails]);
+  }, [animeDetails])
 
-  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
-  const trailerId = animeDetails ? (getYoutubeId(animeDetails.trailerUrl) || dynamicTrailerId) : null;
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false)
+  const trailerId = animeDetails
+    ? getYoutubeId(animeDetails.trailerUrl) || dynamicTrailerId
+    : null
 
   useEffect(() => {
     if (trailerId) {
-      setIsVideoLoaded(false);
-      const timer = setTimeout(() => setIsVideoLoaded(true), 3000);
-      return () => clearTimeout(timer);
+      setIsVideoLoaded(false)
+      const timer = setTimeout(() => setIsVideoLoaded(true), 3000)
+      return () => clearTimeout(timer)
     }
-  }, [trailerId]);
+  }, [trailerId])
 
   if (isLoading || !animeDetails) {
     return (

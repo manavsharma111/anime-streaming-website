@@ -13,6 +13,7 @@ const dirs = {
   cover: path.join(baseDir, "covers"),
   subtitles: path.join(baseDir, "subtitles"),
   audios: path.join(baseDir, "audios"),
+  avatarFile: path.join(baseDir, "avatars"),
 }
 Object.values(dirs).forEach((dir) => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })

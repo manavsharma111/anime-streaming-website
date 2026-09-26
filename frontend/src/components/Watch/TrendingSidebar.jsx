@@ -19,9 +19,14 @@ export default function TrendingSidebar() {
           throw new Error("Empty trending data")
         }
       } catch (error) {
-        console.error("Failed to fetch live trending, falling back to local DB", error)
+        console.error(
+          "Failed to fetch live trending, falling back to local DB",
+          error,
+        )
         try {
-          const fallbackRes = await axiosInstance.get("/anime?sort=-rating&limit=8")
+          const fallbackRes = await axiosInstance.get(
+            "/anime?sort=-rating&limit=8",
+          )
           if (fallbackRes.data.success) {
             setTrending(fallbackRes.data.data.slice(0, 8))
           }

@@ -23,7 +23,9 @@ const authMiddleware = async (req, res, next) => {
         const user = await User.findById(decodedRefresh.id)
 
         if (!user) {
-          return res.status(401).json({ message: "Unauthorized: User not found" })
+          return res
+            .status(401)
+            .json({ message: "Unauthorized: User not found" })
         }
 
         const newToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {

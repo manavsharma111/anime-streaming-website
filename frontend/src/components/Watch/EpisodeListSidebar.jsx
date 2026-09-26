@@ -1,5 +1,14 @@
 import React, { useState } from "react"
-import { Search, ChevronDown, ChevronLeft, ChevronRight, Hash, Mic, List, LayoutGrid } from "lucide-react"
+import {
+  Search,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Hash,
+  Mic,
+  List,
+  LayoutGrid,
+} from "lucide-react"
 
 export default function EpisodeListSidebar({
   searchEpisode,
@@ -8,15 +17,14 @@ export default function EpisodeListSidebar({
   episode,
   handleSelectEpisode,
 }) {
-  const [viewMode, setViewMode] = useState("list"); // 'list' | 'grid'
+  const [viewMode, setViewMode] = useState("list") // 'list' | 'grid'
 
   return (
     <aside className="w-full flex flex-col xl:sticky xl:top-[100px] h-[600px] xl:h-[calc(100vh-140px)] bg-[#13151a] p-4 rounded-xl border border-white/5 font-sans">
-      
       {/* Header Area */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold text-white tracking-wide">Episodes</h2>
-        
+
         <div className="flex items-center gap-2">
           {/* Search Input */}
           <div className="flex items-center bg-[#1f222b] rounded-md px-2 py-1.5 h-8 w-24">
@@ -37,11 +45,17 @@ export default function EpisodeListSidebar({
           </div>
 
           {/* Toggle List/Grid */}
-          <button 
-            onClick={() => setViewMode(prev => prev === "list" ? "grid" : "list")}
+          <button
+            onClick={() =>
+              setViewMode((prev) => (prev === "list" ? "grid" : "list"))
+            }
             className="flex items-center justify-center bg-[#1f222b] hover:bg-white/10 rounded-md h-8 w-8 text-neutral-400 transition-colors"
           >
-            {viewMode === "list" ? <LayoutGrid size={16} /> : <List size={16} />}
+            {viewMode === "list" ? (
+              <LayoutGrid size={16} />
+            ) : (
+              <List size={16} />
+            )}
           </button>
         </div>
       </div>
@@ -60,11 +74,13 @@ export default function EpisodeListSidebar({
       </div>
 
       {/* Episodes Container */}
-      <div className={`overflow-y-auto [scrollbar-width:thin] [scrollbar-color:#333_transparent] ${
-        viewMode === "grid" 
-          ? "grid grid-cols-6 gap-2 content-start" 
-          : "flex flex-col gap-2"
-      }`}>
+      <div
+        className={`overflow-y-auto [scrollbar-width:thin] [scrollbar-color:#333_transparent] ${
+          viewMode === "grid"
+            ? "grid grid-cols-6 gap-2 content-start"
+            : "flex flex-col gap-2"
+        }`}
+      >
         {episodesList
           .filter((ep) =>
             searchEpisode
@@ -72,10 +88,10 @@ export default function EpisodeListSidebar({
               : true,
           )
           .map((ep, idx) => {
-            const isActive = (ep._id || ep) === episode?._id;
-            const bgClass = isActive 
-              ? "bg-[#e25c3d] text-white shadow-md shadow-[#e25c3d]/20" 
-              : "bg-[#181a24] text-white hover:bg-[#252836]";
+            const isActive = (ep._id || ep) === episode?._id
+            const bgClass = isActive
+              ? "bg-[#e25c3d] text-white shadow-md shadow-[#e25c3d]/20"
+              : "bg-[#181a24] text-white hover:bg-[#252836]"
 
             if (viewMode === "grid") {
               return (
@@ -87,7 +103,7 @@ export default function EpisodeListSidebar({
                 >
                   {ep.episodeNumber}
                 </button>
-              );
+              )
             }
 
             return (
@@ -97,7 +113,9 @@ export default function EpisodeListSidebar({
                 className={`w-full flex items-center px-4 py-3 rounded-lg text-sm text-left transition-colors ${bgClass}`}
                 title={ep.title || `Episode ${ep.episodeNumber}`}
               >
-                <span className={`w-8 font-semibold shrink-0 ${isActive ? "text-white/90" : "text-white"}`}>
+                <span
+                  className={`w-8 font-semibold shrink-0 ${isActive ? "text-white/90" : "text-white"}`}
+                >
                   {ep.episodeNumber}
                 </span>
                 <span className="truncate">

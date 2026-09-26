@@ -86,13 +86,18 @@ const getAnimes = async (req, res, next) => {
             }
           }
         `
-        const alRes = await axios.post("https://graphql.anilist.co", { query: queryStr, variables: { search } })
+        const alRes = await axios.post("https://graphql.anilist.co", {
+          query: queryStr,
+          variables: { search },
+        })
         if (alRes.data && alRes.data.data && alRes.data.data.Page) {
           const malAnimes = alRes.data.data.Page.media.map(mapAnilistToAnime)
-          const localTitles = animes.map(a => a.title.toLowerCase())
-          
-          const newMalAnimes = malAnimes.filter(ma => !localTitles.includes(ma.title.toLowerCase()))
-          
+          const localTitles = animes.map((a) => a.title.toLowerCase())
+
+          const newMalAnimes = malAnimes.filter(
+            (ma) => !localTitles.includes(ma.title.toLowerCase()),
+          )
+
           animes = [...animes, ...newMalAnimes]
           total = total + newMalAnimes.length
         }
@@ -125,31 +130,36 @@ const getAnimes = async (req, res, next) => {
   }
 }
 
-
 // Helper to map Anilist Anime to our DB Anime format
 function mapAnilistToAnime(alAnime) {
   return {
     _id: (alAnime.idMal || alAnime.id).toString(),
     title: alAnime.title?.english || alAnime.title?.romaji || "Unknown Title",
-    description: (alAnime.description || "No description available.").replace(/<br>/g, "\n"),
+    description: (alAnime.description || "No description available.").replace(
+      /<br>/g,
+      "\n",
+    ),
     year: alAnime.seasonYear || new Date().getFullYear(),
     rating: (alAnime.averageScore || 0) / 10,
     thumbnail: alAnime.coverImage?.extraLarge || alAnime.coverImage?.large,
     cover: alAnime.bannerImage || alAnime.coverImage?.extraLarge,
-    trailerUrl: alAnime.trailer?.site === "youtube" ? `https://www.youtube.com/watch?v=${alAnime.trailer.id}` : "",
+    trailerUrl:
+      alAnime.trailer?.site === "youtube"
+        ? `https://www.youtube.com/watch?v=${alAnime.trailer.id}`
+        : "",
     genres: alAnime.genres || ["Unknown"],
     status: alAnime.status === "RELEASING" ? "ongoing" : "completed",
     episodes: [], // No local episodes for proxy
     totalEpisodes: alAnime.episodes || 0,
     views: 0,
-    isMalProxy: true
+    isMalProxy: true,
   }
 }
 
 // Get single anime details with episodes and recommendations
 const getAnimeDetails = async (req, res, next) => {
   try {
-    let anime = null;
+    let anime = null
 
     if (mongoose.Types.ObjectId.isValid(req.params.id)) {
       anime = await Anime.findById(req.params.id).populate("episodes")
@@ -169,7 +179,10 @@ const getAnimeDetails = async (req, res, next) => {
               }
             }
           `
-          const alRes = await axios.post("https://graphql.anilist.co", { query: queryStr, variables: { id: parsedId } })
+          const alRes = await axios.post("https://graphql.anilist.co", {
+            query: queryStr,
+            variables: { id: parsedId },
+          })
           if (alRes.data && alRes.data.data && alRes.data.data.Media) {
             anime = mapAnilistToAnime(alRes.data.data.Media)
           }
@@ -185,7 +198,7 @@ const getAnimeDetails = async (req, res, next) => {
 
     // Find recommended animes based on similar genres (from our DB)
     const findQuery = { genres: { $in: anime.genres } }
-    
+
     if (mongoose.Types.ObjectId.isValid(anime._id)) {
       findQuery._id = { $ne: anime._id }
     }
@@ -207,7 +220,7 @@ const getAnimeDetails = async (req, res, next) => {
 const getMalTrending = async (req, res, next) => {
   try {
     const redisKey = `animes:trending`
-    
+
     // Try to fetch from cache
     try {
       const cachedData = await redisClient.get(redisKey)
@@ -229,7 +242,9 @@ const getMalTrending = async (req, res, next) => {
         }
       }
     `
-    const alRes = await axios.post("https://graphql.anilist.co", { query: queryStr })
+    const alRes = await axios.post("https://graphql.anilist.co", {
+      query: queryStr,
+    })
     const trendingAnimes = alRes.data.data.Page.media.map(mapAnilistToAnime)
 
     const responsePayload = {
@@ -314,56 +329,63 @@ const getAnimeGenres = async (req, res, next) => {
 // Get smart recommendations based on user's history and wishlist
 const getSmartRecommendations = async (req, res, next) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user._id
 
     // 1. Fetch user's History and Wishlist
-    const history = await History.find({ user: userId }).populate("anime").lean();
-    const wishlist = await Wishlist.find({ 
-      user: userId, 
-      status: { $in: ["Completed", "Watching", "Planning"] } 
-    }).populate("anime").lean();
+    const history = await History.find({ user: userId })
+      .populate("anime")
+      .lean()
+    const wishlist = await Wishlist.find({
+      user: userId,
+      status: { $in: ["Completed", "Watching", "Planning"] },
+    })
+      .populate("anime")
+      .lean()
 
     // Collect all known anime
-    const allKnownAnimes = [...history.map(h => h.anime), ...wishlist.map(w => w.anime)].filter(Boolean);
-    const excludedIds = allKnownAnimes.map(a => a._id);
+    const allKnownAnimes = [
+      ...history.map((h) => h.anime),
+      ...wishlist.map((w) => w.anime),
+    ].filter(Boolean)
+    const excludedIds = allKnownAnimes.map((a) => a._id)
 
     // 2. Tally genres
-    const genreCounts = {};
-    allKnownAnimes.forEach(anime => {
+    const genreCounts = {}
+    allKnownAnimes.forEach((anime) => {
       if (anime.genres && Array.isArray(anime.genres)) {
-        anime.genres.forEach(g => {
-          genreCounts[g] = (genreCounts[g] || 0) + 1;
-        });
+        anime.genres.forEach((g) => {
+          genreCounts[g] = (genreCounts[g] || 0) + 1
+        })
       }
-    });
+    })
 
     // 3. Find top 3 genres
     const topGenres = Object.entries(genreCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3)
-      .map(entry => entry[0]);
+      .map((entry) => entry[0])
 
-    let recommendedAnimes = [];
+    let recommendedAnimes = []
 
     // 4. Fetch recommendations if we have top genres
     if (topGenres.length > 0) {
       recommendedAnimes = await Anime.find({
         genres: { $in: topGenres },
-        _id: { $nin: excludedIds }
+        _id: { $nin: excludedIds },
       })
-      .sort({ rating: -1 })
-      .limit(10);
+        .sort({ rating: -1 })
+        .limit(10)
     }
 
     res.status(200).json({
       success: true,
       data: recommendedAnimes,
-    });
+    })
   } catch (error) {
-    console.error("Smart Recommendation Error:", error);
-    next(error);
+    console.error("Smart Recommendation Error:", error)
+    next(error)
   }
-};
+}
 
 module.exports = {
   getAnimes,

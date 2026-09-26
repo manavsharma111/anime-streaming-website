@@ -4,7 +4,14 @@ import { useDispatch, useSelector } from "react-redux"
 import { fetchAnimes } from "../redux/slice/animeSlice"
 import AnimeCard from "../components/Home/AnimeCard"
 import QuickFilter from "../components/Home/QuickFilter"
-import { Search as SearchIcon, Compass, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
+import {
+  Search as SearchIcon,
+  Compass,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react"
 
 export default function Search() {
   const location = useLocation()
@@ -111,23 +118,25 @@ export default function Search() {
 
   const currentPage = parseInt(pageParam) || 1
   // Use actual data if available, but ensure at least 5 pages are shown for the UI design
-  const actualTotalPages = pagination?.total ? Math.ceil(pagination.total / (pagination.limit || 30)) : 1
+  const actualTotalPages = pagination?.total
+    ? Math.ceil(pagination.total / (pagination.limit || 30))
+    : 1
   const totalPages = Math.max(5, actualTotalPages)
-  
+
   const getPageNumbers = () => {
     const pages = []
     const maxVisible = 5
-    
+
     if (totalPages <= maxVisible) {
       for (let i = 1; i <= totalPages; i++) pages.push(i)
     } else {
       let start = Math.max(1, currentPage - 2)
       let end = Math.min(totalPages, start + maxVisible - 1)
-      
+
       if (end - start < maxVisible - 1) {
         start = Math.max(1, end - maxVisible + 1)
       }
-      
+
       for (let i = start; i <= end; i++) pages.push(i)
     }
     return pages
@@ -140,7 +149,7 @@ export default function Search() {
     const newParams = new URLSearchParams(location.search)
     newParams.set("page", newPage)
     navigate(`/search?${newParams.toString()}`)
-    
+
     if (window.lenis) {
       window.lenis.scrollTo(0, { immediate: false, duration: 1.2 })
     } else {
@@ -192,7 +201,9 @@ export default function Search() {
             </div>
           ) : animeList?.length > 0 ? (
             <>
-              <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 transition-opacity duration-300 ${isLoading ? "opacity-40 pointer-events-none grayscale-[30%]" : "opacity-100"}`}>
+              <div
+                className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 transition-opacity duration-300 ${isLoading ? "opacity-40 pointer-events-none grayscale-[30%]" : "opacity-100"}`}
+              >
                 {animeList.map((anime) => (
                   <AnimeCard key={anime._id} anime={anime} />
                 ))}
@@ -241,7 +252,7 @@ export default function Search() {
                 >
                   <ChevronRight size={18} />
                 </button>
-                
+
                 {/* Last Page */}
                 <button
                   disabled={currentPage >= totalPages}

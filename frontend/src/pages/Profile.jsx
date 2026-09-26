@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { checkAuth } from "../redux/slice/authSlice"
+import subscriptionService from "../services/subscriptionService"
+import {
+  checkAuth,
+  fetchNotifications,
+  markNotificationReadAsync,
+  deleteNotificationAsync,
+} from "../redux/slice/authSlice"
 import {
   getWatchHistory,
   deleteAllHistory,
@@ -15,6 +21,8 @@ import {
   Play,
   LogOut,
   Loader,
+  Crown,
+  Bell,
 } from "lucide-react"
 import { Navigate, Link } from "react-router-dom"
 import { getImageUrl } from "../utils/image"
@@ -30,18 +38,29 @@ export default function Profile() {
 
   const [activeTab, setActiveTab] = useState("history")
   const [isEditing, setIsEditing] = useState(false)
-  const [formData, setFormData] = useState({ username: "", avatar: "" })
+  const [formData, setFormData] = useState({
+    username: "",
+    avatar: "",
+    avatarFile: null,
+  })
   const [isUpdating, setIsUpdating] = useState(false)
 
   useEffect(() => {
     if (isAuthenticated) {
       dispatch(getWatchHistory())
-      setFormData({
-        username: user?.username || "",
-        avatar: user?.avatar || "",
-      })
+      dispatch(fetchNotifications())
     }
-  }, [dispatch, isAuthenticated, user])
+  }, [dispatch, isAuthenticated])
+
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        username: prev.username || user.username || "",
+        avatar: prev.avatar || user.avatar || "",
+      }))
+    }
+  }, [user])
 
   if (loading) {
     return (
@@ -59,7 +78,21 @@ export default function Profile() {
     e.preventDefault()
     setIsUpdating(true)
     try {
-      const res = await axiosInstance.put("/auth/update-profile", formData)
+      let dataToSubmit = formData
+      const config = {}
+
+      if (formData.avatarFile) {
+        dataToSubmit = new FormData()
+        dataToSubmit.append("username", formData.username)
+        dataToSubmit.append("avatarFile", formData.avatarFile)
+        config.headers = { "Content-Type": "multipart/form-data" }
+      }
+
+      const res = await axiosInstance.put(
+        "/auth/update-profile",
+        dataToSubmit,
+        config,
+      )
       if (res.data.success) {
         toast.success("Profile updated successfully!")
         setIsEditing(false)
@@ -89,6 +122,19 @@ export default function Profile() {
     }
   }
 
+  const handleCancelPlan = async () => {
+    try {
+      toast.loading("Cancelling plan...", { id: "cancel" })
+      await subscriptionService.cancelPlan(user._id)
+      toast.success("Plan cancelled successfully!", { id: "cancel" })
+      dispatch(checkAuth())
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to cancel plan", {
+        id: "cancel",
+      })
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#0e0b12] text-white pt-24 pb-32 md:pb-10 px-4 md:px-8">
       <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row gap-8">
@@ -107,7 +153,38 @@ export default function Profile() {
               )}
             </div>
             <h2 className="text-xl font-black mb-1">{user?.username}</h2>
-            <p className="text-sm text-neutral-500 mb-6">{user?.email}</p>
+            <p className="text-sm text-neutral-500 mb-4">{user?.email}</p>
+
+            {user?.subscription?.planId &&
+              user?.subscription?.status === "active" && (
+                <div className="mb-6 flex flex-col items-center gap-2 w-full">
+                  <div className="px-4 py-1.5 bg-gradient-to-r from-[#f33767]/20 to-purple-600/20 border border-[#f33767]/30 rounded-full inline-flex items-center gap-2">
+                    <Crown size={14} className="text-[#f33767]" />
+                    <span className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#f33767] to-purple-500">
+                      {user.subscription.planId.name}
+                    </span>
+                  </div>
+                  {user.subscription.endDate && (
+                    <div className="text-xs text-neutral-400 font-medium">
+                      Time left:{" "}
+                      {Math.max(
+                        0,
+                        Math.ceil(
+                          (new Date(user.subscription.endDate) - new Date()) /
+                            (1000 * 3600 * 24),
+                        ),
+                      )}{" "}
+                      days
+                    </div>
+                  )}
+                  <button
+                    onClick={handleCancelPlan}
+                    className="w-full mt-2 py-2 rounded-xl border border-[#f33767]/50 hover:bg-[#f33767]/20 text-[#f33767] transition-colors text-xs font-bold"
+                  >
+                    Cancel & Refund
+                  </button>
+                </div>
+              )}
 
             <button
               onClick={handleLogout}
@@ -131,6 +208,18 @@ export default function Profile() {
             >
               <Settings size={18} />{" "}
               <span className="font-bold text-sm">Account Settings</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("notifications")}
+              className={`flex items-center gap-3 p-4 border-l-2 transition-colors ${activeTab === "notifications" ? "border-[#f33767] bg-white/5 text-white" : "border-transparent text-neutral-400 hover:bg-white/5 hover:text-white"}`}
+            >
+              <div className="relative">
+                <Bell size={18} />
+                {user?.notifications?.filter((n) => !n.read).length > 0 && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#f33767] rounded-full"></span>
+                )}
+              </div>
+              <span className="font-bold text-sm">Notifications</span>
             </button>
           </div>
         </div>
@@ -243,6 +332,84 @@ export default function Profile() {
             </div>
           )}
 
+          {/* NOTIFICATIONS TAB */}
+          {activeTab === "notifications" && (
+            <div className="bg-[#110e16] p-6 sm:p-8 rounded-2xl border border-white/5">
+              <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
+                <h3 className="text-2xl font-black uppercase tracking-wider flex items-center gap-3">
+                  <Bell className="text-[#f33767]" /> Notifications
+                </h3>
+              </div>
+
+              {!user?.notifications || user.notifications.length === 0 ? (
+                <div className="text-center py-16">
+                  <Bell
+                    size={48}
+                    className="mx-auto text-neutral-600 mb-4 opacity-20"
+                  />
+                  <h4 className="text-xl font-bold mb-2">No Notifications</h4>
+                  <p className="text-neutral-500 text-sm">
+                    You're all caught up!
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  {user.notifications
+                    .slice()
+                    .sort(
+                      (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+                    )
+                    .map((notif) => (
+                      <div
+                        key={notif._id}
+                        onClick={() =>
+                          !notif.read &&
+                          dispatch(markNotificationReadAsync(notif._id))
+                        }
+                        className={`relative flex gap-4 p-4 rounded-xl transition-colors border group ${notif.read ? "bg-white/5 border-white/5" : "bg-[#f33767]/5 border-[#f33767]/20 cursor-pointer"}`}
+                      >
+                        {!notif.read && (
+                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#f33767] rounded-l-xl"></div>
+                        )}
+                        <div
+                          className={`mt-1 rounded-full p-2 h-fit ${notif.read ? "bg-neutral-800 text-neutral-400" : "bg-[#f33767] text-white"}`}
+                        >
+                          <Bell size={16} />
+                        </div>
+                        <div className="flex-1">
+                          <p
+                            className={`text-sm md:text-base ${notif.read ? "text-neutral-300" : "text-white font-semibold"}`}
+                          >
+                            {notif.message}
+                          </p>
+                          <span className="text-xs text-neutral-500 mt-2 block">
+                            {new Date(notif.createdAt).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
+                            )}
+                          </span>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            dispatch(deleteNotificationAsync(notif._id))
+                          }}
+                          className="opacity-0 group-hover:opacity-100 p-2 text-neutral-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all h-fit"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* SETTINGS TAB */}
           {activeTab === "settings" && (
             <div className="bg-[#110e16] p-6 sm:p-8 rounded-2xl border border-white/5">
@@ -296,18 +463,25 @@ export default function Profile() {
 
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-bold uppercase tracking-widest text-neutral-400">
-                    Avatar URL
+                    Profile Picture
                   </label>
                   <input
-                    type="text"
-                    value={formData.avatar}
+                    type="file"
+                    accept="image/*"
                     onChange={(e) =>
-                      setFormData({ ...formData, avatar: e.target.value })
+                      setFormData({
+                        ...formData,
+                        avatarFile: e.target.files[0],
+                      })
                     }
                     disabled={!isEditing}
-                    placeholder="https://example.com/avatar.jpg"
-                    className="bg-[#1a1721] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#f33767] disabled:opacity-50 transition-colors"
+                    className="bg-[#1a1721] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#f33767] disabled:opacity-50 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[#f33767] file:text-white hover:file:bg-[#d02050]"
                   />
+                  {!formData.avatarFile && user?.avatar && (
+                    <p className="text-xs text-neutral-500 mt-1">
+                      Leave empty to keep current picture.
+                    </p>
+                  )}
                 </div>
 
                 {isEditing && (
@@ -326,6 +500,7 @@ export default function Profile() {
                         setFormData({
                           username: user?.username || "",
                           avatar: user?.avatar || "",
+                          avatarFile: null,
                         })
                       }}
                       disabled={isUpdating}

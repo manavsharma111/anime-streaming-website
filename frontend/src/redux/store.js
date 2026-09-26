@@ -5,6 +5,7 @@ import episodeReducer from "./slice/episodeSlice"
 import historyReducer from "./slice/historySlice"
 import wishlistReducer from "./slice/wishlistSlice"
 import reviewReducer from "./slice/reviewSlice"
+import subscriptionReducer from "./slice/subscriptionSlice"
 
 export const store = configureStore({
   reducer: {
@@ -14,5 +15,6 @@ export const store = configureStore({
     history: historyReducer,
     wishlist: wishlistReducer,
     review: reviewReducer,
+    subscription: subscriptionReducer,
   },
 })

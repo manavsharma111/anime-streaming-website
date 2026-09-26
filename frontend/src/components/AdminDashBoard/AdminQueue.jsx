@@ -20,25 +20,25 @@ export default function AdminQueue() {
       const res = await axiosInstance.get("/anime-admin/queue")
       if (res.data.success) {
         setJobs((prev) => {
-          const newData = res.data.data;
-          
+          const newData = res.data.data
+
           // Preserve eta and taskName from socket for active jobs
-          const newActive = newData.active.map(newJob => {
-            const existingJob = prev.active.find(j => j.id === newJob.id);
+          const newActive = newData.active.map((newJob) => {
+            const existingJob = prev.active.find((j) => j.id === newJob.id)
             if (existingJob) {
               return {
                 ...newJob,
                 eta: existingJob.eta,
-                taskName: existingJob.taskName
-              };
+                taskName: existingJob.taskName,
+              }
             }
-            return newJob;
-          });
-          
+            return newJob
+          })
+
           return {
             ...newData,
-            active: newActive
-          };
+            active: newActive,
+          }
         })
       }
     } catch (err) {
@@ -79,7 +79,6 @@ export default function AdminQueue() {
     }
   }
 
-
   useEffect(() => {
     fetchQueue()
     const interval = setInterval(fetchQueue, 5000) // Polling fallback
@@ -89,7 +88,12 @@ export default function AdminQueue() {
       setJobs((prev) => {
         const newActive = prev.active.map((job) =>
           job.data.episodeId === data.episodeId
-            ? { ...job, progress: data.percent, eta: data.eta, taskName: data.taskName }
+            ? {
+                ...job,
+                progress: data.percent,
+                eta: data.eta,
+                taskName: data.taskName,
+              }
             : job,
         )
         return { ...prev, active: newActive }
@@ -135,11 +139,11 @@ export default function AdminQueue() {
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
               {job.taskName
-                ? job.taskName.startsWith("Uploading") || job.taskName.startsWith("Saving")
+                ? job.taskName.startsWith("Uploading") ||
+                  job.taskName.startsWith("Saving")
                   ? `⚡ ${job.taskName}`
                   : `Encoding: ${job.taskName}`
-                : "Encoding Progress"
-              }
+                : "Encoding Progress"}
             </span>
             <span className="text-sm font-black text-white">
               {job.progress || 0}%
@@ -218,7 +222,10 @@ export default function AdminQueue() {
             onClick={fetchQueue}
             className="p-3 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl transition-all"
           >
-            <RefreshCw size={20} className={loading ? "animate-spin text-neutral-400" : ""} />
+            <RefreshCw
+              size={20}
+              className={loading ? "animate-spin text-neutral-400" : ""}
+            />
           </button>
         </div>
       </div>

@@ -6,7 +6,7 @@ const axiosInstance = axios.create({
   baseURL: BASE_URL,
   headers: {
     "Content-Type": "application/json",
-    "Bypass-Tunnel-Reminder": "true"
+    "Bypass-Tunnel-Reminder": "true",
   },
   withCredentials: true,
 })

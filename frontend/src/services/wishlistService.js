@@ -12,7 +12,7 @@ const wishlistService = {
   },
   updateWishlistStatus: (id, status) => {
     return axiosInstance.put(`/wishlist/update-status/${id}`, { status })
-  }
+  },
 }
 
 export default wishlistService

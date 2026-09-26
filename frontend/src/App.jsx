@@ -10,10 +10,13 @@ const Home = lazy(() => import("./pages/Home"))
 const AnimeDetails = lazy(() => import("./pages/AnimeDetail/AnimeDetails"))
 const Watch = lazy(() => import("./pages/Watch"))
 const Search = lazy(() => import("./pages/Search"))
-const AdminDashboard = lazy(() => import("./pages/AdminDashBoard/AdminDashboard"))
+const AdminDashboard = lazy(
+  () => import("./pages/AdminDashBoard/AdminDashboard"),
+)
 const Wishlist = lazy(() => import("./pages/WishList/Wishlist"))
 const Profile = lazy(() => import("./pages/Profile"))
 const LandingPage = lazy(() => import("./pages/LandingPage"))
+const Pricing = lazy(() => import("./pages/Pricing"))
 
 import Lenis from "@studio-freight/lenis"
 import { Toaster, toast } from "react-hot-toast"
@@ -88,28 +91,75 @@ export default function App() {
         <SmoothScroll>
           {location.pathname !== "/" && <Navbar />}
 
-          <Suspense 
+          <Suspense
             fallback={
               <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center">
                 <div className="w-12 h-12 border-4 border-[#f33767]/20 border-t-[#f33767] rounded-full animate-spin mb-4" />
-                <div className="text-[#f33767] font-black tracking-[0.2em] font-mono text-sm animate-pulse">LOADING...</div>
+                <div className="text-[#f33767] font-black tracking-[0.2em] font-mono text-sm animate-pulse">
+                  LOADING...
+                </div>
               </div>
             }
           >
             <AnimatePresence mode="wait">
               <Routes location={location} key={location.pathname}>
-                <Route path="/" element={<PageTransition><LandingPage /></PageTransition>} />
-                <Route path="/home" element={<PageTransition><Home /></PageTransition>} />
-                <Route path="/anime/:id" element={<PageTransition><AnimeDetails /></PageTransition>} />
-                <Route path="/search" element={<PageTransition><Search /></PageTransition>} />
-                <Route path="/watch/:episodeId" element={<PageTransition><Watch /></PageTransition>} />
+                <Route
+                  path="/"
+                  element={
+                    <PageTransition>
+                      <LandingPage />
+                    </PageTransition>
+                  }
+                />
+                <Route
+                  path="/home"
+                  element={
+                    <PageTransition>
+                      <Home />
+                    </PageTransition>
+                  }
+                />
+                <Route
+                  path="/anime/:id"
+                  element={
+                    <PageTransition>
+                      <AnimeDetails />
+                    </PageTransition>
+                  }
+                />
+                <Route
+                  path="/search"
+                  element={
+                    <PageTransition>
+                      <Search />
+                    </PageTransition>
+                  }
+                />
+                <Route
+                  path="/watch/:episodeId"
+                  element={
+                    <PageTransition>
+                      <Watch />
+                    </PageTransition>
+                  }
+                />
+                <Route
+                  path="/pricing"
+                  element={
+                    <PageTransition>
+                      <Pricing />
+                    </PageTransition>
+                  }
+                />
 
                 {/* Protected User Routes */}
                 <Route
                   path="/wishlist"
                   element={
                     <ProtectedRoute>
-                      <PageTransition><Wishlist /></PageTransition>
+                      <PageTransition>
+                        <Wishlist />
+                      </PageTransition>
                     </ProtectedRoute>
                   }
                 />
@@ -117,7 +167,9 @@ export default function App() {
                   path="/profile"
                   element={
                     <ProtectedRoute>
-                      <PageTransition><Profile /></PageTransition>
+                      <PageTransition>
+                        <Profile />
+                      </PageTransition>
                     </ProtectedRoute>
                   }
                 />

@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react"
 
 export const useGestures = (containerRef, videoRef, handlers) => {
-  const { togglePlay, onDoubleTapLeft, onDoubleTapRight, onDoubleTapCenter } = handlers
+  const { togglePlay, onDoubleTapLeft, onDoubleTapRight, onDoubleTapCenter } =
+    handlers
   const lastTapRef = useRef(0)
 
   useEffect(() => {

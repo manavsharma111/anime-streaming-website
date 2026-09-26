@@ -55,7 +55,7 @@ const uploadFileToR2 = async (localFilePath, s3Key) => {
     let content = fileBuffer.toString("utf8")
     content = content.replace(/\\/g, "/")
 
-    // We no longer need to run regex fixes on master.m3u8 
+    // We no longer need to run regex fixes on master.m3u8
     // because ffmpegService.js now generates a clean, perfect master playlist.
 
     body = Buffer.from(content, "utf8")

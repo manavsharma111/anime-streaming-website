@@ -3,10 +3,12 @@ import {
   Settings,
   ChevronRight,
   ChevronLeft,
-  Download
+  Download,
+  Crown,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "./utils/cn"
+import toast from "react-hot-toast"
 
 export default function SettingsMenu({
   showSettings,
@@ -29,6 +31,8 @@ export default function SettingsMenu({
   downloadQualities = {},
   videoUrl,
   isFullscreen,
+  isAllowedDownloads = false,
+  maxAllowedResolution = 480,
 }) {
   const [activeMenu, setActiveMenu] = useState("main")
 
@@ -64,35 +68,64 @@ export default function SettingsMenu({
     return `${backendUrl}${url}`
   }
 
-  const displayAudioTracks = audioTracks.length > 0 ? audioTracks : [
-    { id: 0, name: "Japanese (Original)" },
-    { id: 1, name: "English (Dub)" },
-    { id: 2, name: "Hindi (Dub)" },
-  ]
+  const displayAudioTracks =
+    audioTracks.length > 0
+      ? audioTracks
+      : [
+          { id: 0, name: "Japanese (Original)" },
+          { id: 1, name: "English (Dub)" },
+          { id: 2, name: "Hindi (Dub)" },
+        ]
 
-  const displaySubtitleTracks = subtitleTracks.length > 1 ? subtitleTracks : [
-    { id: -1, name: "Off" },
-    { id: 0, name: "English (CC)" },
-    { id: 1, name: "Spanish" },
-    { id: 2, name: "Hindi" },
-  ]
+  const displaySubtitleTracks =
+    subtitleTracks.length > 1
+      ? subtitleTracks
+      : [
+          { id: -1, name: "Off" },
+          { id: 0, name: "English (CC)" },
+          { id: 1, name: "Spanish" },
+          { id: 2, name: "Hindi" },
+        ]
 
-  const displayDownloadQualities = Object.keys(downloadQualities || {}).length > 0 ? downloadQualities : {
-    "1080p (FHD)": videoUrl,
-    "720p (HD)": videoUrl,
-    "480p (SD)": videoUrl,
-  }
+  const rawDownloadQualities =
+    Object.keys(downloadQualities || {}).length > 0
+      ? downloadQualities
+      : {
+          1080: videoUrl,
+          720: videoUrl,
+          480: videoUrl,
+        }
 
-  const getCurrentAudioLabel = () => displayAudioTracks.find(t => t.id === currentAudio)?.name || "Default"
-  const getCurrentSubtitleLabel = () => displaySubtitleTracks.find(t => t.id === currentSubtitle)?.name || "Off"
+  // Filter based on maxAllowedResolution
+  const displayDownloadQualities = Object.fromEntries(
+    Object.entries(rawDownloadQualities).filter(([key]) => {
+      const res = parseInt(key.replace(/\D/g, "")) || 0
+      const maxRes = Number(maxAllowedResolution) || 480
+      return res <= maxRes
+    }),
+  )
+
+  const getCurrentAudioLabel = () =>
+    displayAudioTracks.find((t) => t.id === currentAudio)?.name || "Default"
+  const getCurrentSubtitleLabel = () =>
+    displaySubtitleTracks.find((t) => t.id === currentSubtitle)?.name || "Off"
   const getCurrentQualityLabel = () => {
     if (currentQuality === -1 || currentQuality === undefined) return "Auto"
-    return qualities.find(q => q.id === currentQuality)?.name || "Auto"
+    return qualities.find((q) => q.id === currentQuality)?.name || "Auto"
   }
-  const getSpeedLabel = () => playbackSpeed === 1 ? "Normal" : `${playbackSpeed}x`
-  const getSubtitlePositionLabel = () => subtitlePosition === "top" ? "Top" : "Bottom"
+  const getSpeedLabel = () =>
+    playbackSpeed === 1 ? "Normal" : `${playbackSpeed}x`
+  const getSubtitlePositionLabel = () =>
+    subtitlePosition === "top" ? "Top" : "Bottom"
 
-  const renderList = (items, currentId, onSelect, labelKey = "name", idKey = "id", emptyMessage = "Default") => (
+  const renderList = (
+    items,
+    currentId,
+    onSelect,
+    labelKey = "name",
+    idKey = "id",
+    emptyMessage = "Default",
+  ) => (
     <div className="flex flex-col py-1 pointer-events-auto">
       {items.length > 0 ? (
         items.map((item) => {
@@ -102,7 +135,7 @@ export default function SettingsMenu({
               key={item[idKey]}
               onClick={(e) => {
                 if (!hasMoved) {
-                  if(onSelect) onSelect(item[idKey])
+                  if (onSelect) onSelect(item[idKey])
                   setActiveMenu("main")
                 } else {
                   e.preventDefault()
@@ -113,7 +146,11 @@ export default function SettingsMenu({
               <div className="w-4 flex justify-center text-[18px]">
                 {isActive && "✓"}
               </div>
-              <span className={isActive ? "text-white font-medium" : "text-neutral-300"}>
+              <span
+                className={
+                  isActive ? "text-white font-medium" : "text-neutral-300"
+                }
+              >
                 {item[labelKey] || `Track ${item[idKey]}`}
               </span>
             </button>
@@ -128,22 +165,35 @@ export default function SettingsMenu({
   )
 
   const renderMainMenuItem = (label, value, onClick) => (
-    <button 
-      onClick={(e) => { if (!hasMoved) onClick(); else e.preventDefault(); }}
+    <button
+      onClick={(e) => {
+        if (!hasMoved) onClick()
+        else e.preventDefault()
+      }}
       className="w-full text-left px-5 py-3 flex items-center justify-between hover:bg-white/10 transition-colors group"
     >
       <div className="flex flex-col">
-        <span className="text-[14px] font-medium text-neutral-200 group-hover:text-white transition-colors">{label}</span>
-        {value && <span className="text-[12px] text-neutral-400 mt-0.5">{value}</span>}
+        <span className="text-[14px] font-medium text-neutral-200 group-hover:text-white transition-colors">
+          {label}
+        </span>
+        {value && (
+          <span className="text-[12px] text-neutral-400 mt-0.5">{value}</span>
+        )}
       </div>
-      <ChevronRight size={18} className="text-neutral-500 group-hover:text-white transition-colors" />
+      <ChevronRight
+        size={18}
+        className="text-neutral-500 group-hover:text-white transition-colors"
+      />
     </button>
   )
 
   const renderSubMenuHeader = (title) => (
     <div className="flex items-center px-2 py-2 border-b border-white/10">
-      <button 
-        onClick={(e) => { if (!hasMoved) setActiveMenu("main"); else e.preventDefault(); }}
+      <button
+        onClick={(e) => {
+          if (!hasMoved) setActiveMenu("main")
+          else e.preventDefault()
+        }}
         className="p-2 hover:bg-white/10 rounded-full transition-colors text-neutral-300 hover:text-white"
       >
         <ChevronLeft size={20} />
@@ -181,7 +231,7 @@ export default function SettingsMenu({
     e.preventDefault()
     const y = e.pageY - scrollRef.current.offsetTop
     const walk = (y - startY) * 1.5
-    
+
     // Only consider it a drag if moved more than 5px
     if (Math.abs(y - startY) > 5) {
       setHasMoved(true)
@@ -195,7 +245,7 @@ export default function SettingsMenu({
         onClick={() => setShowSettings(!showSettings)}
         className={cn(
           "text-white hover:text-[#ff5722] transition-all p-2 rounded-full",
-          showSettings && "text-[#ff5722] rotate-90"
+          showSettings && "text-[#ff5722] rotate-90",
         )}
       >
         <Settings size={20} className="transition-transform duration-300" />
@@ -211,7 +261,7 @@ export default function SettingsMenu({
             transition={{ duration: 0.15, ease: "easeOut" }}
             className={cn(
               "absolute right-0 w-[260px] sm:w-[300px] bg-[#2a2d34]/95 backdrop-blur-xl rounded-xl shadow-2xl z-50 flex flex-col border border-white/10 overflow-hidden text-white pointer-events-auto font-sans cursor-grab active:cursor-grabbing",
-              "bottom-full mb-3 origin-bottom-right max-h-[150px] sm:max-h-[250px] md:max-h-[320px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              "bottom-full mb-3 origin-bottom-right max-h-[150px] sm:max-h-[250px] md:max-h-[320px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
             )}
             data-lenis-prevent="true"
             onMouseDown={handleMouseDown}
@@ -220,73 +270,166 @@ export default function SettingsMenu({
             onMouseMove={handleMouseMove}
           >
             {activeMenu === "main" && (
-              <motion.div 
+              <motion.div
                 key="main"
-                initial={{ x: -20, opacity: 0 }} 
-                animate={{ x: 0, opacity: 1 }} 
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
                 exit={{ x: -20, opacity: 0 }}
                 transition={{ duration: 0.2 }}
                 className="py-2 flex flex-col"
               >
-                {renderMainMenuItem("Audio settings", getCurrentAudioLabel(), () => setActiveMenu("audio"))}
-                {renderMainMenuItem("Subtitle settings", getCurrentSubtitleLabel(), () => setActiveMenu("subtitles"))}
-                {renderMainMenuItem("Subtitle size", subtitleSize ? `${subtitleSize}%` : "100%", () => setActiveMenu("size"))}
-                {renderMainMenuItem("Subtitle position", getSubtitlePositionLabel(), () => setActiveMenu("position"))}
-                {renderMainMenuItem("Quality", getCurrentQualityLabel(), () => setActiveMenu("quality"))}
-                {renderMainMenuItem("Playback speed", getSpeedLabel(), () => setActiveMenu("speed"))}
-                {renderMainMenuItem("Download Options", "", () => setActiveMenu("download"))}
+                {renderMainMenuItem(
+                  "Audio settings",
+                  getCurrentAudioLabel(),
+                  () => setActiveMenu("audio"),
+                )}
+                {renderMainMenuItem(
+                  "Subtitle settings",
+                  getCurrentSubtitleLabel(),
+                  () => setActiveMenu("subtitles"),
+                )}
+                {renderMainMenuItem(
+                  "Subtitle size",
+                  subtitleSize ? `${subtitleSize}%` : "100%",
+                  () => setActiveMenu("size"),
+                )}
+                {renderMainMenuItem(
+                  "Subtitle position",
+                  getSubtitlePositionLabel(),
+                  () => setActiveMenu("position"),
+                )}
+                {renderMainMenuItem("Quality", getCurrentQualityLabel(), () =>
+                  setActiveMenu("quality"),
+                )}
+                {renderMainMenuItem("Playback speed", getSpeedLabel(), () =>
+                  setActiveMenu("speed"),
+                )}
+                {isAllowedDownloads ? (
+                  renderMainMenuItem("Download Options", "", () =>
+                    setActiveMenu("download"),
+                  )
+                ) : (
+                  <div
+                    onClick={() =>
+                      toast.error("Premium subscription required for downloads")
+                    }
+                    className="w-full flex items-center justify-between px-6 py-2.5 hover:bg-white/10 transition-colors text-sm text-neutral-400 cursor-not-allowed group"
+                  >
+                    <span>Download Options</span>
+                    <Crown size={14} className="text-[#f33767] opacity-80" />
+                  </div>
+                )}
               </motion.div>
             )}
 
             {activeMenu === "quality" && (
-              <motion.div key="quality" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 20, opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col">
+              <motion.div
+                key="quality"
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: 20, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col"
+              >
                 {renderSubMenuHeader("Quality")}
                 {renderList(
-                  qualities.length > 0 ? qualities : [ { id: -1, name: "Auto (1080p)" }, { id: 2, name: "1080p" }, { id: 1, name: "720p" } ],
+                  qualities.length > 0
+                    ? qualities
+                    : [
+                        { id: -1, name: "Auto (1080p)" },
+                        { id: 2, name: "1080p" },
+                        { id: 1, name: "720p" },
+                      ],
                   currentQuality,
                   onQualityChange,
-                  "name", "id", "Auto (Default)"
+                  "name",
+                  "id",
+                  "Auto (Default)",
                 )}
               </motion.div>
             )}
 
             {activeMenu === "audio" && (
-              <motion.div key="audio" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 20, opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col">
+              <motion.div
+                key="audio"
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: 20, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col"
+              >
                 {renderSubMenuHeader("Audio settings")}
-                {renderList(displayAudioTracks, currentAudio, onAudioChange, "name", "id", "Default Track")}
+                {renderList(
+                  displayAudioTracks,
+                  currentAudio,
+                  onAudioChange,
+                  "name",
+                  "id",
+                  "Default Track",
+                )}
               </motion.div>
             )}
 
             {activeMenu === "subtitles" && (
-              <motion.div key="subtitles" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 20, opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col">
+              <motion.div
+                key="subtitles"
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: 20, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col"
+              >
                 {renderSubMenuHeader("Subtitle settings")}
-                {renderList(displaySubtitleTracks, currentSubtitle, onSubtitleChange, "name", "id", "Off")}
+                {renderList(
+                  displaySubtitleTracks,
+                  currentSubtitle,
+                  onSubtitleChange,
+                  "name",
+                  "id",
+                  "Off",
+                )}
               </motion.div>
             )}
 
             {activeMenu === "size" && (
-              <motion.div key="size" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 20, opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col">
+              <motion.div
+                key="size"
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: 20, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col"
+              >
                 {renderSubMenuHeader("Subtitle Size")}
                 <div className="flex flex-col py-1 pointer-events-auto">
                   {[50, 75, 90, 100, 110, 125, 150, 175].map((size) => {
-                    const isActive = subtitleSize === size || (!subtitleSize && size === 100);
+                    const isActive =
+                      subtitleSize === size || (!subtitleSize && size === 100)
                     return (
                       <button
                         key={size}
                         onClick={(e) => {
                           if (!hasMoved) {
-                            if (onSubtitleSizeChange) onSubtitleSizeChange(size);
-                            setActiveMenu("main");
+                            if (onSubtitleSizeChange) onSubtitleSizeChange(size)
+                            setActiveMenu("main")
                           } else {
-                            e.preventDefault();
+                            e.preventDefault()
                           }
                         }}
                         className={cn(
                           "text-left px-5 py-4 text-[15px] transition-colors flex items-center hover:bg-white/5 border-l-[3px]",
-                          isActive ? "border-[#29b6f6] bg-white/5" : "border-transparent text-neutral-300"
+                          isActive
+                            ? "border-[#29b6f6] bg-white/5"
+                            : "border-transparent text-neutral-300",
                         )}
                       >
-                        <span className={isActive ? "text-white font-semibold" : "text-neutral-300 font-semibold"}>
+                        <span
+                          className={
+                            isActive
+                              ? "text-white font-semibold"
+                              : "text-neutral-300 font-semibold"
+                          }
+                        >
                           {size}%
                         </span>
                       </button>
@@ -297,19 +440,38 @@ export default function SettingsMenu({
             )}
 
             {activeMenu === "position" && (
-              <motion.div key="position" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 20, opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col">
+              <motion.div
+                key="position"
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: 20, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col"
+              >
                 {renderSubMenuHeader("Subtitle position")}
                 {renderList(
-                  [{ id: "bottom", name: "Bottom" }, { id: "top", name: "Top" }],
+                  [
+                    { id: "bottom", name: "Bottom" },
+                    { id: "top", name: "Top" },
+                  ],
                   subtitlePosition,
                   onSubtitlePositionChange,
-                  "name", "id", "Bottom"
+                  "name",
+                  "id",
+                  "Bottom",
                 )}
               </motion.div>
             )}
 
             {activeMenu === "speed" && (
-              <motion.div key="speed" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 20, opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col">
+              <motion.div
+                key="speed"
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: 20, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col"
+              >
                 {renderSubMenuHeader("Playback speed")}
                 <div className="px-5 py-6 flex flex-col gap-4">
                   <div className="flex justify-between items-center text-neutral-400 text-[12px] font-medium">
@@ -320,9 +482,14 @@ export default function SettingsMenu({
                     <span>2x</span>
                   </div>
                   <input
-                    type="range" min="0.25" max="2" step="0.25" value={playbackSpeed}
+                    type="range"
+                    min="0.25"
+                    max="2"
+                    step="0.25"
+                    value={playbackSpeed}
                     onChange={(e) => {
-                       if(onSpeedChange) onSpeedChange(parseFloat(e.target.value))
+                      if (onSpeedChange)
+                        onSpeedChange(parseFloat(e.target.value))
                     }}
                     className="w-full h-1 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-white"
                   />
@@ -331,29 +498,42 @@ export default function SettingsMenu({
             )}
 
             {activeMenu === "download" && (
-              <motion.div key="download" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 20, opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col">
+              <motion.div
+                key="download"
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: 20, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col"
+              >
                 {renderSubMenuHeader("Download Options")}
                 <div className="flex flex-col py-2">
-                  {Object.entries(displayDownloadQualities).map(([quality, url]) => (
-                    <a
-                      key={quality}
-                      href={getFullUrl(url)}
-                      download={`Episode_${quality}.mp4`}
-                      target="_blank"
-                      rel="noreferrer"
-                      onClick={(e) => {
-                        if (hasMoved) e.preventDefault();
-                      }}
-                      className="text-left px-5 py-3 text-[14px] font-medium text-neutral-300 hover:text-white hover:bg-white/10 transition-colors flex items-center justify-between group"
-                    >
-                      <span className="group-hover:translate-x-1 transition-transform">{quality}</span>
-                      <Download size={16} className="opacity-70 group-hover:opacity-100 group-hover:text-[#ff5722] transition-all" />
-                    </a>
-                  ))}
+                  {Object.entries(displayDownloadQualities).map(
+                    ([quality, url]) => (
+                      <a
+                        key={quality}
+                        href={getFullUrl(url)}
+                        download={`Episode_${quality}.mp4`}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={(e) => {
+                          if (hasMoved) e.preventDefault()
+                        }}
+                        className="text-left px-5 py-3 text-[14px] font-medium text-neutral-300 hover:text-white hover:bg-white/10 transition-colors flex items-center justify-between group"
+                      >
+                        <span className="group-hover:translate-x-1 transition-transform">
+                          {quality}
+                        </span>
+                        <Download
+                          size={16}
+                          className="opacity-70 group-hover:opacity-100 group-hover:text-[#ff5722] transition-all"
+                        />
+                      </a>
+                    ),
+                  )}
                 </div>
               </motion.div>
             )}
-
           </motion.div>
         )}
       </AnimatePresence>
