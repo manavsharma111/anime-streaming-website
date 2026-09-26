@@ -311,8 +311,8 @@ export default function UploadEpisodeForm({ animesList }) {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Info (Shared across all tabs) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="space-y-2 md:col-span-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="space-y-2">
             <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-2">
               <Tv className="w-4 h-4" /> Series
             </label>
@@ -357,6 +357,18 @@ export default function UploadEpisodeForm({ animesList }) {
                   onChange={handleInputChange}
                   placeholder="Name of episode"
                   className={`w-full bg-neutral-950/50 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:border-${activeTab === "link" ? "orange" : "indigo"}-500 text-white transition-colors`}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-neutral-500" /> Schedule For
+                </label>
+                <input
+                  type="datetime-local"
+                  name="scheduledAt"
+                  value={formData.scheduledAt || ""}
+                  onChange={handleInputChange}
+                  className={`w-full bg-neutral-950/50 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:border-${activeTab === "link" ? "orange" : "indigo"}-500 text-white transition-colors [color-scheme:dark]`}
                 />
               </div>
             </>

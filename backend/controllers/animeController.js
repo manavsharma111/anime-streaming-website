@@ -163,7 +163,12 @@ const getAnimeDetails = async (req, res, next) => {
     let anime = null
 
     if (mongoose.Types.ObjectId.isValid(req.params.id)) {
-      anime = await Anime.findById(req.params.id).populate("episodes").lean()
+      anime = await Anime.findById(req.params.id)
+        .populate({
+          path: "episodes",
+          match: { status: "ready" },
+        })
+        .lean()
     }
 
     if (!anime) {

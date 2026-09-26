@@ -66,7 +66,7 @@ const episodeSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["queued", "processing", "ready", "failed"],
+      enum: ["queued", "processing", "ready", "failed", "scheduled"],
       default: "queued",
     },
     scheduledAt: {

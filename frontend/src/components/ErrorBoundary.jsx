@@ -7,6 +7,16 @@ class ErrorBoundary extends React.Component {
   }
 
   static getDerivedStateFromError(error) {
+    // If Vercel deployed a new version, old JS chunks are deleted. 
+    // Auto-reload the page to fetch the new chunks.
+    if (
+      error &&
+      error.message &&
+      (error.message.includes("Failed to fetch dynamically imported module") ||
+        error.message.includes("Importing a module script failed"))
+    ) {
+      window.location.reload();
+    }
     return { hasError: true, error }
   }
 
