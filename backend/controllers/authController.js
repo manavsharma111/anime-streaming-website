@@ -131,7 +131,10 @@ const googleCallback = async (req, res) => {
       returnTo = "/admin"
     }
 
-    res.redirect(`${frontendUrl}${returnTo}`)
+    const redirectUrl = new URL(`${frontendUrl}${returnTo}`)
+    redirectUrl.searchParams.append("login", "success")
+
+    res.redirect(redirectUrl.toString())
   } catch (error) {
     console.log("Google Auth Error:", error)
     res.status(500).json({ message: "Google callback error" })

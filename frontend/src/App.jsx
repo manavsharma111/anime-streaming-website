@@ -40,6 +40,17 @@ export default function App() {
   }, [isAuthenticated, dispatch])
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get("login") === "success") {
+      toast.success("Logged in successfully!")
+      // Remove the login=success parameter from the URL
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.delete("login")
+      window.history.replaceState({}, document.title, newUrl.toString())
+    }
+  }, [])
+
+  useEffect(() => {
     dispatch(checkAuth())
 
     // Initialize Socket Connection for Notifications

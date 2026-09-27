@@ -95,6 +95,9 @@ const Pricing = () => {
       }
 
       const paymentObject = new window.Razorpay(options)
+      paymentObject.on('payment.failed', function (response) {
+        toast.error(`Payment failed: ${response.error.description}`, { id: "payment" })
+      })
       paymentObject.open()
       toast.dismiss("payment")
     } catch (error) {

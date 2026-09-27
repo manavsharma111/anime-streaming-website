@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux"
 import { logout } from "../../redux/slice/authSlice"
 import { Link } from "react-router-dom"
 import { LogOut, LayoutDashboard, User, Crown } from "lucide-react"
+import { toast } from "react-hot-toast"
 
 export default function AuthDropdown() {
   const dispatch = useDispatch()
@@ -16,8 +17,13 @@ export default function AuthDropdown() {
     window.location.href = `${backendUrl}/auth/google?returnTo=${encodeURIComponent(currentPath)}`
   }
 
-  const handleLogout = () => {
-    dispatch(logout())
+  const handleLogout = async () => {
+    try {
+      await dispatch(logout()).unwrap()
+      toast.success("Logged out successfully!")
+    } catch (error) {
+      toast.error("Failed to log out!")
+    }
   }
 
   if (isAuthenticated && user) {
@@ -132,8 +138,12 @@ export default function AuthDropdown() {
             try {
               const { default: api } = await import("../../services/api")
               await api.post("/auth/dev-login")
-              window.location.reload()
+              toast.success("Logged in successfully (Dev Mode)!")
+              setTimeout(() => {
+                window.location.href = window.location.pathname + "?login=success"
+              }, 500)
             } catch (error) {
+              toast.error("Dev login failed!")
               console.error(error)
             }
           }}

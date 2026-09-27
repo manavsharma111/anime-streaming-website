@@ -83,11 +83,11 @@ button {
   cursor: pointer;
 }
 
-@media (pointer: fine) {
-  .hide-cursor,
-  .hide-cursor *,
-  .hide-cursor *::before,
-  .hide-cursor *::after {
-    cursor: none !important;
+@media (hover: hover) {
+  * {
+    cursor: grab !important;
+  }
+  *:active {
+    cursor: grabbing !important;
   }
 }
