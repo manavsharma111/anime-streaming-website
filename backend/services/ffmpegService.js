@@ -29,40 +29,28 @@ const processAnimeVideo = async (
     if (!fs.existsSync(downloadDir))
       fs.mkdirSync(downloadDir, { recursive: true })
 
-    // ==========================================
     // STEP 1: INITIAL SETUP & DIRECTORY CREATION
-    // ==========================================
     // Create isolated resolution folders for HLS variants
     // FFmpeg 4.0.2 does not support 'name:' in var_stream_map, so %v resolves to 0, 1, 2, 3, etc.
     const resolutions = [
       "0",
       "1",
       "2",
-      "3",
-      "4",
-      "5",
-      "6",
-      "7",
-      "8",
-      "9",
-      "10",
       "audio_0",
       "audio_1",
       "audio_2",
       "audio_3",
       "audio_4",
-      "audio_5",
-      "audio_6",
-      "audio_7",
     ]
     resolutions.forEach((res) => {
       if (!fs.existsSync(path.join(streamDir, res)))
         fs.mkdirSync(path.join(streamDir, res), { recursive: true })
     })
 
-    // ==========================================
     // STEP 2: PROBE VIDEO FOR AUDIO & SUBTITLES
-    // ==========================================
+    // Before we start encoding, we need to know exactly what's inside the uploaded video file.
+    // We use FFprobe to scan the file and count how many audio tracks (languages) and subtitle tracks it has.
+    // This allows us to dynamically set up our processing pipeline without blindly guessing.
     const streamCounts = await new Promise((res, rej) => {
       const { execFile } = require("child_process")
       execFile(
@@ -126,13 +114,12 @@ const processAnimeVideo = async (
       )
     })
 
-    // ==========================================
     // STEP 3: EXTRACT & CLEAN INTERNAL SUBTITLES
-    // ==========================================
-    // If the video has built-in text subtitles, we extract them as .vtt files.
-    // We also clean out any complex formatting tags (like ASS styling) so they render perfectly on the web player.
+    // Anime files (.mkv) usually have built-in subtitles, but web browsers can't read them directly.
+    // Here, we extract those subtitles and convert them into web-friendly .vtt files.
+    // We also strip out advanced styling tags (like ASS colors or screen positioning) because web players often fail to read them and display raw code on the screen instead of clean text.
 
-    // Extract subtitles if any text-based subs exist
+    // Check if there are any text-based subtitles to extract
     let extractedSubs = []
 
     const subsDir = path.join(outputDir, "subtitles")
@@ -144,7 +131,7 @@ const processAnimeVideo = async (
     }
 
     if (streamCounts.subStreams.length > 0) {
-      await new Promise((resSub, rejSub) => {
+      await new Promise((resSub) => {
         const subCommand = ffmpeg(inputPath)
         console.log(
           `[FFmpeg] Extracting ${streamCounts.subStreams.length} text subtitles... (This may take a few seconds)`,
@@ -166,16 +153,16 @@ const processAnimeVideo = async (
             console.log(
               `[FFmpeg] Subtitles successfully extracted! Starting video encoding...`,
             )
-            // Clean up extracted VTT files to remove ASS formatting tags
+            // Clean up the extracted VTT files to remove messy formatting tags
             streamCounts.subStreams.forEach((sub, i) => {
               const vttPath = path.join(subsDir, `sub_${i}.vtt`)
               if (fs.existsSync(vttPath)) {
                 let content = fs.readFileSync(vttPath, "utf8")
-                // Remove ASS tags like {\an8}
+                // Strips out advanced ASS placement tags like {\an8} that web players don't understand
                 content = content.replace(/\{[^}]+\}/g, "")
-                // Remove HTML-like tags (some players don't support them well)
+                // Removes HTML formatting (bold, italics, font colors) to ensure raw, clean text
                 content = content.replace(/<\/?(?:font|b|i|u|c)[^>]*>/g, "")
-                // Fix multiple blank lines
+                // Cleans up any messy vertical gaps left behind by the tag removal
                 content = content.replace(/\n{3,}/g, "\n\n")
                 fs.writeFileSync(vttPath, content, "utf8")
               }
@@ -193,11 +180,9 @@ const processAnimeVideo = async (
       })
     }
 
-    // ==========================================
     // STEP 4: PROCESS EXTERNAL SUBTITLES
-    // ==========================================
-    // If the admin manually uploaded external subtitle files (e.g., a custom Hindi SRT),
-    // we copy them over and clean them just like the internal ones.
+    // Sometimes the video doesn't have internal subtitles, but the admin uploads custom .srt or .vtt files (like a custom Hindi sub).
+    // We grab those manually uploaded files, try to guess their language from the filename, and apply the exact same cleaning process to ensure they look perfect on the web player.
 
     // Process manually uploaded external subtitles
     if (subtitlePaths && subtitlePaths.length > 0) {
@@ -207,13 +192,13 @@ const processAnimeVideo = async (
           fs.copyFileSync(subPath, newVttPath)
           const folderId = path.basename(outputDir)
 
-          // Try to extract language from filename, fallback to generic name
+          // Try to guess the language from the filename (e.g. 'naruto_hindi.srt' -> 'hindi')
           let lang = `External ${i + 1}`
           const baseName = path.basename(subPath, path.extname(subPath))
           if (baseName.includes("_")) lang = baseName.split("_").pop()
           else if (baseName.includes("-")) lang = baseName.split("-").pop()
 
-          // Also clean external subs just in case
+          // Run the exact same cleaning process on the external subtitles just to be safe
           let content = fs.readFileSync(newVttPath, "utf8")
           content = content
             .replace(/\{[^}]+\}/g, "")
@@ -294,10 +279,7 @@ const processAnimeVideo = async (
 
     let overallProgress = { base: 0, startTime: Date.now() }
 
-    try {
-      // ==========================================
-      // STEP 5: EXTRACT & ENCODE AUDIO TRACKS
-      // ==========================================
+    // STEP 5: EXTRACT & ENCODE AUDIO TRACKS
       // We separate audio completely from the video stream. This is crucial for multi-language support.
       // It converts each audio track into AAC format and creates its own HLS chunks (`audio_0`, `audio_1`).
       // It processes internal tracks first, then adds any external audio tracks uploaded by the user.
@@ -359,7 +341,7 @@ const processAnimeVideo = async (
         }
       }
 
-      for (let i = 0; i < audioPaths.length; i++) {
+      for (let i = 0; audioPaths && i < audioPaths.length; i++) {
         const audioPath = audioPaths[i]
         const audioCmd = ffmpeg().input(audioPath)
         audioCmd
@@ -413,21 +395,20 @@ const processAnimeVideo = async (
       }
 
       let baseHlsOptions = [
-        "-c:v libx264", // Use H.264 video codec for maximum compatibility
-        "-profile:v main", // Use Main profile for broad device support (older phones/TVs)
-        "-pix_fmt yuv420p", // Standard pixel format widely supported by web players
-        "-preset ultrafast", // Video transfer and process speed (fastest encoding)
-        "-threads 1", // CRITICAL FOR RENDER: Limit to 1 thread to prevent OOM crash on 512MB RAM
-        "-g 48", // Force a keyframe every 48 frames (Group of Pictures size)
-        "-keyint_min 48", // Minimum distance between keyframes
-        "-sc_threshold 0", // Disable scene change detection to keep strict and predictable segment times
-        "-r 30", // Limit to 30fps to avoid memory spikes and reduce CPU load
+        "-c:v libx264", // Converts the video to H.264 so it plays smoothly on any browser or mobile device
+        "-profile:v main", // Uses the 'Main' profile to ensure older TVs and low-end phones can decode the video easily
+        "-pix_fmt yuv420p", // Standardizes the color format to prevent green screens on certain players (e.g., converts 10-bit to 8-bit)
+        "-preset ultrafast", // Prioritizes the fastest encoding speed possible to save server processing time
+        "-threads 1", // CRITICAL: Limits processing to a single CPU thread to prevent RAM overload and server crashes
+        "-g 48", // Inserts a full image "Keyframe" every 48 frames so the video player doesn't freeze when skipping/seeking
+        "-keyint_min 48", // Enforces a strict minimum gap of 48 frames between keyframes
+        "-sc_threshold 0", // Prevents FFMPEG from randomly adding keyframes, ensuring the video is perfectly split into equal chunks
         "-f",
-        "hls", // Output format as HTTP Live Streaming (HLS)
+        "hls", // Formats the output for web streaming by breaking the video into small downloadable chunks
         "-hls_time",
-        "6", // Duration of each video segment in seconds (6s chunks)
+        "6", // Forces each chunk to be exactly 6 seconds long for smooth player buffering
         "-hls_playlist_type",
-        "vod", // Video on Demand playlist type (tells player it's not a live stream)
+        "vod", // Tells the video player this is a pre-recorded Video-On-Demand (VOD), not a live stream
       ]
 
       // Determine which resolutions to generate to avoid upscaling
@@ -439,9 +420,9 @@ const processAnimeVideo = async (
       let mp4TotalBase = (gen1080 ? 2 : 0) + (gen720 ? 2 : 0) + (gen480 ? 1 : 0)
       let remainingWeight = 100 - overallProgress.base - 5 - mp4TotalBase
 
-      // ==========================================
+
       // STEP 6: ENCODE VIDEO INTO MULTIPLE RESOLUTIONS (SINGLE DECODE)
-      // ==========================================
+      // To save massive CPU usage, we decode the source video only once, then use complex filters to split and scale it into 1080p, 720p, and 480p simultaneously.
       const videoCmd = ffmpeg().input(inputPath)
 
       let numOutputs = (gen1080 ? 1 : 0) + (gen720 ? 1 : 0) + (gen480 ? 1 : 0)
@@ -459,17 +440,17 @@ const processAnimeVideo = async (
       if (gen1080) {
         let inPad = numOutputs > 1 ? `[v${currentSplitIdx++}]` : `[0:v:0]`
         map1080 = `[v1080out]`
-        complexFilters.push(`${inPad}scale=-2:1080${map1080}`)
+        complexFilters.push(`${inPad}scale=-2:1080,format=yuv420p${map1080}`)
       }
       if (gen720) {
         let inPad = numOutputs > 1 ? `[v${currentSplitIdx++}]` : `[0:v:0]`
         map720 = `[v720out]`
-        complexFilters.push(`${inPad}scale=-2:720${map720}`)
+        complexFilters.push(`${inPad}scale=-2:720,format=yuv420p${map720}`)
       }
       if (gen480) {
         let inPad = numOutputs > 1 ? `[v${currentSplitIdx++}]` : `[0:v:0]`
         map480 = `[v480out]`
-        complexFilters.push(`${inPad}scale=-2:480${map480}`)
+        complexFilters.push(`${inPad}scale=-2:480,format=yuv420p${map480}`)
       }
 
       videoCmd.complexFilter(complexFilters)
@@ -524,9 +505,9 @@ const processAnimeVideo = async (
       )
       overallProgress.base += remainingWeight
 
-      // ==========================================
       // STEP 7: GENERATE MASTER PLAYLIST
-      // ==========================================
+      // The master playlist (.m3u8) acts as the brain for the web player. It lists all the available video resolutions and audio tracks.
+      // This allows the player to automatically adjust quality based on the user's internet speed and lets them switch audio languages on the fly.
       let masterPlaylist = "#EXTM3U\n"
       if (audioPlaylists.length > 0) {
         audioPlaylists.forEach((ap, idx) => {
@@ -542,9 +523,13 @@ const processAnimeVideo = async (
         masterPlaylist += `#EXT-X-STREAM-INF:BANDWIDTH=800000,RESOLUTION=854x480${audioStr}\n2/manifest.m3u8\n`
       fs.writeFileSync(path.join(streamDir, "master.m3u8"), masterPlaylist)
 
-      // ==========================================
       // STEP 8: GENERATE DOWNLOADABLE MP4 FILES
-      // ==========================================
+      // HLS chunks are great for web streaming, but users can't download them easily.
+      // Here, we take the processed streams and instantly repackage them into standard MP4 files so users have a direct download option.
+      const pathSegments = outputDir.split(path.sep)
+      const folderId = pathSegments[pathSegments.indexOf("processed") + 1]
+      const baseFolder = `/uploads/processed/${folderId}`
+
       const setupMp4Cmd = (cmd, manifestPath) => {
         cmd.input(path.join(streamDir, manifestPath))
         if (audioPlaylists.length > 0) {
@@ -594,9 +579,7 @@ const processAnimeVideo = async (
         mp4Downloads["480"] = `${baseFolder}/downloads/480p.mp4`
       }
 
-      // ==========================================
       // STEP 9: GENERATE THUMBNAIL SPRITE SHEET
-      // ==========================================
       // We capture frames from the video at regular intervals (e.g. 1 frame every 60 seconds).
       // These can be used for thumbnail previews when hovering over the video player scrubber.
 
@@ -611,10 +594,6 @@ const processAnimeVideo = async (
         ])
       await runFfmpegCommand(thumbCmd, "Thumbnails", 0.05, overallProgress)
 
-      const pathSegments = outputDir.split(path.sep)
-      const folderId = pathSegments[pathSegments.indexOf("processed") + 1]
-      const baseFolder = `/uploads/processed/${folderId}`
-
       // Match the Episode.js Schema exactly
       return {
         hlsMaster: `${baseFolder}/streaming/master.m3u8`,
@@ -622,9 +601,6 @@ const processAnimeVideo = async (
         thumbnails: `${baseFolder}/thumbnails/`,
         embeddedSubtitles: extractedSubs,
       }
-    } catch (err) {
-      throw err
-    }
   } catch (error) {
     throw error
   }
