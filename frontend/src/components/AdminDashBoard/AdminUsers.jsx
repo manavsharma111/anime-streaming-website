@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import axiosInstance from "../../services/api"
 import { Users, Crown, Calendar, IndianRupee } from "lucide-react"
 import CustomSelect from "../common/CustomSelect"
+import { getImageUrl } from "../../utils/image"
 
 export default function AdminUsers() {
   const [subscriptions, setSubscriptions] = useState([])
@@ -188,13 +189,14 @@ export default function AdminUsers() {
                     <td className="p-4 min-w-[200px]">
                       <div className="flex items-center gap-3">
                         <img
-                          src={
+                          src={getImageUrl(
                             sub.userId?.avatar ||
                             "https://api.dicebear.com/7.x/avataaars/svg?seed=" +
                               sub.userId?._id
-                          }
+                          )}
                           alt="avatar"
                           className="w-10 h-10 rounded-full bg-neutral-800 shrink-0"
+                          referrerPolicy="no-referrer"
                         />
                         <div className="min-w-0">
                           <p className="text-white font-medium truncate">

@@ -8,6 +8,7 @@ import {
   addReplyAsync,
 } from "../../../redux/slice/reviewSlice"
 import ReplyItem from "./Replies/ReplyItem"
+import { getImageUrl } from "../../../../utils/image"
 
 const ReviewList = ({ reviews = [] }) => {
   const dispatch = useDispatch()
@@ -106,9 +107,10 @@ const ReviewList = ({ reviews = [] }) => {
                   <div className="w-10 h-10 bg-[#1a1721] rounded-full border border-white/10 flex items-center justify-center text-neutral-400 overflow-hidden">
                     {review.user?.avatar ? (
                       <img
-                        src={review.user.avatar}
+                        src={getImageUrl(review.user.avatar)}
                         className="w-full h-full object-cover"
                         alt="avatar"
+                        referrerPolicy="no-referrer"
                       />
                     ) : (
                       <User size={20} />

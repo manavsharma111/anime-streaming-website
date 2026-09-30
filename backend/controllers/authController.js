@@ -230,11 +230,9 @@ const updateProfile = async (req, res) => {
 
     if (username) user.username = username
 
-    // If a file was uploaded, use its URL, otherwise fallback to the provided URL string
+    // If a file was uploaded, save its relative path
     if (req.file) {
-      const serverUrl =
-        process.env.SERVER_URL || `${req.protocol}://${req.get("host")}`
-      user.avatar = `${serverUrl}/uploads/avatars/${req.file.filename}`
+      user.avatar = `/uploads/avatars/${req.file.filename}`
     } else if (avatar) {
       user.avatar = avatar
     }

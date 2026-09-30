@@ -3,6 +3,7 @@ import { User, Trash2, Calendar } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
 import { deleteReplyAsync } from "../../../../redux/slice/reviewSlice"
 import { motion } from "framer-motion"
+import { getImageUrl } from "../../../../../utils/image"
 
 export default function ReplyItem({ reply, reviewId }) {
   const dispatch = useDispatch()
@@ -38,9 +39,10 @@ export default function ReplyItem({ reply, reviewId }) {
           <div className="w-6 h-6 bg-[#1a1721] rounded-full border border-white/10 flex items-center justify-center text-neutral-400 overflow-hidden">
             {reply.user?.avatar ? (
               <img
-                src={reply.user.avatar}
+                src={getImageUrl(reply.user.avatar)}
                 className="w-full h-full object-cover"
                 alt="avatar"
+                referrerPolicy="no-referrer"
               />
             ) : (
               <User size={12} />

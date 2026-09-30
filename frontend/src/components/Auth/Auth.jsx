@@ -4,6 +4,7 @@ import { logout } from "../../redux/slice/authSlice"
 import { Link } from "react-router-dom"
 import { LogOut, LayoutDashboard, User, Crown } from "lucide-react"
 import { toast } from "react-hot-toast"
+import { getImageUrl } from "../../utils/image"
 
 export default function AuthDropdown() {
   const dispatch = useDispatch()
@@ -32,9 +33,10 @@ export default function AuthDropdown() {
         <div className="flex items-center gap-3 mb-5 mt-2 px-1">
           {user.avatar ? (
             <img
-              src={user.avatar}
+              src={getImageUrl(user.avatar)}
               alt="Profile"
               className="w-11 h-11 rounded-full object-cover"
+              referrerPolicy="no-referrer"
             />
           ) : (
             <div className="w-11 h-11 rounded-full bg-[#2a2a2a] flex items-center justify-center text-white font-black text-lg">
