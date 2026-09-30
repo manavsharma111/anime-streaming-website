@@ -51,6 +51,7 @@ const uploadEpisode = async (req, res, next) => {
       introEnd: Number(req.body.introEnd || 0),
       outroStart: Number(req.body.outroStart || 0),
       outroEnd: Number(req.body.outroEnd || 0),
+      isPremiumOnly: req.body.isPremiumOnly === 'true' || req.body.isPremiumOnly === true,
       status: initialStatus,
     })
 

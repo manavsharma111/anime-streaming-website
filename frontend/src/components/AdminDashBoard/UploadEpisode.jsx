@@ -34,6 +34,7 @@ export default function UploadEpisodeForm({ animesList }) {
     introEnd: "",
     outroStart: "",
     outroEnd: "",
+    isPremiumOnly: false,
   })
 
   const [files, setFiles] = useState({
@@ -206,6 +207,7 @@ export default function UploadEpisodeForm({ animesList }) {
           introEnd: formData.introEnd,
           outroStart: formData.outroStart,
           outroEnd: formData.outroEnd,
+          isPremiumOnly: formData.isPremiumOnly,
         })
         setStatusMessage({
           type: "success",
@@ -220,6 +222,7 @@ export default function UploadEpisodeForm({ animesList }) {
           introEnd: "",
           outroStart: "",
           outroEnd: "",
+          isPremiumOnly: false,
         }))
       } else {
         const payload = new FormData()
@@ -245,6 +248,7 @@ export default function UploadEpisodeForm({ animesList }) {
         if (formData.outroStart)
           payload.append("outroStart", formData.outroStart)
         if (formData.outroEnd) payload.append("outroEnd", formData.outroEnd)
+        payload.append("isPremiumOnly", formData.isPremiumOnly)
 
         // Trigger background upload
         uploadFile(payload)
@@ -370,6 +374,20 @@ export default function UploadEpisodeForm({ animesList }) {
                   onChange={handleInputChange}
                   className={`w-full bg-neutral-950/50 border border-neutral-800 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:border-${activeTab === "link" ? "orange" : "indigo"}-500 text-white transition-colors [color-scheme:dark]`}
                 />
+              </div>
+              <div className="space-y-2 flex items-center h-full pt-6">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="isPremiumOnly"
+                    checked={formData.isPremiumOnly}
+                    onChange={(e) => setFormData({ ...formData, isPremiumOnly: e.target.checked })}
+                    className="w-5 h-5 rounded bg-neutral-900 border-neutral-700 text-[#f33767] focus:ring-[#f33767] focus:ring-offset-neutral-950"
+                  />
+                  <span className="text-sm font-bold text-white flex items-center gap-2">
+                    <span className="text-[#f33767]">★</span> Premium Only
+                  </span>
+                </label>
               </div>
             </>
           )}

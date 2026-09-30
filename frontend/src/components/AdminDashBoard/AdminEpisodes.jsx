@@ -18,6 +18,7 @@ export default function AdminEpisodes({ anime, onBack }) {
     introEnd: 0,
     outroStart: 0,
     outroEnd: 0,
+    isPremiumOnly: false,
   })
 
   const fetchEpisodes = async () => {
@@ -56,6 +57,7 @@ export default function AdminEpisodes({ anime, onBack }) {
       introEnd: ep.introEnd || 0,
       outroStart: ep.outroStart || 0,
       outroEnd: ep.outroEnd || 0,
+      isPremiumOnly: ep.isPremiumOnly || false,
     })
     setEditingEpisode(ep)
   }
@@ -154,8 +156,9 @@ export default function AdminEpisodes({ anime, onBack }) {
                     </div>
 
                     {/* Details */}
-                    <div className="md:p-5 text-center md:text-left w-full md:w-auto">
-                      <p className="font-black text-white text-base md:truncate">
+                    <div className="md:p-5 text-center md:text-left w-full md:w-auto flex flex-col md:gap-1">
+                      <p className="font-black text-white text-base md:truncate flex items-center gap-2 justify-center md:justify-start">
+                        {ep.isPremiumOnly && <span className="text-[#f33767]" title="Premium">★</span>}
                         Ep {ep.episodeNumber}: {ep.title}
                       </p>
                       <p className="text-xs text-neutral-500 mt-1">
@@ -301,6 +304,20 @@ export default function AdminEpisodes({ anime, onBack }) {
                             className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-indigo-500"
                           />
                         </div>
+                      </div>
+
+                      <div className="flex items-center pt-2">
+                        <label className="flex items-center gap-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={formData.isPremiumOnly}
+                            onChange={(e) => setFormData({ ...formData, isPremiumOnly: e.target.checked })}
+                            className="w-5 h-5 rounded bg-neutral-900 border-neutral-700 text-indigo-500 focus:ring-indigo-500"
+                          />
+                          <span className="text-sm font-bold text-white flex items-center gap-2">
+                            <span className="text-indigo-400">★</span> Mark as Premium Only
+                          </span>
+                        </label>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4 border-t border-white/5 pt-4 mt-2">

@@ -106,6 +106,7 @@ const uploadEpisodeMeta = async (req, res, next) => {
       introEnd: Number(req.body.introEnd || 0),
       outroStart: Number(req.body.outroStart || 0),
       outroEnd: Number(req.body.outroEnd || 0),
+      isPremiumOnly: req.body.isPremiumOnly === 'true' || req.body.isPremiumOnly === true,
       status: scheduledAt ? "scheduled" : "queued",
       scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
     })
@@ -404,6 +405,7 @@ const addEpisodeLink = async (req, res, next) => {
       introEnd: introEnd || 0,
       outroStart: outroStart || 0,
       outroEnd: outroEnd || 0,
+      isPremiumOnly: req.body.isPremiumOnly === 'true' || req.body.isPremiumOnly === true,
     })
 
     await newEpisode.save()
