@@ -8,7 +8,7 @@ import {
   addReplyAsync,
 } from "../../../redux/slice/reviewSlice"
 import ReplyItem from "./Replies/ReplyItem"
-import { getImageUrl } from "../../../../utils/image"
+import { getImageUrl } from "../../../utils/image"
 
 const ReviewList = ({ reviews = [] }) => {
   const dispatch = useDispatch()

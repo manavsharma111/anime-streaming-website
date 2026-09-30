@@ -3,7 +3,7 @@ import { User, Trash2, Calendar } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
 import { deleteReplyAsync } from "../../../../redux/slice/reviewSlice"
 import { motion } from "framer-motion"
-import { getImageUrl } from "../../../../../utils/image"
+import { getImageUrl } from "../../../../utils/image"
 
 export default function ReplyItem({ reply, reviewId }) {
   const dispatch = useDispatch()
