@@ -180,6 +180,10 @@ export default function Watch() {
   const isAllowedDownloads =
     user?.subscription?.planId?.isAllowedDownloads || false
 
+  const isPremiumEpisode = episode?.isPremiumOnly
+  const isSubscribed = user?.subscription?.status === "active"
+  const showPremiumBlock = isPremiumEpisode && !isSubscribed
+
   const handleProgressSync = (seconds, duration) => {
     if (seconds > 5 && !hasTrackedView.current) {
       hasTrackedView.current = true
@@ -235,22 +239,35 @@ export default function Watch() {
             <div
               className={`w-full aspect-video bg-black relative ${isFocused ? "z-50 shadow-[0_0_100px_rgba(243,55,103,0.15)] ring-1 ring-[#f33767]/30 rounded-2xl" : ""}`}
             >
-              <VideoPlayer
-                streamUrl={streamUrl}
-                title={`Episode ${episode.episodeNumber} - ${episode.title || ""}`}
-                episodeData={episodeData}
-                initialTime={initialTime}
-                onProgressSync={handleProgressSync}
-                onBack={() => navigate(-1)}
-                autoPlay={autoPlay}
-                autoSkip={autoSkip}
-                hasNextEpisode={currentIndex < episodesList.length - 1}
-                autoNext={autoNext}
-                onPlayNext={handleNext}
-                onEnded={handleVideoEnded}
-                maxAllowedResolution={maxAllowedResolution}
-                isAllowedDownloads={isAllowedDownloads}
-              />
+              {showPremiumBlock ? (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 text-white rounded-2xl z-20">
+                  <h2 className="text-3xl font-black mb-4 text-[#f33767]">Premium Content</h2>
+                  <p className="text-neutral-400 mb-6">A premium subscription is required to watch this episode.</p>
+                  <button
+                    onClick={() => navigate("/pricing")}
+                    className="px-8 py-3 bg-[#f33767] hover:bg-[#ff7eb3] transition-colors rounded-full font-bold uppercase tracking-widest text-sm shadow-[0_0_20px_rgba(243,55,103,0.4)]"
+                  >
+                    View Plans
+                  </button>
+                </div>
+              ) : (
+                <VideoPlayer
+                  streamUrl={streamUrl}
+                  title={`Episode ${episode.episodeNumber} - ${episode.title || ""}`}
+                  episodeData={episodeData}
+                  initialTime={initialTime}
+                  onProgressSync={handleProgressSync}
+                  onBack={() => navigate(-1)}
+                  autoPlay={autoPlay}
+                  autoSkip={autoSkip}
+                  hasNextEpisode={currentIndex < episodesList.length - 1}
+                  autoNext={autoNext}
+                  onPlayNext={handleNext}
+                  onEnded={handleVideoEnded}
+                  maxAllowedResolution={maxAllowedResolution}
+                  isAllowedDownloads={isAllowedDownloads}
+                />
+              )}
             </div>
 
             <PlayerToolbar
