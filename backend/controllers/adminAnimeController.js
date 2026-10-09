@@ -438,22 +438,22 @@ const bulkFetchEpisodes = async (req, res, next) => {
       return res.status(400).json({ message: "Anime ID and title required" })
 
     // Initialize Native Consumet Scraper
-    const { ANIME } = require("@consumet/extensions")
-    const hianime = new ANIME.Hianime()
+    const { META } = require("@consumet/extensions")
+    const anilist = new META.Anilist()
 
     // Search for the anime
-    const searchRes = await hianime.search(title)
+    const searchRes = await anilist.search(title)
     if (!searchRes.results || searchRes.results.length === 0) {
       return res
         .status(404)
-        .json({ message: "Anime not found via Hianime Scraper" })
+        .json({ message: "Anime not found via Scraper" })
     }
 
     // Pick the most relevant result
     const consumetId = searchRes.results[0].id
 
     // Get anime info to get all episodes
-    const infoRes = await hianime.fetchAnimeInfo(consumetId)
+    const infoRes = await anilist.fetchAnimeInfo(consumetId)
     const episodesList = infoRes.episodes
 
     if (!episodesList || episodesList.length === 0) {
@@ -496,7 +496,7 @@ const bulkFetchEpisodes = async (req, res, next) => {
         if (existingEp) continue
 
         // Fetch streaming link for the episode natively
-        const watchRes = await hianime.fetchEpisodeSources(ep.id)
+        const watchRes = await anilist.fetchEpisodeSources(ep.id)
         const sources = watchRes.sources
 
         if (!sources || sources.length === 0) continue
