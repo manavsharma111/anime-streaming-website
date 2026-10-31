@@ -1,10 +1,28 @@
 const Review = require("../models/Review")
 const Anime = require("../models/Anime")
+const mongoose = require("mongoose")
 
 // get anime reviews
 exports.getAnimeReviews = async (req, res, next) => {
   try {
-    const reviews = await Review.find({ anime: req.params.animeId })
+    const { animeId } = req.params
+
+    let targetId = animeId
+    if (!mongoose.Types.ObjectId.isValid(animeId)) {
+      const numMalId = Number(animeId)
+      if (!isNaN(numMalId)) {
+        const foundAnime = await Anime.findOne({ malId: numMalId })
+        if (foundAnime) {
+          targetId = foundAnime._id
+        } else {
+          return res.status(200).json({ success: true, data: [] })
+        }
+      } else {
+        return res.status(200).json({ success: true, data: [] })
+      }
+    }
+
+    const reviews = await Review.find({ anime: targetId })
       .populate("user", "username avatar email")
       .populate("replies.user", "username avatar email")
       .sort({ createdAt: -1 })
@@ -22,7 +40,27 @@ exports.getAnimeReviews = async (req, res, next) => {
 exports.addReview = async (req, res, next) => {
   try {
     const { rating, comment, media } = req.body
-    const animeId = req.params.animeId
+    let animeId = req.params.animeId
+
+    if (!mongoose.Types.ObjectId.isValid(animeId)) {
+      const numMalId = Number(animeId)
+      if (!isNaN(numMalId)) {
+        const foundAnime = await Anime.findOne({ malId: numMalId })
+        if (foundAnime) {
+          animeId = foundAnime._id
+        } else {
+          return res.status(400).json({
+            success: false,
+            message: "Anime not found in local catalog to review.",
+          })
+        }
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid anime identifier.",
+        })
+      }
+    }
 
     // Ensure user hasn't already reviewed
     const existingReview = await Review.findOne({

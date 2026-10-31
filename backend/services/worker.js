@@ -161,6 +161,30 @@ const worker = new Worker(
         downloadQualities: result.downloads,
       }
 
+      // Auto-detect intro and outro if neither AniSkip nor admin provided timestamps
+      try {
+        const currentEp = await Episode.findById(episodeId).select("introStart introEnd")
+        if (currentEp && (!currentEp.introStart || currentEp.introStart === 0)) {
+          const { detectAnimeSkipTimes } = require("./introDetectionService")
+          const skipMarkers = await detectAnimeSkipTimes(finalInputPath)
+          if (skipMarkers) {
+            if (skipMarkers.introStart > 0) {
+              updateData.introStart = skipMarkers.introStart
+              updateData.introEnd = skipMarkers.introEnd
+            }
+            if (skipMarkers.outroStart > 0) {
+              updateData.outroStart = skipMarkers.outroStart
+              updateData.outroEnd = skipMarkers.outroEnd
+            }
+            if (skipMarkers.duration > 0) {
+              updateData.duration = skipMarkers.duration
+            }
+          }
+        }
+      } catch (skipErr) {
+        console.warn("[Worker] Skip boundary detection skipped:", skipErr.message)
+      }
+
       if (result.embeddedSubtitles && result.embeddedSubtitles.length > 0) {
         // Use $push to append them to the existing subtitleTracks
         await Episode.findByIdAndUpdate(episodeId, {

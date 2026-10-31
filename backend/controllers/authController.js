@@ -143,7 +143,7 @@ const googleCallback = async (req, res) => {
 
 // logout
 const devLogin = async (req, res) => {
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.NODE_ENV === "production" && process.env.ALLOW_DEV_LOGIN !== "true") {
     return res.status(403).json({ message: "Forbidden in production" })
   }
 

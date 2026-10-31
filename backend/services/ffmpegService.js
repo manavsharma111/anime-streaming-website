@@ -214,6 +214,59 @@ const processAnimeVideo = async (
       })
     }
 
+    // Generate subtitles via Whisper if the file came without any
+    if (extractedSubs.length === 0 && streamCounts.aCount > 0) {
+      const { generateWhisperSubtitles } = require("./whisperService")
+      const tempAudioForWhisper = path.join(subsDir, "temp_whisper_audio.wav")
+      const aiVttPath = path.join(subsDir, "ai_generated_sub.vtt")
+
+      if (!fs.existsSync(subsDir)) fs.mkdirSync(subsDir, { recursive: true })
+
+      try {
+        console.log(
+          "[Whisper] No subtitles found in file, extracting audio for transcription..."
+        )
+        await new Promise((resA) => {
+          ffmpeg(inputPath)
+            .output(tempAudioForWhisper)
+            .outputOptions([
+              "-vn",
+              "-acodec", "pcm_s16le",
+              "-ar", "16000",
+              "-ac", "1",
+              "-t", "1200", // 20-minute cap per episode for safe processing
+            ])
+            .on("end", resA)
+            .on("error", (err) => {
+              console.warn("[Whisper AI] Audio extraction failed:", err.message)
+              resA()
+            })
+            .run()
+        })
+
+        if (fs.existsSync(tempAudioForWhisper)) {
+          const generated = await generateWhisperSubtitles(
+            tempAudioForWhisper,
+            aiVttPath
+          )
+          // Clean up temp audio immediately to save disk space
+          try {
+            fs.unlinkSync(tempAudioForWhisper)
+          } catch (e) {}
+
+          if (generated && fs.existsSync(aiVttPath)) {
+            const folderId = path.basename(outputDir)
+            extractedSubs.push({
+              lang: "English (AI)",
+              url: `/uploads/processed/${folderId}/subtitles/ai_generated_sub.vtt`,
+            })
+          }
+        }
+      } catch (whisperErr) {
+        console.error("[Whisper AI] Skipped due to error:", whisperErr.message)
+      }
+    }
+
     // Helper function to run an ffmpeg command as a Promise
     const runFfmpegCommand = (cmd, taskName, weight, overallProgress) => {
       return new Promise((res, rej) => {

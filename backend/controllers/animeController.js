@@ -333,62 +333,164 @@ const getAnimeGenres = async (req, res, next) => {
     next(error)
   }
 }
-// Get smart recommendations based on user's history and wishlist
+// Personalized recommendations using watch behavior and genre weighting
 const getSmartRecommendations = async (req, res, next) => {
   try {
     const userId = req.user._id
+    const redisKey = `smart_rec:${userId}`
 
-    // 1. Fetch user's History and Wishlist
-    const history = await History.find({ user: userId })
-      .populate("anime")
-      .lean()
-    const wishlist = await Wishlist.find({
-      user: userId,
-      status: { $in: ["Completed", "Watching", "Planning"] },
-    })
-      .populate("anime")
-      .lean()
+    // Return cached results if available to save DB hits
+    try {
+      const cached = await redisClient.get(redisKey)
+      if (cached) {
+        return res.status(200).json(JSON.parse(cached))
+      }
+    } catch (redisErr) {
+      console.log("Redis cache read skipped:", redisErr.message)
+    }
 
-    // Collect all known anime
-    const allKnownAnimes = [
-      ...history.map((h) => h.anime),
-      ...wishlist.map((w) => w.anime),
-    ].filter(Boolean)
-    const excludedIds = allKnownAnimes.map((a) => a._id)
+    // Pull user history and wishlist together
+    const [history, wishlist] = await Promise.all([
+      History.find({ user: userId })
+        .populate("anime")
+        .sort({ updatedAt: -1 })
+        .lean(),
+      Wishlist.find({
+        user: userId,
+        status: { $in: ["Completed", "Watching", "Planning"] },
+      })
+        .populate("anime")
+        .lean(),
+    ])
 
-    // 2. Tally genres
-    const genreCounts = {}
-    allKnownAnimes.forEach((anime) => {
-      if (anime.genres && Array.isArray(anime.genres)) {
-        anime.genres.forEach((g) => {
-          genreCounts[g] = (genreCounts[g] || 0) + 1
-        })
+    // Skip titles the user already watched or queued
+    const excludedAnimeMap = new Map()
+    const allKnownAnimes = []
+
+    history.forEach((h) => {
+      if (h.anime && h.anime._id) {
+        excludedAnimeMap.set(h.anime._id.toString(), true)
+        allKnownAnimes.push({ ...h.anime, _historyItem: h })
       }
     })
 
-    // 3. Find top 3 genres
-    const topGenres = Object.entries(genreCounts)
+    wishlist.forEach((w) => {
+      if (w.anime && w.anime._id) {
+        excludedAnimeMap.set(w.anime._id.toString(), true)
+        allKnownAnimes.push({ ...w.anime, _wishlistStatus: w.status })
+      }
+    })
+
+    const excludedIds = Array.from(excludedAnimeMap.keys())
+
+    // Score genres based on actual viewing patterns
+    const genreAffinities = {}
+
+    // Weight by completion percentage and recency
+    history.forEach((item) => {
+      if (!item.anime || !Array.isArray(item.anime.genres)) return
+
+      let ratio = 0
+      if (item.totalDuration && item.totalDuration > 0) {
+        ratio = item.watchTime / item.totalDuration
+      } else if (item.progress) {
+        ratio = item.progress / 100
+      }
+
+      // Stronger boost if completed, penalty if abandoned early
+      let weight = 0.2
+      if (item.completed || ratio >= 0.8) {
+        weight = 2.0
+      } else if (ratio >= 0.4) {
+        weight = 1.0
+      } else if (ratio < 0.2 && item.watchTime > 20) {
+        weight = -0.6
+      }
+
+      // Slightly discount older activity
+      const daysAgo = (Date.now() - new Date(item.updatedAt || item.createdAt || Date.now())) / (1000 * 60 * 60 * 24)
+      const decay = Math.max(0.4, 1 / (1 + 0.05 * daysAgo))
+      const finalWeight = weight * decay
+
+      item.anime.genres.forEach((genre) => {
+        genreAffinities[genre] = (genreAffinities[genre] || 0) + finalWeight
+      })
+    })
+
+    // Add extra weight for wishlist items
+    wishlist.forEach((item) => {
+      if (!item.anime || !Array.isArray(item.anime.genres)) return
+
+      let wishlistWeight = 0.5
+      if (item.status === "Completed") wishlistWeight = 1.8
+      else if (item.status === "Watching") wishlistWeight = 1.2
+      else if (item.status === "Planning") wishlistWeight = 0.7
+
+      item.anime.genres.forEach((genre) => {
+        genreAffinities[genre] = (genreAffinities[genre] || 0) + wishlistWeight
+      })
+    })
+
+    // Take top genres that scored positively
+    const sortedGenres = Object.entries(genreAffinities)
+      .filter(([_, score]) => score > 0)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
       .map((entry) => entry[0])
+
+    const topGenres = sortedGenres.slice(0, 4)
 
     let recommendedAnimes = []
 
-    // 4. Fetch recommendations if we have top genres
+    // Fetch matching candidates and rank by affinity + rating
     if (topGenres.length > 0) {
-      recommendedAnimes = await Anime.find({
+      const candidates = await Anime.find({
         genres: { $in: topGenres },
         _id: { $nin: excludedIds },
       })
-        .sort({ rating: -1 })
+        .limit(30)
+        .lean()
+
+      candidates.forEach((anime) => {
+        let matchScore = 0
+        if (Array.isArray(anime.genres)) {
+          anime.genres.forEach((g) => {
+            if (genreAffinities[g]) {
+              matchScore += genreAffinities[g]
+            }
+          })
+        }
+        const ratingBoost = (anime.rating || 0) * 0.1
+        anime._relevanceScore = matchScore + ratingBoost
+      })
+
+      recommendedAnimes = candidates
+        .sort((a, b) => (b._relevanceScore || 0) - (a._relevanceScore || 0))
+        .slice(0, 12)
+    }
+
+    // Fallback for new accounts without history
+    if (recommendedAnimes.length === 0) {
+      recommendedAnimes = await Anime.find({
+        _id: { $nin: excludedIds },
+      })
+        .sort({ rating: -1, views: -1 })
         .limit(10)
         .lean()
     }
 
-    res.status(200).json({
+    const responsePayload = {
       success: true,
       data: recommendedAnimes,
-    })
+    }
+
+    // Cache in Redis for 30 mins
+    try {
+      await redisClient.setex(redisKey, 1800, JSON.stringify(responsePayload))
+    } catch (redisWriteErr) {
+      console.log("Redis cache write skipped:", redisWriteErr.message)
+    }
+
+    res.status(200).json(responsePayload)
   } catch (error) {
     console.error("Smart Recommendation Error:", error)
     next(error)

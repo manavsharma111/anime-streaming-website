@@ -8,3 +8,4 @@ coverage
 .vscode
 backend/uploads/
 .agents/
+new_features.md

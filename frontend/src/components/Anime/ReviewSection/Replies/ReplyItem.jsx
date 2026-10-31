@@ -43,6 +43,10 @@ export default function ReplyItem({ reply, reviewId }) {
                 className="w-full h-full object-cover"
                 alt="avatar"
                 referrerPolicy="no-referrer"
+                onError={(e) => {
+                  e.target.onerror = null
+                  e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(reply.user?.username || "User")}&background=f33767&color=fff&bold=true`
+                }}
               />
             ) : (
               <User size={12} />

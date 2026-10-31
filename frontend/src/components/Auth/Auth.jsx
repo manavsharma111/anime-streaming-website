@@ -37,6 +37,10 @@ export default function AuthDropdown() {
               alt="Profile"
               className="w-11 h-11 rounded-full object-cover"
               referrerPolicy="no-referrer"
+              onError={(e) => {
+                e.target.onerror = null
+                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username || "User")}&background=f33767&color=fff&bold=true`
+              }}
             />
           ) : (
             <div className="w-11 h-11 rounded-full bg-[#2a2a2a] flex items-center justify-center text-white font-black text-lg">

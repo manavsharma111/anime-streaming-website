@@ -148,6 +148,10 @@ export default function Profile() {
                   alt={user.username}
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    e.target.onerror = null
+                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username || "User")}&background=f33767&color=fff&bold=true`
+                  }}
                 />
               ) : (
                 <User size={40} className="text-neutral-500" />

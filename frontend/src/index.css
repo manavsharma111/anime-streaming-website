@@ -90,4 +90,11 @@ button {
   *:active {
     cursor: grabbing !important;
   }
+
+  button,
+  [role="button"],
+  a,
+  select {
+    cursor: pointer !important;
+  }
 }
