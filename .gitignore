@@ -9,3 +9,11 @@ coverage
 backend/uploads/
 .agents/
 new_features.md
+
+# Research Paper & IEEE drafts
+*RESEARCH_PAPER*
+*research_paper*
+*ieee*
+*IEEE*
+*.tex
+*.pdf
