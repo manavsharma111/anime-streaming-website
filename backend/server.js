@@ -88,17 +88,15 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use(compression())
 
-// Trust proxy (needed for Render/Heroku with express-rate-limit)
+// Trust reverse proxy headers (required for accurate client IP resolution behind Cloudflare/Render/Vercel)
 app.set("trust proxy", 1)
 
-// rate Limiter
-const rateLimit = require("express-rate-limit")
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5000, // limit each IP to 5000 requests per windowMs
+// Sliding Window Rate Limiter (Redis Sorted Set)
+const slidingLimiter = require("./middleware/slidingRateLimiter")
+const limiter = slidingLimiter({
+  windowMs: 15 * 60 * 1000, // 15-minute rolling window
+  max: 5000, // Limit each client IP to 5000 requests per rolling window
   message: "Too many requests from this IP, please try again after 15 minutes",
-  standardHeaders: true,
-  legacyHeaders: false,
 })
 app.use("/api", limiter)
 
