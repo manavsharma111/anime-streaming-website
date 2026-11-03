@@ -8,10 +8,7 @@ const { sendEmail } = require("../services/emailService")
 const dotenv = require("dotenv")
 dotenv.config()
 
-/**
- * Creates a Razorpay Order with pro-rated billing calculation.
- * Computes remaining value on active subscriptions for plan upgrades/downgrades.
- */
+
 const createRazorpayOrder = async (req, res) => {
   try {
     const { planId, userId } = req.body
@@ -45,6 +42,14 @@ const createRazorpayOrder = async (req, res) => {
         // Deduct unused value from target plan price (enforcing 1 INR minimum)
         finalAmount = Math.max(1, finalAmount - remainingValue)
       }
+    }
+
+    // Verify Razorpay instance is initialized
+    if (!razorpayInstance) {
+      return res.status(503).json({
+        success: false,
+        message: "Payment service unavailable. Razorpay credentials are not configured.",
+      })
     }
 
     // Initialize payment order via Razorpay API (amount in paise)

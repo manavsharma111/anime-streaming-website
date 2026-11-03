@@ -7,7 +7,7 @@ const connectDB = require("./config/db")
 const compression = require("compression")
 
 // Load env vars
-dotenv.config()
+dotenv.config({ path: path.join(__dirname, ".env") })
 
 // Connect to database and then initialize services
 connectDB()
