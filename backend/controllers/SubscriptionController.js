@@ -1,3 +1,4 @@
+const mongoose = require("mongoose")
 const Plan = require("../models/Plan")
 const Subscription = require("../models/Subscription")
 const User = require("../models/User")
@@ -111,28 +112,32 @@ const getAllActiveSubscriptions = async (req, res) => {
   }
 }
 
-// Cancel active subscription
+// Cancel active subscription with atomic ACID guarantees
 const cancelSubscription = async (req, res) => {
+  const session = await mongoose.startSession()
+  session.startTransaction()
+
   try {
     const { userId } = req.body
-    if (!userId)
-      return res
-        .status(400)
-        .json({ success: false, message: "UserId required" })
+    if (!userId) {
+      await session.abortTransaction()
+      session.endSession()
+      return res.status(400).json({ success: false, message: "UserId required" })
+    }
 
-    // Find the active subscription and populate the plan to get the price
+    // Retrieve active subscription to evaluate pro-rated refund calculations
     const activeSub = await Subscription.findOne({
       userId,
       status: "active",
-    }).populate("planId")
+    }).populate("planId").session(session)
+
     let refundAmountText = ""
 
     if (activeSub && activeSub.planId && activeSub.endDate > new Date()) {
-      // Calculate remaining days
       const timeDiff = activeSub.endDate.getTime() - new Date().getTime()
       const daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24))
 
-      // Pro-rated refund
+      // Pro-rated refund calculation based on remaining days
       const pricePerDay = activeSub.planId.price / activeSub.planId.duration
       const refundAmount = Math.floor(pricePerDay * daysRemaining)
 
@@ -141,51 +146,65 @@ const cancelSubscription = async (req, res) => {
       refundAmountText = `<p><strong>Refund Amount:</strong> ₹0 (Subscription already expired)</p>`
     }
 
+    // 1. Mark active subscriptions as cancelled within transaction
     await Subscription.updateMany(
       { userId, status: "active" },
       { $set: { status: "cancelled" } },
+      { session },
     )
 
-    const user = await User.findByIdAndUpdate(userId, {
-      isPremium: false,
-      $push: {
-        notifications: {
-          message: "Your subscription has been cancelled and refund initiated.",
-          link: "/profile",
-          read: false,
-          createdAt: new Date(),
+    // 2. Revoke premium entitlements and append cancellation notification
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        isPremium: false,
+        $push: {
+          notifications: {
+            message: "Your subscription has been cancelled and refund initiated.",
+            link: "/profile",
+            read: false,
+            createdAt: new Date(),
+          },
         },
       },
-    })
+      { session, new: true },
+    )
 
+    // 3. Atomically commit both operations
+    await session.commitTransaction()
+    session.endSession()
+
+    // 4. Send asynchronous email notification after successful database commit
     if (user && user.email) {
       const emailContent = `
-                <div style="font-family: sans-serif; padding: 20px;">
-                    <h2 style="color: #f33767;">Subscription Cancelled</h2>
-                    <p>Hi ${user.username},</p>
-                    <p>Your Anime Stream premium subscription has been successfully cancelled and any applicable refunds have been initiated.</p>
-                    ${refundAmountText}
-                    <p><em>Note: Refunds typically take 5-7 business days to reflect in your original payment method.</em></p>
-                    <p>You can resubscribe anytime to get premium access back.</p>
-                    <br/>
-                    <p>Best Regards,</p>
-                    <p>Anime Stream Team</p>
-                </div>
-            `
+        <div style="font-family: sans-serif; padding: 20px;">
+          <h2 style="color: #f33767;">Subscription Cancelled</h2>
+          <p>Hi ${user.username},</p>
+          <p>Your Anime Stream premium subscription has been successfully cancelled and any applicable refunds have been initiated.</p>
+          ${refundAmountText}
+          <p><em>Note: Refunds typically take 5-7 business days to reflect in your original payment method.</em></p>
+          <p>You can resubscribe anytime to get premium access back.</p>
+          <br/>
+          <p>Best Regards,</p>
+          <p>Anime Stream Team</p>
+        </div>
+      `
       sendEmail(
         user.email,
         "Subscription Cancelled - Anime Stream",
         emailContent,
-      ).catch((err) => console.error("Email error:", err))
+      ).catch((err) => console.error("Email notification dispatch error:", err))
     }
 
-    res.json({
+    return res.json({
       success: true,
       message: "Subscription cancelled successfully. Refund processed.",
     })
   } catch (error) {
-    console.error("Cancel Subscription Error:", error)
-    res.status(500).json({ success: false, message: "Server Error" })
+    await session.abortTransaction()
+    session.endSession()
+    console.error("Cancel Subscription Transaction Error:", error)
+    return res.status(500).json({ success: false, message: "Server Error" })
   }
 }
 

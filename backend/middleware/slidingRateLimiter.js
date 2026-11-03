@@ -1,5 +1,5 @@
 const redis = require("../config/redis")
-
+// Redis Sorted Set (ZSET)
 const slidingWindowLimiter = ({
   windowMs = 15 * 60 * 1000,
   max = 5000,
